@@ -1,0 +1,28 @@
+@font-face {
+    font-family: googlefont;
+    src: url('../../Asset/Font/Roboto-Regular.ttf');
+}
+
+
+.registerMachineFormContainer {
+    font-family: googlefont;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.inputDateAndTime {
+    width: 100%;
+    border: #ced4da solid 1px;
+    border-radius: 5px;
+    display: block;
+    padding: 0.375rem 0.75rem;
+}
+
+
+.informationState {
+    font-size: 12px;
+}
+
+.machineDescriptionTitle {
+    font-family: googlefont;
+}

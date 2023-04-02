@@ -1,0 +1,25 @@
+@font-face {
+    font-family: googlefont;
+    src: url('../../Asset/Font/Roboto-Medium.ttf');
+}
+
+.tabTitle {
+    font-family: googlefont;
+    font-size: 15px;
+    text-align: left;
+}
+
+.menuListAdmin {
+    text-align: left;
+    border-bottom: 1px solid grey;
+    line-height: 50px;
+    font-size: 20px;
+    margin-bottom: 10px;
+
+}
+
+.navigationAdmin {
+    background-color: white;
+    height: 80vh;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}

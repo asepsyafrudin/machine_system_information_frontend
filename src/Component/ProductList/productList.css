@@ -1,0 +1,19 @@
+
+@font-face {
+    font-family: googlefont;
+    src: url('../../Asset/Font/Roboto-Regular.ttf');
+}
+
+
+.registerProductFormContainer {
+    font-family: googlefont;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+
+.paginationTableProduct {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

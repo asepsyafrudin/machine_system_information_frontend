@@ -1,0 +1,30 @@
+@font-face {
+    font-family: googleRobotoFont;
+    src: url('../../Asset/Font/Roboto-Medium.ttf');
+}
+
+.documentContent {
+    font-family: googleRobotoFont; 
+    background-color: white;
+    padding: 30px 50px 50px 50px
+
+}
+
+.documentContainer {
+    background-color: white;
+}
+
+.titleDocumentDetailPage {
+    font-size: 30px;
+    font-weight: bold;
+    text-align: left;
+    border-bottom: 1px grey solid;
+}
+
+.docDate {
+    text-align: left;
+}
+
+.username {
+    color:  blue;
+}

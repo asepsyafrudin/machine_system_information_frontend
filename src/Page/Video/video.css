@@ -1,0 +1,97 @@
+@font-face {
+    font-family: googlerobotofontbold;
+    src: url('../../Asset/Font/Roboto-Bold.ttf');
+}
+
+@font-face {
+    font-family: googlerobotofontregular;
+    src: url('../../Asset/Font/Roboto-Medium.ttf');
+}
+.videoPage {
+    background-color: white;
+}
+
+.videoTitle {
+    font-family: googlerobotofontbold;
+    text-align: left;
+}
+.photoUserVideoCover{
+    width: 50px;
+    background-color: white;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    overflow: hidden;
+}
+.photoUserVideo {
+   width: auto;
+   height: 50px;
+   font-family: googlerobotofontregular;
+}
+
+.profileUser {
+    text-align: left;
+    font-family: googlerobotofontregular;
+}
+
+.videoComment {
+    margin-top: 20px;
+}
+
+.deleteComment {
+    font-size: 20px
+}
+
+/* .deleteComment :hover {
+    color: red;
+} */
+
+.buttonReply {
+    font-size: 12px;
+    margin-right: 5px;
+}
+
+.buttonReply :hover {
+    color: blue;
+}
+
+.descriptionVideo {
+    margin-top: 20px;
+    background-color: #f2f2f2;
+    border-radius: 10px;
+    padding: 10px 10px 10px 10px;
+    font-family: googlerobotofontregular;
+}
+
+.videoContent {
+    width: 98%;
+    height: 100%;
+    background-repeat: repeat;
+    padding: 20px 20px 20px 20px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.titleDescription {
+    font-weight: bold;
+}
+
+.paginationVideo {
+    width: 98%;
+    height: 100%;
+    background-repeat: repeat;
+    padding: 20px 20px 20px 20px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.videoFramePage {
+    height: 500px;
+    width: auto;
+}
+
+.commentContainer {
+    font-family: googlerobotofontregular;
+}

@@ -1,0 +1,21 @@
+.loginContent {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    flex-direction: row;
+    height: 90vh;
+    background-image: url('../../Asset/ImageGeneral/backgroundLogin.png');
+    background-size: cover;
+}
+
+.loginImage {
+    width: 50%;
+    height: 100%;
+}
+
+.loginFormBox {
+    width: 50%;
+    height: 50%;
+    padding-left: 100px;
+    padding-right: 100px;
+}

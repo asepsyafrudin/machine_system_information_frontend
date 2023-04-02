@@ -1,0 +1,10 @@
+.videoList {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.videoListContainer {
+    margin-bottom: 10px;
+}

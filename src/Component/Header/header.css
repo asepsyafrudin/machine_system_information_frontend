@@ -1,0 +1,31 @@
+
+.titlePEMS {
+    font-family: fantasy;
+    font-size:30px;
+    color: aliceblue;
+}
+
+.userName {
+    color: white;
+    cursor: pointer;
+}
+
+.imageProfileCover {
+    width: 40px;
+    background-color: white;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.photoProfile {
+    height: 40px;
+    width: auto;
+    cursor: pointer;
+}
+
+.logoHeader {
+   cursor: pointer; 
+}

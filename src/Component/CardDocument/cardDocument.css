@@ -1,0 +1,57 @@
+
+
+.cardDocumentContainer {
+    min-height: 80px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+@font-face {
+    font-family: 'robotogoogle';
+    src: url('../../Asset/Font/Roboto-Bold.ttf');
+}
+
+@font-face {
+    font-family: 'robotogoogle2';
+    src: url('../../Asset//Font/Roboto-Medium.ttf');
+}
+
+.titleDocument {
+    text-align: left;
+    color: blue;
+    font-family: 'robotogoogle' ;
+    font-size: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+}
+
+.description_document {
+    text-align: left;
+    font-family: 'robotogoogle2' ;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+
+}
+
+.linkTitle {
+    text-decoration: none;
+}
+
+.jenisDocument {
+    text-align: right;
+}
+
+.createdByDocument {
+    text-align: right;
+    font-size: 12px;
+    font-family: 'robotogoogle2';
+}
+

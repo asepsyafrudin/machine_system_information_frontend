@@ -1,0 +1,58 @@
+
+.searchFormBoxContainer {
+    padding-top: 15px;
+    padding-left: 90px;
+    min-height: 90vh;
+    /* background-image: url('../../Asset/ImageGeneral/backgroundSearch.jpg'); */
+    /* background-size: cover; */
+}
+
+.searchFormBox {
+    width: 600px;
+    height: 45px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.searchFormBox:hover {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.input_search_box {
+    height: 40px;
+    width: 450px;
+    border : 0;
+    background: none;
+}
+
+.input_search_box:focus, .input_search_box:active {
+    background: transparent;
+}
+
+.input_search_box:focus {
+    outline: none;
+  }
+
+.navigationTabSearch {
+    margin-top: 15px;
+    width: 98%;
+    height: fit-content;
+    margin-bottom: 100px;
+  }
+
+
+  .buttonSearch {
+    font-size: 25px;
+    margin-left: 5px;
+    margin-right: 5px;
+    cursor: pointer;
+  }
+
+  .buttonSearch:active {
+    text-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    font-size: 20px;
+}
+

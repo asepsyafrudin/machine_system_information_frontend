@@ -1,0 +1,15 @@
+@font-face {
+    font-family: googlefont;
+    src: url('../../Asset/Font/Roboto-Black.ttf');
+}
+
+.titleSectionContainer {
+    font-family: googlefont;
+    font-size: 18px;
+    margin-bottom: 15px;
+    background-color: #00adeb;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: 5px;
+    color: white;
+}

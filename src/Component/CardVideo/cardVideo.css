@@ -1,0 +1,53 @@
+.cardVideoContainer {
+    max-width: 20%;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-top: 10px;
+    margin-left: 15px;
+    margin-right: 15px;
+    background-color: white;
+}
+
+@font-face {
+    font-family: googleroboto;
+    src: url('../../Asset/Font/Roboto-Regular.ttf');
+}
+
+.videoFrame {
+    border-radius: 15px;
+    height: 100%;
+    width: 100%;
+}
+
+.videoTitle {
+    font-size: 1rem;
+    font-family: googleroboto;
+    font-weight: 500;
+    line-height: 1.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    max-height: 4.4rem;
+    -webkit-line-clamp: 2;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.createDateVideo {
+    font-size: 12px;
+}
+/* .videoDescription {
+    font-size: 0.8rem;
+    font-family: googleroboto;
+    font-weight: 100;
+    line-height: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    max-height: 20rem;
+    -webkit-line-clamp: 4;
+} */

@@ -1,0 +1,4 @@
+.recentlyDocumentContainer {
+    display: flex;
+    flex-direction: column;
+}
