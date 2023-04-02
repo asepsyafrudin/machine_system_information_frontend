@@ -8,12 +8,14 @@ import SearchEnginePage from "../SearchEnginePage";
 import SearchListPage from "../SearchListPage";
 import UserDashboardPage from "../UserDashboardPage";
 import Video from "../Video";
+import Openai from "../OpenAI";
 
 function LayoutPage() {
   return (
     <div>
       <Routes>
         <Route index element={<Login />} />
+        <Route path="/openai" element={<Openai />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/adminmenu" element={<Admin />} />
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />

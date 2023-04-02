@@ -1,0 +1,12 @@
+.openaicontent {
+    padding: 40px 100px 40px 100px;
+}
+
+.chatOpenai {
+    margin-top: 20px;
+    margin-bottom: 100px;
+    height: 60vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+
+}

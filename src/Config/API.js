@@ -154,3 +154,7 @@ export const getNotificationByUserId = (userId) => {
 export const changeStatusNotification = (id) => {
   return `${port}/api/notification/change/${id}`;
 };
+
+//openai
+
+export const openaiApi = `http://localhost:8080/api/openai/post`;

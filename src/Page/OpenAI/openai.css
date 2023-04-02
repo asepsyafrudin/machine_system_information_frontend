@@ -1,0 +1,12 @@
+@font-face {
+    font-family: roboto;
+    src: url("../../Asset/Font/Roboto-Regular.ttf");
+}
+
+.openaiContainer {
+    height: 100vh;
+    font-family: roboto;
+    color : black;
+    font-size: 400;
+    overflow: scroll;
+}
