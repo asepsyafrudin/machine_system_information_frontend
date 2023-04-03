@@ -7,8 +7,9 @@ import { AiOutlineScan } from "react-icons/ai";
 import "./searchListPage.css";
 import ModalBarcodeScanner from "../../Component/ModalBarcodeScanner";
 import NavigationTab from "../../Component/NavigationTab";
-import { useNavigate, useParams } from "react-router-dom";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { Button, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { SiOpenai } from "react-icons/si";
 
 function SearchListPage() {
   let { searchValue } = useParams();
@@ -53,50 +54,61 @@ function SearchListPage() {
     <div className="searchListPageContainer">
       <Header />
       <div className="searchFormBoxContainer">
-        <form className="searchFormBox" onSubmit={handleSearch}>
-          <input
-            type="text"
-            placeholder="Enter your request here"
-            className="input_search_box"
-            value={search}
-            onChange={handleSearchValue}
-          />
-          <OverlayTrigger
-            placement="bottom"
-            delay={{ show: 250, hide: 400 }}
-            overlay={clearTooltip}
-          >
-            <span className="d-inline-block">
-              <MdOutlineClear
-                onClick={() => setSearch("")}
-                className="buttonSearch"
+        <Row>
+          <Col sm={8}>
+            <form className="searchFormBox" onSubmit={handleSearch}>
+              <input
+                type="text"
+                placeholder="Enter your request here"
+                className="input_search_box"
+                value={search}
+                onChange={handleSearchValue}
               />
-            </span>
-          </OverlayTrigger>
-          <div className="vr" />
-          <OverlayTrigger
-            placement="bottom"
-            delay={{ show: 250, hide: 400 }}
-            overlay={scanTooltip}
-          >
-            <span className="d-inline-block">
-              <AiOutlineScan
-                onClick={() => setShowModalBarcode(true)}
-                className="buttonSearch"
-              />
-            </span>
-          </OverlayTrigger>
-          <div className="vr" />
-          <OverlayTrigger
-            placement="bottom"
-            delay={{ show: 250, hide: 400 }}
-            overlay={searchTooltip}
-          >
-            <span className="d-inline-block">
-              <FcSearch className="buttonSearch" onClick={handleSearch} />
-            </span>
-          </OverlayTrigger>
-        </form>
+              <OverlayTrigger
+                placement="bottom"
+                delay={{ show: 250, hide: 400 }}
+                overlay={clearTooltip}
+              >
+                <span className="d-inline-block">
+                  <MdOutlineClear
+                    onClick={() => setSearch("")}
+                    className="buttonSearch"
+                  />
+                </span>
+              </OverlayTrigger>
+              <div className="vr" />
+              <OverlayTrigger
+                placement="bottom"
+                delay={{ show: 250, hide: 400 }}
+                overlay={scanTooltip}
+              >
+                <span className="d-inline-block">
+                  <AiOutlineScan
+                    onClick={() => setShowModalBarcode(true)}
+                    className="buttonSearch"
+                  />
+                </span>
+              </OverlayTrigger>
+              <div className="vr" />
+              <OverlayTrigger
+                placement="bottom"
+                delay={{ show: 250, hide: 400 }}
+                overlay={searchTooltip}
+              >
+                <span className="d-inline-block">
+                  <FcSearch className="buttonSearch" onClick={handleSearch} />
+                </span>
+              </OverlayTrigger>
+            </form>
+          </Col>
+          <Col sm={4}>
+            <Link to="/openai">
+              <Button type="button" variant="dark" style={{ marginLeft: 5 }}>
+                <SiOpenai size={22} /> Need Assitance?
+              </Button>
+            </Link>
+          </Col>
+        </Row>
         <div className="navigationTabSearch">
           <NavigationTab searchValue={searchValue} pageNumber={pageNumber} />
         </div>

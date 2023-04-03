@@ -157,4 +157,4 @@ export const changeStatusNotification = (id) => {
 
 //openai
 
-export const openaiApi = `http://localhost:8080/api/openai/post`;
+export const openaiApi = `${port}/api/openai/post`;

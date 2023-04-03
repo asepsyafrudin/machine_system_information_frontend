@@ -15,9 +15,9 @@ function LayoutPage() {
     <div>
       <Routes>
         <Route index element={<Login />} />
-        <Route path="/openai" element={<Openai />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/adminmenu" element={<Admin />} />
+          <Route path="/openai" element={<Openai />} />
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />
           <Route path="/searching_page" element={<SearchEnginePage />} />
           <Route
