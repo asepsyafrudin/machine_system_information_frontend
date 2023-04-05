@@ -31,6 +31,7 @@ import { GrEdit } from "react-icons/gr";
 import PaginationTable from "../Pagination";
 import { MdOutlineQrCode2 } from "react-icons/md";
 import QRCode from "react-qr-code";
+import ModalAlert from "../ModalAlert";
 
 function MachineList(props) {
   const { actionState, actionStateValue } = props;
@@ -45,7 +46,6 @@ function MachineList(props) {
   const [tableLine, setTableLine] = useState("");
   const [tableMachine, setTableMachine] = useState("");
   const [search, setSearch] = useState("");
-  const [alert, setAlert] = useState(false);
   const [notifSuccess, setNotifSuccess] = useState(false);
   const [id, setId] = useState("");
   const [updateMode, setUpdateMode] = useState(false);
@@ -53,6 +53,8 @@ function MachineList(props) {
   const [modalShowGenerateQR, setModalShowGenerateQR] = useState(false);
   const [machineForGenerateQR, setMachineForGeneratedOR] = useState("");
   const [assetNo, setAssetNo] = useState("");
+  const [message, setMessage] = useState("");
+  const [showModalAlert, setShowModalAlert] = useState(false);
 
   useEffect(() => {
     axios
@@ -150,20 +152,20 @@ function MachineList(props) {
       axios
         .post(registerMachineApi, data)
         .then((response) => {
+          setMessage("Register Success!!");
           setNotifSuccess(true);
           handleResetForm();
           actionState(1);
-          setAlert(false);
         })
         .catch((error) => console.log.error);
     } else {
       axios
         .patch(updateMachineApi, data)
         .then((response) => {
+          setMessage("Update Data Success!!!");
           setNotifSuccess(true);
           handleResetForm();
           actionState(1);
-          setAlert(false);
         })
         .catch((error) => console.log(error));
     }
@@ -176,7 +178,6 @@ function MachineList(props) {
     setDescription("");
     setLine("");
     setMachine("");
-    setAlert(false);
     setOperationRatio("");
     setUpdateMode(false);
     setAssetNo("");
@@ -192,7 +193,8 @@ function MachineList(props) {
     );
     if (confirmDelete) {
       axios.delete(deleteMachineApi(id)).then((response) => {
-        window.alert("Data telah terhapus");
+        setMessage("Data Telah Terhapus");
+        setShowModalAlert(true);
         handleResetForm();
         actionState(1);
       });
@@ -229,7 +231,8 @@ function MachineList(props) {
     axios
       .patch(updateStatusMachineApi, data)
       .then((response) => {
-        window.alert("Data Status Mesin Berhasil diubah");
+        setMessage("Data Status Mesin Berhasil diubah");
+        setShowModalAlert(true);
         actionState(1);
       })
       .catch((error) => console.log(error));
@@ -440,22 +443,12 @@ function MachineList(props) {
       </div>
       <div style={{ marginTop: 5 }}>
         <Alert
-          show={alert}
-          variant="danger"
-          onClose={() => setAlert(false)}
-          dismissible
-        >
-          Please Check Your Input!!!
-        </Alert>
-      </div>
-      <div style={{ marginTop: 5 }}>
-        <Alert
           show={notifSuccess}
           variant="success"
           onClose={() => setNotifSuccess(false)}
           dismissible
         >
-          {updateMode ? "Update Success" : "Register Success"}
+          {message}
           <GoSmiley style={{ marginLeft: 10 }} />
         </Alert>
       </div>
@@ -535,6 +528,13 @@ function MachineList(props) {
           </Button>
         </Modal.Footer>
       </Modal>
+      <ModalAlert
+        show={showModalAlert}
+        onHandleClose={(e) => {
+          setShowModalAlert(e);
+        }}
+        message={message}
+      />
     </div>
   );
 }

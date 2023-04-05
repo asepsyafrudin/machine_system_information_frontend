@@ -21,6 +21,7 @@ import {
 import { GoSmiley } from "react-icons/go";
 import Pagination from "../Pagination";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
+import ModalAlert from "../ModalAlert";
 
 function UserList(props) {
   const { actionState, actionStateValue } = props;
@@ -43,6 +44,7 @@ function UserList(props) {
   const [numberStartData, setNumberStartData] = useState(1);
   const [searchUser, setSearchUser] = useState("");
   const [message, setMessage] = useState("");
+  const [showModalAlert, setShowModalAlert] = useState(false);
   useEffect(() => {
     if (searchUser === "") {
       axios
@@ -161,7 +163,8 @@ function UserList(props) {
     const confirm = window.confirm("Apakah mau menghapus data ini?");
     if (confirm) {
       axios.delete(deleteUserApi(id)).then((response) => {
-        window.alert("Data Telah Terhapus!!");
+        setMessage("Data Telah Terhapus");
+        setShowModalAlert(true);
         resetForm();
         updateMode(false);
       });
@@ -536,6 +539,13 @@ function UserList(props) {
           pageActive={page}
         />
       </div>
+      <ModalAlert
+        show={showModalAlert}
+        onHandleClose={(e) => {
+          setShowModalAlert(e);
+        }}
+        message={message}
+      />
     </div>
   );
 }

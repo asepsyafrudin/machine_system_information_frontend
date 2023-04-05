@@ -35,6 +35,7 @@ import { IoMdDocument } from "react-icons/io";
 import PaginationTable from "../Pagination";
 import { Link } from "react-router-dom";
 import { GrEdit } from "react-icons/gr";
+import ModalAlert from "../ModalAlert";
 
 function DocumentRegister(props) {
   const { actionState, actionStateValue } = props;
@@ -65,6 +66,7 @@ function DocumentRegister(props) {
   const [totalPageData, setTotalPageData] = useState(0);
   const [numberStart, setNumberStart] = useState(1);
   const [id, setId] = useState("");
+  const [showModalAlert, setShowModalAlert] = useState(false);
 
   useEffect(() => {
     axios
@@ -334,7 +336,8 @@ function DocumentRegister(props) {
       axios
         .delete(deleteDocumentApi(e.target.id))
         .then((response) => {
-          window.alert("File sudah terhapus");
+          setMessage("Document Telah Terhapus!!!");
+          setShowModalAlert(true);
           actionState(1);
         })
         .catch((error) => console.log(error));
@@ -357,7 +360,8 @@ function DocumentRegister(props) {
       status: status,
     };
     axios.patch(changeStatusDocumentApi, data).then((response) => {
-      window.alert("data telah terupdate");
+      setMessage("Status Data Telah Berganti");
+      setShowModalAlert(true);
       handleResetForm();
       actionState(1);
     });
@@ -383,12 +387,13 @@ function DocumentRegister(props) {
 
   const handleDeleteFile = (e) => {
     const id = e.target.id;
-    const confirm = window.confirm("File Akan di Hapus?");
+    const confirm = window.confirm("Apakah file Akan di Hapus?");
     if (confirm) {
       axios
         .delete(deleteFileByIdApi(id))
         .then((response) => {
-          window.alert("File Telah terhapus");
+          setMessage("File Telah Terhapus!!!");
+          setShowModalAlert(true);
           const fileData = fileCurrent.find(
             (value) => value.id === parseInt(id)
           );
@@ -708,6 +713,13 @@ function DocumentRegister(props) {
           pageActive={page}
         />
       </div>
+      <ModalAlert
+        show={showModalAlert}
+        onHandleClose={(e) => {
+          setShowModalAlert(e);
+        }}
+        message={message}
+      />
     </div>
   );
 }

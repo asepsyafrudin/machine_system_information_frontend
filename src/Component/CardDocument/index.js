@@ -4,6 +4,7 @@ import "./cardDocument.css";
 import "@fontsource/roboto";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { Link } from "react-router-dom";
+import moment from "moment";
 
 function CardDocument(props) {
   const { title, fileType, username, description, createDate, id } = props;
@@ -52,8 +53,8 @@ function CardDocument(props) {
         <Col>
           <div className="createdByDocument">
             <span>
-              Created by : {CapitalCaseFirstWord(username)} , Created Date :{" "}
-              {createDate}
+              Created by : {CapitalCaseFirstWord(username)} , Last Update :{" "}
+              {moment(createDate).fromNow()}
             </span>
           </div>
         </Col>

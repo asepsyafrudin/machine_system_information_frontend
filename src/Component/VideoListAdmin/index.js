@@ -34,6 +34,7 @@ import { GrEdit } from "react-icons/gr";
 import PaginationTable from "../Pagination";
 import { MdVideoLibrary } from "react-icons/md";
 import { Link } from "react-router-dom";
+import ModalAlert from "../ModalAlert";
 
 function VideoListAdmin(props) {
   const { actionState, actionStateValue } = props;
@@ -61,6 +62,8 @@ function VideoListAdmin(props) {
   const [totalPageData, setTotalPageData] = useState(0);
   const [numberStartData, setNumberStartData] = useState(1);
   const [percentProgress, setPercentProgress] = useState(0);
+  const [message, setMessage] = useState("");
+  const [showModalAlert, setShowModalAlert] = useState(false);
 
   useEffect(() => {
     axios
@@ -233,13 +236,18 @@ function VideoListAdmin(props) {
         })
         .then((response) => {
           handleResetForm();
+          setMessage("Register Success!!!");
           setNotifSuccess(true);
           setAlert(false);
           setLoading(false);
           actionState(1);
           setPercentProgress(0);
         })
-        .catch((error) => console.log(error));
+        .catch((error) => {
+          setMessage("Hubungi Developer");
+          setAlert(true);
+          console.log(error);
+        });
     } else {
       if (video) {
         formData.append("video", video);
@@ -247,13 +255,21 @@ function VideoListAdmin(props) {
         formData.append("video", currentVideo);
       }
       formData.append("id", id);
-      axios.patch(updateVideoApi, formData).then((response) => {
-        handleResetForm();
-        setNotifSuccess(true);
-        setAlert(false);
-        setLoading(false);
-        actionState(1);
-      });
+      axios
+        .patch(updateVideoApi, formData)
+        .then((response) => {
+          handleResetForm();
+          setMessage("Update Success !!!");
+          setNotifSuccess(true);
+          setAlert(false);
+          setLoading(false);
+          actionState(1);
+        })
+        .catch((error) => {
+          setMessage("Hubungi Developer");
+          setAlert(true);
+          console.log(error);
+        });
     }
   };
 
@@ -278,7 +294,8 @@ function VideoListAdmin(props) {
       axios
         .delete(deleteVideoApi(e.target.id))
         .then((response) => {
-          window.alert("File sudah terhapus");
+          setMessage("File sudah terhapus");
+          setShowModalAlert(true);
           actionState(1);
           handleResetForm();
         })
@@ -342,7 +359,7 @@ function VideoListAdmin(props) {
   const changeStatus = (e) => {
     const id = e.target.id;
     const videoEdit = tableVideo.find((value) => {
-      return value.id === parseInt(id);
+      return value.id === id;
     });
     let status = "";
     if (videoEdit.status === "Active") {
@@ -355,7 +372,8 @@ function VideoListAdmin(props) {
       status: status,
     };
     axios.patch(updateStatusVideoApi, data).then((response) => {
-      window.alert("data telah terupdate");
+      setMessage("Status data telah berganti");
+      setShowModalAlert(true);
       handleResetForm();
       actionState(1);
     });
@@ -467,6 +485,14 @@ function VideoListAdmin(props) {
             onClose={() => setAlert(false)}
             dismissible
           >
+            {message}
+          </Alert>
+          <Alert
+            show={alert}
+            variant="danger"
+            onClose={() => setAlert(false)}
+            dismissible
+          >
             Please Check Your Password!!!
           </Alert>
         </div>
@@ -477,7 +503,8 @@ function VideoListAdmin(props) {
             onClose={() => setNotifSuccess(false)}
             dismissible
           >
-            Register success <GoSmiley style={{ marginLeft: 10 }} />
+            {message}
+            <GoSmiley style={{ marginLeft: 10 }} />
           </Alert>
         </div>
       </div>
@@ -591,6 +618,13 @@ function VideoListAdmin(props) {
           pageActive={page}
         />
       </div>
+      <ModalAlert
+        show={showModalAlert}
+        onHandleClose={(e) => {
+          setShowModalAlert(e);
+        }}
+        message={message}
+      />
     </div>
   );
 }
