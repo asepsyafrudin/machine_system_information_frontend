@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Form, InputGroup, Row, Spinner } from "react-bootstrap";
 import "./openaiComponent.css";
-import { TfiUser } from "react-icons/tfi";
-import { SiProbot } from "react-icons/si";
+import photoBluePrint from "../../Asset/ImageGeneral/profile.jpg";
+import photoRobot from "../../Asset/ImageGeneral/robotai.jpg";
 import { openaiApi } from "../../Config/API";
 import { BsChatLeft } from "react-icons/bs";
 import axios from "axios";
@@ -13,14 +13,19 @@ function OpenaiComponent() {
   const [chatLog, setChatLog] = useState([]);
   const [wait, setWait] = useState(false);
 
+  const [userPhoto, setUserPhoto] = useState("");
+
   const messagesEndRef = useRef(null);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [chatLog]);
+    const user = JSON.parse(localStorage.getItem("user"));
+    setUserPhoto(user.photo);
+  }, [userPhoto, chatLog]);
 
   const hanldeSubmit = (e) => {
     e.preventDefault();
@@ -68,7 +73,7 @@ function OpenaiComponent() {
                 </InputGroup.Text>
                 <Form.Control
                   type="text"
-                  placeholder="Enter Text Here"
+                  placeholder="Enter Everything You Want , Everything You Need"
                   value={inputText}
                   onChange={(e) => {
                     setInputText(e.target.value);
@@ -95,9 +100,21 @@ function OpenaiComponent() {
               <Row key={index} className="mb-3">
                 <Col sm={1}>
                   {value.role === "user" ? (
-                    <TfiUser style={{ fontSize: 30, color: "blue" }} />
+                    <div className="photoUserVideoCover">
+                      <img
+                        src={userPhoto ? userPhoto : photoBluePrint}
+                        alt="profile"
+                        className="photoUserVideo"
+                      />
+                    </div>
                   ) : (
-                    <SiProbot style={{ fontSize: 30, color: "green" }} />
+                    <div className="photoUserVideoCover">
+                      <img
+                        src={photoRobot}
+                        alt="profile"
+                        className="photoUserVideo"
+                      />
+                    </div>
                   )}
                 </Col>
                 <Col sm={10} style={{ textAlign: "left" }}>
@@ -105,10 +122,13 @@ function OpenaiComponent() {
                     value.message
                   ) : index === chatLog.length - 1 ? (
                     wait ? (
-                      <Spinner animation="border" variant="primary" />
+                      <>
+                        {" "}
+                        "Robot Sedang Berpikir, Tunggu Dulu Yaa.."
+                        <Spinner animation="border" variant="primary" />
+                      </>
                     ) : (
                       <>
-                        <span>Robot Menjawab :</span>
                         <TypeAnimationText text={value.message} />{" "}
                       </>
                     )

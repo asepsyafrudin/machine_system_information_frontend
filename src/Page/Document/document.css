@@ -28,3 +28,8 @@
 .username {
     color:  blue;
 }
+
+.commentDocumentContainer {
+    border-top: dashed blue 2px;
+    padding-top: 20px;
+}

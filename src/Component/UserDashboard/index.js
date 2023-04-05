@@ -476,8 +476,10 @@ function UserDashboard(props) {
                             <small>{moment(value.create_date).fromNow()}</small>
                           </Toast.Header>
                           <Toast.Body>
-                            Mengomentari Video Anda , Klik{" "}
-                            <a href={value.link}>LINK</a>,{" "}
+                            {value.type === "document"
+                              ? "Mengomentari document anda klik"
+                              : "Mengomentari video anda klik"}{" "}
+                            , Klik <a href={value.link}>LINK</a>,{" "}
                             <Button
                               style={{ fontSize: 12 }}
                               id={value.id}

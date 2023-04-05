@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import TitleSection from "../TitleSection";
 import { TfiVideoClapper } from "react-icons/tfi";
+import moment from "moment";
+
 import {
   Alert,
   Button,
@@ -32,7 +34,6 @@ import { GrEdit } from "react-icons/gr";
 import PaginationTable from "../Pagination";
 import { MdVideoLibrary } from "react-icons/md";
 import { Link } from "react-router-dom";
-import { generateTime } from "../../Config/generateTime";
 
 function VideoListAdmin(props) {
   const { actionState, actionStateValue } = props;
@@ -193,6 +194,7 @@ function VideoListAdmin(props) {
   const handleResetForm = () => {
     setDescription("");
     refVidoe.current.value = "";
+    setCurrentVideo("");
     setVideoName("");
     setProduct("");
     setLine("");
@@ -208,15 +210,8 @@ function VideoListAdmin(props) {
     formData.append("video_name", videoName);
     formData.append("user_id", parseInt(userId));
     formData.append("machine_id", machine);
-
-    if (currentVideo) {
-      formData.append("video", currentVideo);
-    } else {
-      formData.append("video", video);
-    }
     formData.append("description", description);
     formData.append("status", "Active");
-    formData.append("create_date", generateTime());
     setLoading(true);
 
     const onUploadProgress = (progressEvent) => {
@@ -228,6 +223,7 @@ function VideoListAdmin(props) {
       }
     };
     if (!updateMode) {
+      formData.append("video", video);
       axios
         .post(registerVideoApi, formData, {
           headers: {
@@ -245,6 +241,11 @@ function VideoListAdmin(props) {
         })
         .catch((error) => console.log(error));
     } else {
+      if (video) {
+        formData.append("video", video);
+      } else {
+        formData.append("video", currentVideo);
+      }
       formData.append("id", id);
       axios.patch(updateVideoApi, formData).then((response) => {
         handleResetForm();
@@ -258,9 +259,7 @@ function VideoListAdmin(props) {
 
   const handleEdit = (e) => {
     setId(e.target.id);
-    const dataEdit = tableVideo.find(
-      (value) => value.id === parseInt(e.target.id)
-    );
+    const dataEdit = tableVideo.find((value) => value.id === e.target.id);
     if (dataEdit) {
       setLine(dataEdit.line_id);
       setMachine(dataEdit.machine_id);
@@ -281,6 +280,7 @@ function VideoListAdmin(props) {
         .then((response) => {
           window.alert("File sudah terhapus");
           actionState(1);
+          handleResetForm();
         })
         .catch((error) => console.log(error));
     }
@@ -292,19 +292,15 @@ function VideoListAdmin(props) {
       videoFile.push(
         <Form.Group as={Col} key={new Date()}>
           <Form.Label>Current video</Form.Label>
-          <a
-            href={currentVideo}
-            target="_blank"
-            rel="noreferrer"
-            style={{ display: "block" }}
-          >
+          <br />
+          <Link to={`/video/${id}`} target="_blank">
             <Button>
               <MdOutlineOndemandVideo
                 style={{ marginRight: 5, fontSize: 20 }}
               />
               Open Current Video
             </Button>
-          </a>
+          </Link>
         </Form.Group>
       );
     }
@@ -528,7 +524,11 @@ function VideoListAdmin(props) {
                     <td>{value.product_name}</td>
                     <td>{value.line_name}</td>
                     <td>{value.machine_name}</td>
-                    <td>{value.create_date}</td>
+                    <td>
+                      {moment(value.create_date).format(
+                        "MMMM Do YYYY, h:mm:ss a"
+                      )}
+                    </td>
                     <td>{value.status}</td>
                     <td>
                       <Button

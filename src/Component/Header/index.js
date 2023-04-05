@@ -6,7 +6,7 @@ import "./header.css";
 import { Link, useNavigate } from "react-router-dom";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import photoBluePrint from "../../Asset/ImageGeneral/profile.jpg";
-import { Nav, NavDropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Nav, NavDropdown } from "react-bootstrap";
 
 function Header() {
   const [username, setUsername] = useState("");
@@ -42,15 +42,17 @@ function Header() {
   };
 
   const handleSelect = (eventKey) => {
-    localStorage.clear();
-    navigate("/");
+    if (eventKey === "userDashboard") {
+      if (position === "Administrator") {
+        navigate("/adminmenu");
+      } else {
+        navigate("/dashboardUsers");
+      }
+    } else {
+      localStorage.clear();
+      navigate("/");
+    }
   };
-
-  const userTooltip = (props) => (
-    <Tooltip id="button-tooltip" {...props}>
-      Open User Dashbord
-    </Tooltip>
-  );
 
   const userStatusLogin = () => {
     if (username !== "") {
@@ -61,15 +63,9 @@ function Header() {
             <Navbar.Text>
               Hello,{" "}
               <span className="userName" onClick={handleClickUserProfile}>
-                <OverlayTrigger
-                  placement="bottom"
-                  delay={{ show: 250, hide: 400 }}
-                  overlay={userTooltip}
-                >
-                  <span className="d-inline-block">
-                    {CapitalCaseFirstWord(username)}
-                  </span>
-                </OverlayTrigger>
+                <span className="d-inline-block">
+                  {CapitalCaseFirstWord(username)}
+                </span>
               </span>
             </Navbar.Text>
             <Nav onSelect={handleSelect}>
@@ -88,6 +84,9 @@ function Header() {
                 style={{ width: 100 }}
               >
                 <NavDropdown.Item eventKey="logout">logout</NavDropdown.Item>
+                <NavDropdown.Item eventKey="userDashboard">
+                  UserDashboard
+                </NavDropdown.Item>
               </NavDropdown>
             </Nav>
           </Navbar.Collapse>

@@ -52,6 +52,7 @@ function MachineList(props) {
   const [page, setPage] = useState(1);
   const [modalShowGenerateQR, setModalShowGenerateQR] = useState(false);
   const [machineForGenerateQR, setMachineForGeneratedOR] = useState("");
+  const [assetNo, setAssetNo] = useState("");
 
   useEffect(() => {
     axios
@@ -141,6 +142,7 @@ function MachineList(props) {
       masspro_date: dateMassProd,
       description: description,
       status: "Active",
+      asset_id: assetNo,
     };
 
     e.preventDefault();
@@ -155,7 +157,6 @@ function MachineList(props) {
         })
         .catch((error) => console.log.error);
     } else {
-      console.log(data);
       axios
         .patch(updateMachineApi, data)
         .then((response) => {
@@ -178,6 +179,7 @@ function MachineList(props) {
     setAlert(false);
     setOperationRatio("");
     setUpdateMode(false);
+    setAssetNo("");
   };
 
   const handleDelete = (e) => {
@@ -210,6 +212,7 @@ function MachineList(props) {
       setMachine(machineEdit.machine_name);
       setOperationRatio(machineEdit.operation_ratio);
       setUpdateMode(true);
+      setAssetNo(machineEdit.asset_id);
     }
   };
 
@@ -363,6 +366,15 @@ function MachineList(props) {
                 value={machine}
                 onChange={(e) => setMachine(e.target.value)}
                 required
+              />
+            </Form.Group>
+            <Form.Group as={Col}>
+              <Form.Label>Asset No</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Asset No"
+                value={assetNo}
+                onChange={(e) => setAssetNo(e.target.value)}
               />
             </Form.Group>
           </Row>

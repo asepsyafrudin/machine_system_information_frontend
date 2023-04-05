@@ -24,6 +24,12 @@ export const getUserByNPKApi = (npk) => {
   return `${port}/api/users/getUserByNPK/${npk}`;
 };
 
+export const getUserByEmailApi = (email) => {
+  return `${port}/api/users/getUserByEmail/${email}`;
+};
+
+export const changePasswordUserApi = `${port}/api/users/changePassword`;
+
 export const checkUserPassword = `${port}/api/users/comparePassword`;
 export const loginApi = `${port}/login`;
 
@@ -158,3 +164,12 @@ export const changeStatusNotification = (id) => {
 //openai
 
 export const openaiApi = `${port}/api/openai/post`;
+
+//api requst
+export const createRequestApi = `${port}/api/request/create`;
+export const getRequestApi = (token) => {
+  return `${port}/api/request/get/${token}`;
+};
+export const deleteRequestApi = (token) => {
+  return `${port}/api/request/delete/${token}`;
+};

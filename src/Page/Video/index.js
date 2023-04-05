@@ -13,10 +13,10 @@ import {
   postFeedbackComment,
 } from "../../Config/API";
 import "./video.css";
+import moment from "moment";
 import photoBluePrint from "../../Asset/ImageGeneral/profile.jpg";
 import { Button, Col, Form, Row } from "react-bootstrap";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
-import { generateTime } from "../../Config/generateTime";
 import PaginationTable from "../../Component/Pagination";
 function Video() {
   const { id } = useParams();
@@ -64,8 +64,8 @@ function Video() {
     e.preventDefault();
     const data = {
       user_id: parseInt(currentUserId),
-      video_id: parseInt(id),
-      create_date: generateTime(),
+      selected_id: id,
+      selected_item: "video",
       comment: comment,
     };
 
@@ -94,8 +94,8 @@ function Video() {
       comment_id: commentId,
       user_id: currentUserId,
       feedback: feedback,
-      video_id: id,
-      create_date: generateTime(),
+      selected_id: id,
+      selected_item: "video",
     };
     axios
       .post(postFeedbackComment, data)
@@ -155,7 +155,11 @@ function Video() {
                 </Row>
                 <Row>
                   <Col>
-                    <span>{video[0].create_date}</span>
+                    <span>
+                      {moment(video[0].create_date).format(
+                        "MMMM Do YYYY, h:mm:ss a"
+                      )}
+                    </span>
                   </Col>
                 </Row>
               </Col>
@@ -274,7 +278,9 @@ function Video() {
                       </Col>
                       <Col sm={4} style={{ textAlign: "right" }}>
                         <span style={{ fontSize: 12 }}>
-                          {value.create_date}
+                          {moment(value.create_date).format(
+                            "MMMM Do YYYY, h:mm:ss a"
+                          )}
                         </span>
                       </Col>
                     </Row>

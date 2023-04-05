@@ -1,5 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import TitleSection from "../TitleSection";
+import moment from "moment";
+
 import {
   Alert,
   Button,
@@ -30,7 +32,6 @@ import { GoGitCompare, GoSmiley } from "react-icons/go";
 import { MdDeleteForever, MdVideoLibrary } from "react-icons/md";
 import { convertFileName, convertFileType } from "../../Config/fileType";
 import { IoMdDocument } from "react-icons/io";
-import { generateTime } from "../../Config/generateTime";
 import PaginationTable from "../Pagination";
 import { Link } from "react-router-dom";
 import { GrEdit } from "react-icons/gr";
@@ -215,10 +216,6 @@ function DocumentRegister(props) {
     setFile(e.target.files);
   };
 
-  const generatedId = () => {
-    return `FE${new Date().getTime()}`;
-  };
-
   const handleRegisterVideo = (e) => {
     e.preventDefault();
     if (file.length <= 10) {
@@ -226,14 +223,12 @@ function DocumentRegister(props) {
       formData.append("title", documentTitle);
       formData.append("machine_id", machine);
       formData.append("user_id", userId);
-      formData.append("create_date", generateTime());
       formData.append("file_type", fileType);
       formData.append("description", description);
       for (let i = 0; i < file.length; i++) {
         formData.append("file", file[i]);
       }
       if (!updateMode) {
-        formData.append("id", generatedId());
         formData.append("status", "Active");
         setLoading(true);
         const onUploadProgress = (progressEvent) => {
@@ -312,6 +307,7 @@ function DocumentRegister(props) {
           size="sm"
           role="status"
           aria-hidden="true"
+          key={new Date()}
         />
       );
     }
@@ -398,6 +394,7 @@ function DocumentRegister(props) {
           );
           let arrayNew = fileCurrent.filter((value) => value !== fileData);
           setFileCurrent(arrayNew); // after delete file
+          handleResetForm();
         })
         .catch((error) => console.log(error));
     }
@@ -478,8 +475,8 @@ function DocumentRegister(props) {
               <Form.Label>Input File</Form.Label>
               <Form.Control
                 type="file"
-                accept=".png , .jpeg, .JPEG, .PNG, .ppt, .xls, .pdf"
-                placeholder="Enter File"
+                accept=".png , .jpeg, .JPEG, .PNG, .pdf"
+                placeholder="Enter JPG, PNG or PDF File"
                 onChange={handleMultipleDocument}
                 ref={refVidoe}
                 multiple
@@ -529,7 +526,7 @@ function DocumentRegister(props) {
                     <tbody>
                       {fileCurrent.map((value, index) => {
                         return (
-                          <tr key={new Date()}>
+                          <tr key={index}>
                             <td>{index + 1}</td>
                             <td>{convertFileName(value.name)}</td>
                             <td>
@@ -643,59 +640,61 @@ function DocumentRegister(props) {
             {tableDocument &&
               tableDocument.map((value, index) => {
                 return (
-                  <Fragment key={index}>
-                    <tr key={new Date()}>
-                      <td>{index + numberStart}</td>
-                      <td>{value.title}</td>
-                      <td>{value.product_name}</td>
-                      <td>{value.line_name}</td>
-                      <td>{value.machine_name}</td>
-                      <td>{value.create_date}</td>
-                      <td>{value.status}</td>
-                      <td>
+                  <tr key={index}>
+                    <td>{index + numberStart}</td>
+                    <td>{value.title}</td>
+                    <td>{value.product_name}</td>
+                    <td>{value.line_name}</td>
+                    <td>{value.machine_name}</td>
+                    <td>
+                      {moment(value.create_date).format(
+                        "MMMM Do YYYY, h:mm:ss a"
+                      )}
+                    </td>
+                    <td>{value.status}</td>
+                    <td>
+                      <Button
+                        title="Delete"
+                        size="sm"
+                        style={{ marginRight: 2 }}
+                        id={value.id}
+                        onClick={handleDelete}
+                      >
+                        <MdDeleteForever style={{ pointerEvents: "none" }} />
+                      </Button>
+                      <Button
+                        title="Change Status"
+                        size="sm"
+                        style={{ marginRight: 2 }}
+                        variant="warning"
+                        id={value.id}
+                        onClick={changeStatus}
+                      >
+                        <GoGitCompare style={{ pointerEvents: "none" }} />
+                      </Button>
+                      <Button
+                        title="Edit"
+                        size="sm"
+                        style={{ marginRight: 2 }}
+                        id={value.id}
+                        onClick={handleEdit}
+                        variant="success"
+                      >
+                        <GrEdit style={{ pointerEvents: "none" }} />
+                      </Button>
+                      <Link to={`/document/${value.id}`}>
                         <Button
-                          title="Delete"
+                          title="View"
                           size="sm"
                           style={{ marginRight: 2 }}
                           id={value.id}
-                          onClick={handleDelete}
+                          variant="dark"
                         >
-                          <MdDeleteForever style={{ pointerEvents: "none" }} />
+                          <MdVideoLibrary style={{ pointerEvents: "none" }} />
                         </Button>
-                        <Button
-                          title="Change Status"
-                          size="sm"
-                          style={{ marginRight: 2 }}
-                          variant="warning"
-                          id={value.id}
-                          onClick={changeStatus}
-                        >
-                          <GoGitCompare style={{ pointerEvents: "none" }} />
-                        </Button>
-                        <Button
-                          title="Edit"
-                          size="sm"
-                          style={{ marginRight: 2 }}
-                          id={value.id}
-                          onClick={handleEdit}
-                          variant="success"
-                        >
-                          <GrEdit style={{ pointerEvents: "none" }} />
-                        </Button>
-                        <Link to={`/document/${value.id}`}>
-                          <Button
-                            title="View"
-                            size="sm"
-                            style={{ marginRight: 2 }}
-                            id={value.id}
-                            variant="dark"
-                          >
-                            <MdVideoLibrary style={{ pointerEvents: "none" }} />
-                          </Button>
-                        </Link>
-                      </td>
-                    </tr>
-                  </Fragment>
+                      </Link>
+                    </td>
+                  </tr>
                 );
               })}
           </tbody>
