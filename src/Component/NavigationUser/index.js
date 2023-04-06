@@ -6,6 +6,8 @@ import { MdOutlineVideoSettings } from "react-icons/md";
 import UserDashboard from "../UserDashboard";
 import DocumentRegister from "../DocumentRegister";
 import { ImAttachment } from "react-icons/im";
+import CapabilityMenu from "../CapabilityMenu";
+import { SlGraph } from "react-icons/sl";
 
 function NavigationUser() {
   const [actionState, setActionState] = useState(1);
@@ -36,6 +38,12 @@ function NavigationUser() {
                 Document Upload
               </Nav.Link>
             </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey={"capabilityMenu"} className="tabTitle">
+                <SlGraph style={{ marginRight: 5 }} />
+                Capability Menu
+              </Nav.Link>
+            </Nav.Item>
           </Nav>
         </Col>
         <Col sm={10}>
@@ -54,6 +62,12 @@ function NavigationUser() {
             </Tab.Pane>
             <Tab.Pane eventKey={"documentList"}>
               <DocumentRegister
+                actionState={(value) => setActionState(actionState + value)}
+                actionStateValue={actionState}
+              />
+            </Tab.Pane>
+            <Tab.Pane eventKey={"capabilityMenu"}>
+              <CapabilityMenu
                 actionState={(value) => setActionState(actionState + value)}
                 actionStateValue={actionState}
               />

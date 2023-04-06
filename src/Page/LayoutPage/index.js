@@ -10,6 +10,7 @@ import UserDashboardPage from "../UserDashboardPage";
 import Video from "../Video";
 import Openai from "../OpenAI";
 import ProtectedRouteAdmin from "../../Component/ProtectedRouteAdmin";
+import CapabilityFormPage from "../CapabilityFormPage";
 
 function LayoutPage() {
   return (
@@ -27,6 +28,7 @@ function LayoutPage() {
           />
           <Route path="/video/:id" element={<Video />} />
           <Route path="/document/:id" element={<Document />} />
+          <Route path="/capabilityForm" element={<CapabilityFormPage />} />
           <Route element={<ProtectedRouteAdmin />}>
             <Route path="/adminmenu" element={<Admin />} />
           </Route>
