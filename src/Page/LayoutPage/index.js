@@ -19,6 +19,7 @@ function LayoutPage() {
         <Route index element={<Login />} />
         <Route path="/:token" element={<Login />} />
         <Route element={<ProtectedRoute />}>
+          <Route path="/capabilityForm" element={<CapabilityFormPage />} />
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />
           <Route path="/openai" element={<Openai />} />
           <Route path="/searching_page" element={<SearchEnginePage />} />
@@ -28,7 +29,6 @@ function LayoutPage() {
           />
           <Route path="/video/:id" element={<Video />} />
           <Route path="/document/:id" element={<Document />} />
-          <Route path="/capabilityForm" element={<CapabilityFormPage />} />
           <Route element={<ProtectedRouteAdmin />}>
             <Route path="/adminmenu" element={<Admin />} />
           </Route>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   CartesianGrid,
+  Label,
   Legend,
   Line,
   LineChart,
@@ -34,20 +35,33 @@ function GraphCapabilityLine(props) {
   }, [listData, actionValue]);
 
   const min = () => {
-    let newValue =
-      parseFloat(standardMin) -
-      (parseFloat(standardMax) - parseFloat(standardMin)) / 2;
-    let number = (Math.round(newValue * 100) / 100).toFixed(2);
-
-    return parseFloat(number);
+    if (type === DOUBLE_STANDARD) {
+      let newValue =
+        parseFloat(standardMin) -
+        (parseFloat(standardMax) - parseFloat(standardMin)) / 2;
+      let number = (Math.round(newValue * 100) / 100).toFixed(2);
+      return parseFloat(number);
+    } else if (type === SINGLE_STANDARD_MIN) {
+      let newValue = parseFloat(standard) - parseFloat(standard) / 2;
+      let number = (Math.round(newValue * 100) / 100).toFixed(2);
+      return parseFloat(number);
+    }
+    return "auto";
   };
 
   const max = () => {
-    let newValue =
-      parseFloat(standardMax) +
-      (parseFloat(standardMax) - parseFloat(standardMin)) / 2;
-    let number = (Math.round(newValue * 100) / 100).toFixed(2);
-    return parseFloat(number);
+    if (type === DOUBLE_STANDARD) {
+      let newValue =
+        parseFloat(standardMax) +
+        (parseFloat(standardMax) - parseFloat(standardMin)) / 2;
+      let number = (Math.round(newValue * 100) / 100).toFixed(2);
+      return parseFloat(number);
+    } else if (SINGLE_STANDARD_MAX) {
+      let newValue = parseFloat(standard) + parseFloat(standard) / 4;
+      let number = (Math.round(newValue * 100) / 100).toFixed(2);
+      return parseFloat(number);
+    }
+    return "auto";
   };
 
   const domain = (type) => {
@@ -83,16 +97,19 @@ function GraphCapabilityLine(props) {
           <YAxis domain={domain(type)} />
           {type === DOUBLE_STANDARD ? (
             <>
+              <ReferenceLine y={standardMax} stroke="red">
+                <Label value={"Maximum Standard"} position={"top"} />
+              </ReferenceLine>
+              <ReferenceLine y={standardMin} stroke="blue">
+                <Label value={"Minimum Standard"} position={"bottom"} />
+              </ReferenceLine>
               <ReferenceLine
-                y={standardMax}
-                label="Maximum Standard"
-                stroke="red"
-              />
-              <ReferenceLine
-                y={standardMin}
-                label="Minimum Standard"
-                stroke="blue"
-              />
+                y={(parseFloat(standardMin) + parseFloat(standardMax)) / 2}
+                stroke="green"
+                strokeDasharray="3 3"
+              >
+                <Label value={"Center Standard"} position={"center"} />
+              </ReferenceLine>
             </>
           ) : (
             <ReferenceLine

@@ -1,8 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import "./capabilityForm.css";
 import TitleSection from "../TitleSection";
 import { VscGraphLine } from "react-icons/vsc";
-import { Button, Col, Form, Row, Tab, Table, Tabs } from "react-bootstrap";
+import {
+  Badge,
+  Button,
+  Col,
+  Form,
+  Row,
+  Spinner,
+  Tab,
+  Table,
+  Tabs,
+} from "react-bootstrap";
 import axios from "axios";
 import {
   getAllLineApi,
@@ -18,6 +28,12 @@ import {
 } from "../../Config/const";
 import GraphCapabilityLine from "../GraphCapabilityLine";
 import GraphCapabilityDistribution from "../GraphCapabilityDistribution";
+import GraphNormalDistribution from "../GraphNormalDistribution";
+import { SlEmotsmile } from "react-icons/sl";
+import { FaRegSadCry } from "react-icons/fa";
+import RECOMENDATION from "../../Config/recomendationOfCapability";
+import { BsDiamondFill } from "react-icons/bs";
+import { RiStopMiniLine } from "react-icons/ri";
 
 function CapabilityForm() {
   const [tableProduct, setTableProduct] = useState("");
@@ -26,9 +42,12 @@ function CapabilityForm() {
   const [product, setProduct] = useState("");
   const [line, setLine] = useState("");
   const [machine, setMachine] = useState("");
+  const [partName, setPartName] = useState("");
+  const [partNumber, setPartNumber] = useState("");
+  const [remark, setRemark] = useState("");
   const [itemCheck, setItemCheck] = useState("");
   const [type, setType] = useState("");
-  const [sigma, setSigma] = useState(0);
+  const [sigma, setSigma] = useState("");
   const [standard, setStandard] = useState("");
   const [standardMax, setStandardMax] = useState("");
   const [standardMin, setStandardMin] = useState("");
@@ -132,7 +151,6 @@ function CapabilityForm() {
 
   const handleAddData = (e) => {
     e.preventDefault();
-    console.log(listData.length);
     const data = {
       no: listData.length + 1,
       data: inputData,
@@ -167,7 +185,7 @@ function CapabilityForm() {
     let sigma = 0;
     let average = averageData(listData);
 
-    if (listData.length > 0) {
+    if (listData.length > 1) {
       let sum = 0;
       for (let index = 0; index < listData.length; index++) {
         sum += Math.pow(parseFloat(listData[index].data) - average, 2);
@@ -185,7 +203,7 @@ function CapabilityForm() {
     let sigmaValue = sigmaData(listData);
     let average = averageData(listData);
 
-    if (listData.length > 0) {
+    if (listData.length > 1) {
       if (type === DOUBLE_STANDARD) {
         cp =
           (parseFloat(standardMax) - parseFloat(standardMin)) /
@@ -207,7 +225,7 @@ function CapabilityForm() {
     let average = averageData(listData);
     let centerData = (parseFloat(standardMax) + parseFloat(standardMin)) / 2;
 
-    if (listData.length > 0) {
+    if (listData.length > 1) {
       if (type === DOUBLE_STANDARD) {
         if (average > centerData) {
           cpk =
@@ -227,15 +245,159 @@ function CapabilityForm() {
     return number;
   };
 
+  const judgement = (type, cp, cpk) => {
+    if (type === DOUBLE_STANDARD) {
+      if (cp > 1.33 && cpk > 1.33) {
+        return (
+          <>
+            <Badge bg="success" style={{ fontSize: 15 }}>
+              <SlEmotsmile style={{ marginRight: 5 }} /> Good
+            </Badge>
+          </>
+        );
+      } else {
+        return (
+          <>
+            <Badge bg="danger" style={{ fontSize: 15 }}>
+              <FaRegSadCry style={{ marginRight: 5 }} /> No Good
+            </Badge>
+          </>
+        );
+      }
+    } else if (type === SINGLE_STANDARD_MAX || type === SINGLE_STANDARD_MIN) {
+      if (cp > 1.33) {
+        return (
+          <>
+            <Badge bg="success" style={{ fontSize: 15 }}>
+              <SlEmotsmile style={{ marginRight: 5 }} /> Good
+            </Badge>
+          </>
+        );
+      }
+      return (
+        <>
+          <Badge bg="danger" style={{ fontSize: 15 }}>
+            <FaRegSadCry style={{ marginRight: 5 }} /> No Good
+          </Badge>
+        </>
+      );
+    }
+  };
+
+  const recomendationHandle = () => {
+    if (listData.length >= 24) {
+      const data = RECOMENDATION(
+        listData,
+        standardMax,
+        standardMin,
+        sigmaData(listData),
+        type,
+        cpData(listData),
+        cpkData(listData)
+      ); //return object data ;
+
+      if (data.role.length > 0) {
+        return (
+          <>
+            <Row style={{ textAlign: "left" }} className="mb-3">
+              <Col sm={3}>Analyzing Result : </Col>
+              <Col sm={9}>
+                {data.role.map((value, index) => {
+                  return (
+                    <Row key={index}>
+                      <Col>
+                        <Row>
+                          <Col>{value}</Col>
+                        </Row>
+                      </Col>
+                    </Row>
+                  );
+                })}
+              </Col>
+            </Row>
+
+            {data.category.map((value, index) => {
+              return (
+                <Fragment key={index} className="mb-3">
+                  <Row style={{ textAlign: "left" }}>
+                    <Col>
+                      <BsDiamondFill /> {value.title}
+                    </Col>
+                  </Row>
+
+                  {value.item.map((value, index) => {
+                    return (
+                      <Row style={{ textAlign: "left" }} key={index}>
+                        <Col>
+                          <div style={{ marginLeft: 30 }}>
+                            <RiStopMiniLine />
+                            {value}
+                          </div>
+                        </Col>
+                      </Row>
+                    );
+                  })}
+                </Fragment>
+              );
+            })}
+          </>
+        );
+      } else {
+        return (
+          <Row>
+            <Col>Everything is OK</Col>
+          </Row>
+        );
+      }
+    } else if (listData.length > 1 && listData.length < 24) {
+      return (
+        <>
+          <Spinner animation="grow" variant="primary" />
+          <Spinner animation="grow" variant="secondary" />
+          <Spinner animation="grow" variant="success" />
+          <Spinner animation="grow" variant="danger" />
+          <Spinner animation="grow" variant="warning" />
+          <Spinner animation="grow" variant="info" />
+        </>
+      );
+    }
+  };
+
+  const handleReset = () => {
+    setProduct("");
+    setLine("");
+    setMachine("");
+    setPartName("");
+    setPartNumber("");
+    setRemark("");
+    setItemCheck("");
+    setType("");
+    setSigma("");
+    setStandard("");
+    setStandardMax("");
+    setStandardMin("");
+    setInputData("");
+    setListData([]);
+  };
   return (
     <>
       <div className="capabilityFormContainer">
         <div className="capabilityForm">
-          <TitleSection
-            title="FORM CAPABILITY"
-            icon={<VscGraphLine style={{ marginRight: 5 }} />}
-          />
           <Form>
+            <Row className="mb-3">
+              <Col style={{ textAlign: "right" }}>
+                <Button type="submit" style={{ marginRight: 5 }}>
+                  Save
+                </Button>
+                <Button type="button" onClick={handleReset}>
+                  Clear
+                </Button>
+              </Col>
+            </Row>
+            <TitleSection
+              title="FORM CAPABILITY"
+              icon={<VscGraphLine style={{ marginRight: 5 }} />}
+            />
             <Row className="mb-3" style={{ textAlign: "left" }}>
               <Form.Group as={Col}>
                 <Form.Label>Select Product</Form.Label>
@@ -272,8 +434,26 @@ function CapabilityForm() {
                   {machineOption()}
                 </Form.Select>
               </Form.Group>
+              <Form.Group as={Col}>
+                <Form.Label>Part Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter Part Name"
+                  value={partName}
+                  onChange={(e) => setPartName(e.target.value)}
+                />
+              </Form.Group>
             </Row>
             <Row className="mb-3" style={{ textAlign: "left" }}>
+              <Form.Group as={Col}>
+                <Form.Label>Part Number</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter Part Number"
+                  value={partNumber}
+                  onChange={(e) => setPartNumber(e.target.value)}
+                />
+              </Form.Group>
               <Form.Group as={Col}>
                 <Form.Label>Item Check</Form.Label>
                 <Form.Control
@@ -311,17 +491,6 @@ function CapabilityForm() {
             </Row>
             <Row className="mb-3" style={{ textAlign: "left" }}>
               <Form.Group as={Col}>
-                <Form.Label> Standard Maximum</Form.Label>
-                <Form.Control
-                  type="number"
-                  placeholder="Enter Standard Maximum"
-                  value={standardMax}
-                  onChange={(e) => setStandardMax(e.target.value)}
-                  required={type === DOUBLE_STANDARD ? true : false}
-                  disabled={type === DOUBLE_STANDARD ? false : true}
-                />
-              </Form.Group>
-              <Form.Group as={Col}>
                 <Form.Label> Standard Minimum</Form.Label>
                 <Form.Control
                   type="number"
@@ -333,24 +502,41 @@ function CapabilityForm() {
                 />
               </Form.Group>
               <Form.Group as={Col}>
+                <Form.Label> Standard Maximum</Form.Label>
+                <Form.Control
+                  type="number"
+                  placeholder="Enter Standard Maximum"
+                  value={standardMax}
+                  onChange={(e) => setStandardMax(e.target.value)}
+                  required={type === DOUBLE_STANDARD ? true : false}
+                  disabled={type === DOUBLE_STANDARD ? false : true}
+                />
+              </Form.Group>
+
+              <Form.Group as={Col}>
                 <Form.Label> Standard</Form.Label>
                 <Form.Control
                   type="number"
                   placeholder="Enter Standard"
                   value={standard}
                   onChange={(e) => setStandard(e.target.value)}
-                  required={type !== DOUBLE_STANDARD ? true : false}
-                  disabled={type !== DOUBLE_STANDARD ? false : true}
+                  required={
+                    type !== DOUBLE_STANDARD && type !== "" ? true : false
+                  }
+                  disabled={
+                    type !== DOUBLE_STANDARD && type !== "" ? false : true
+                  }
                 />
               </Form.Group>
-            </Row>
-            <Row className="mb-3">
-              <Col style={{ textAlign: "right" }}>
-                <Button type="submit" style={{ marginRight: 5 }}>
-                  Submit
-                </Button>
-                <Button type="button">Clear</Button>
-              </Col>
+              <Form.Group as={Col}>
+                <Form.Label>Remark</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  style={{ height: 100 }}
+                  value={remark}
+                  onChange={(e) => setRemark(e.target.value)}
+                ></Form.Control>
+              </Form.Group>
             </Row>
           </Form>
         </div>
@@ -372,6 +558,7 @@ function CapabilityForm() {
                       value={inputData}
                       onChange={(e) => setInputData(e.target.value)}
                       lang="en"
+                      step={".001"}
                       required
                     />
                   </Col>
@@ -432,17 +619,38 @@ function CapabilityForm() {
                     standardMax={standardMax}
                     standardMin={standardMin}
                     standard={standard}
-                    sigma={sigma}
+                    sigma={sigmaData(listData)}
                     type={type}
                     listData={listData}
                     actionValue={actionValue}
                   />
                 </Tab>
+                <Tab eventKey={"graph-capability-2"} title="Graph Histogram">
+                  <GraphCapabilityDistribution
+                    standardMax={standardMax}
+                    standardMin={standardMin}
+                    standard={standard}
+                    sigma={sigmaData(listData)}
+                    type={type}
+                    listData={listData}
+                    actionValue={actionValue}
+                    average={averageData(listData)}
+                  />
+                </Tab>
                 <Tab
-                  eventKey={"graph-capability-2"}
+                  eventKey={"graph-capability-3"}
                   title="Graph Normal Distribution"
                 >
-                  <GraphCapabilityDistribution />
+                  <GraphNormalDistribution
+                    standardMax={standardMax}
+                    standardMin={standardMin}
+                    standard={standard}
+                    sigma={sigmaData(listData)}
+                    type={type}
+                    listData={listData}
+                    actionValue={actionValue}
+                    average={averageData(listData)}
+                  />
                 </Tab>
               </Tabs>
             </div>
@@ -452,13 +660,24 @@ function CapabilityForm() {
                 icon={<VscGraphLine style={{ marginRight: 5 }} />}
               />
               <div>
-                <Row>
+                <Row className="mb-3">
                   <Col>Average : {averageData(listData)} </Col>
                   <Col>Sigma : {sigmaData(listData)}</Col>
                   <Col>Cp : {cpData(listData)}</Col>
                   <Col>Cpk : {cpkData(listData)}</Col>
                 </Row>
+                <Row className="mb-3">
+                  <Col>
+                    Judgment :{" "}
+                    {judgement(type, cpData(listData), cpkData(listData))}
+                  </Col>
+                </Row>
               </div>
+              <TitleSection
+                title="Charts Analyzer"
+                icon={<VscGraphLine style={{ marginRight: 5 }} />}
+              />
+              {recomendationHandle()}
             </div>
           </Col>
         </Row>
