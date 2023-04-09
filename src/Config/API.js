@@ -173,3 +173,21 @@ export const getRequestApi = (token) => {
 export const deleteRequestApi = (token) => {
   return `${port}/api/request/delete/${token}`;
 };
+
+//capability
+export const createCpaability = `${port}/api/capability/create`;
+export const updateCapability = `${port}/api/capability/update`;
+export const deleteCapability = (id) => {
+  return `${port}/api/capability/delete/${id}`;
+};
+export const getAllCapability = (page) => {
+  return `${port}/api/capability/getAllCapability/${page}`;
+};
+
+export const getCapabilityByUserId = (page, userId) => {
+  return `${port}/api/capability/getCapabilityByUserId/${userId}/${page}`;
+};
+
+export const getCapabilityById = (id) => {
+  return `${port}/api/capability/getCapabilityById/${id}`;
+};
