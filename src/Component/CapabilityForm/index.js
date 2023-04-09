@@ -15,9 +15,12 @@ import {
 } from "react-bootstrap";
 import axios from "axios";
 import {
+  createCapabilityApi,
   getAllLineApi,
   getAllMachineApi,
   getAllProductApi,
+  getCapabilityByIdApi,
+  updateCapabilityApi,
 } from "../../Config/API";
 import {
   DOUBLE_STANDARD,
@@ -34,8 +37,12 @@ import { FaRegSadCry } from "react-icons/fa";
 import RECOMENDATION from "../../Config/recomendationOfCapability";
 import { BsDiamondFill } from "react-icons/bs";
 import { RiStopMiniLine } from "react-icons/ri";
+import { useParams } from "react-router-dom";
 
 function CapabilityForm() {
+  const { id } = useParams();
+  const [userId, setUserId] = useState("");
+  const [updateMode, setUpdateMode] = useState(false);
   const [tableProduct, setTableProduct] = useState("");
   const [tableLine, setTableLine] = useState("");
   const [tableMachine, setTableMachine] = useState("");
@@ -74,7 +81,38 @@ function CapabilityForm() {
     axios.get(getAllMachineApi).then((response) => {
       setTableMachine(response.data.data);
     });
-  }, []);
+
+    axios.get(getCapabilityByIdApi(id)).then((response) => {
+      const result = response.data.data.result;
+      const data = response.data.data.data;
+      if (result.length > 0) {
+        setMachine(result[0].machine_id);
+        setProduct(result[0].product_id);
+        setLine(result[0].line_id);
+        setPartName(result[0].part_name);
+        setPartNumber(result[0].part_number);
+        setType(result[0].type);
+        setItemCheck(result[0].item_check);
+        setSigma(result[0].sigma);
+        if (result[0].type === DOUBLE_STANDARD) {
+          setStandardMax(result[0].standard_max);
+          setStandardMin(result[0].standard_min);
+        } else {
+          setStandard(result[0].standard);
+        }
+        setRemark(result[0].description);
+        if (data.length > 0) {
+          setListData(data);
+        }
+        setUpdateMode(true);
+      }
+    });
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setUserId(user.id);
+    }
+  }, [id, updateMode]);
 
   const handleSetProduct = (e) => {
     setProduct(e.target.value);
@@ -155,7 +193,7 @@ function CapabilityForm() {
       no: listData.length + 1,
       data: inputData,
     };
-    setListData([...listData, data]);
+    setListData((prev) => [...prev, data]);
     setInputData("");
   };
 
@@ -379,19 +417,58 @@ function CapabilityForm() {
     setInputData("");
     setListData([]);
   };
+
+  const handleBack = () => {};
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    let data = {
+      userId: userId,
+      machine_id: machine,
+      part_name: partName,
+      part_number: partNumber,
+      item_check: itemCheck,
+      type: type,
+      sigma: sigma,
+      standard: standard,
+      standard_max: standardMax,
+      standard_min: standardMin,
+      description: remark,
+      data: listData,
+    };
+    if (!updateMode) {
+      axios
+        .post(createCapabilityApi, data)
+        .then((response) => {
+          handleReset();
+        })
+        .then((error) => console.log(error));
+    } else {
+      data = { ...data, id: id };
+      axios.patch(updateCapabilityApi, data).then((response) => {
+        handleReset();
+      });
+    }
+  };
   return (
     <>
       <div className="capabilityFormContainer">
         <div className="capabilityForm">
-          <Form>
+          <Form onSubmit={handleSave}>
             <Row className="mb-3">
               <Col style={{ textAlign: "right" }}>
                 <Button type="submit" style={{ marginRight: 5 }}>
                   Save
                 </Button>
-                <Button type="button" onClick={handleReset}>
-                  Clear
-                </Button>
+                {updateMode ? (
+                  <Button type="button" onClick={handleBack}>
+                    Back
+                  </Button>
+                ) : (
+                  <Button type="button" onClick={handleReset}>
+                    Clear
+                  </Button>
+                )}
               </Col>
             </Row>
             <TitleSection

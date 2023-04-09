@@ -175,19 +175,19 @@ export const deleteRequestApi = (token) => {
 };
 
 //capability
-export const createCpaability = `${port}/api/capability/create`;
-export const updateCapability = `${port}/api/capability/update`;
-export const deleteCapability = (id) => {
+export const createCapabilityApi = `${port}/api/capability/create`;
+export const updateCapabilityApi = `${port}/api/capability/update`;
+export const deleteCapabilityApi = (id) => {
   return `${port}/api/capability/delete/${id}`;
 };
-export const getAllCapability = (page) => {
+export const getAllCapabilityApi = (page) => {
   return `${port}/api/capability/getAllCapability/${page}`;
 };
 
-export const getCapabilityByUserId = (page, userId) => {
+export const getCapabilityByUserIdApi = (page, userId) => {
   return `${port}/api/capability/getCapabilityByUserId/${userId}/${page}`;
 };
 
-export const getCapabilityById = (id) => {
+export const getCapabilityByIdApi = (id) => {
   return `${port}/api/capability/getCapabilityById/${id}`;
 };
