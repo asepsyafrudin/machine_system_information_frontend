@@ -18,8 +18,8 @@ function LayoutPage() {
       <Routes>
         <Route index element={<Login />} />
         <Route path="/:token" element={<Login />} />
-        <Route path="/capabilityForm" element={<CapabilityFormPage />} />
         <Route element={<ProtectedRoute />}>
+          <Route path="/capabilityForm" element={<CapabilityFormPage />} />
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />
           <Route path="/openai" element={<Openai />} />
           <Route path="/searching_page" element={<SearchEnginePage />} />
