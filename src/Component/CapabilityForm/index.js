@@ -16,6 +16,7 @@ import {
 import axios from "axios";
 import {
   createCapabilityApi,
+  deleteCapabilityApi,
   getAllLineApi,
   getAllMachineApi,
   getAllProductApi,
@@ -39,6 +40,7 @@ import { BsDiamondFill } from "react-icons/bs";
 import { RiStopMiniLine } from "react-icons/ri";
 import { useNavigate, useParams } from "react-router-dom";
 import ModalAlert from "../ModalAlert";
+import ModalConfirm from "../ModalConfirm";
 
 function CapabilityForm() {
   const { id } = useParams();
@@ -66,6 +68,7 @@ function CapabilityForm() {
   const [actionValue, setActionValue] = useState(0);
   const [showModalAlert, setShowModalAlert] = useState(false);
   const [message, setMessage] = useState("");
+  const [showModalConfirm, setShowModalConfirm] = useState(false);
 
   useEffect(() => {
     axios
@@ -316,18 +319,13 @@ function CapabilityForm() {
           </>
         );
       }
-      return (
-        <>
-          <Badge bg="danger" style={{ fontSize: 15 }}>
-            <FaRegSadCry style={{ marginRight: 5 }} /> No Good
-          </Badge>
-        </>
-      );
+
+      return "";
     }
   };
 
   const recomendationHandle = () => {
-    if (listData.length >= 24) {
+    if (listData.length >= 30) {
       const data = RECOMENDATION(
         listData,
         standardMax,
@@ -489,6 +487,20 @@ function CapabilityForm() {
     return true;
   };
 
+  const handleConfirm = (confirm) => {
+    if (confirm) {
+      axios.delete(deleteCapabilityApi(id)).then((response) => {
+        setMessage("Data berhasil di delete");
+        setShowModalConfirm(false);
+        setShowModalAlert(true);
+      });
+    }
+  };
+
+  const handleDeleteCapability = () => {
+    setMessage("Do you want to delete it?");
+    setShowModalConfirm(true);
+  };
   return (
     <>
       <div className="capabilityFormContainer">
@@ -503,13 +515,23 @@ function CapabilityForm() {
                           {updateMode ? "Update" : "Save"}
                         </Button>
                         {updateMode ? (
-                          <Button
-                            type="button"
-                            variant="success"
-                            onClick={handleBack}
-                          >
-                            Back
-                          </Button>
+                          <>
+                            <Button
+                              type="button"
+                              variant="success"
+                              onClick={handleBack}
+                              style={{ marginRight: 5 }}
+                            >
+                              Back
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="danger"
+                              onClick={handleDeleteCapability}
+                            >
+                              Delete
+                            </Button>
+                          </>
                         ) : (
                           <Button type="button" onClick={handleReset}>
                             Clear
@@ -955,6 +977,15 @@ function CapabilityForm() {
             setShowModalAlert(e);
           }}
           message={message}
+          type="navigate"
+        />
+        <ModalConfirm
+          show={showModalConfirm}
+          onHandleClose={(e) => {
+            setShowModalConfirm(e);
+          }}
+          message={message}
+          onHandleConfirm={(confirm) => handleConfirm(confirm)}
         />
       </div>
     </>
