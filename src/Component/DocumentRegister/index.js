@@ -554,7 +554,7 @@ function DocumentRegister(props) {
           </Row>
           <Row className="mb-3">
             <Col>
-              <Form.Label>File Description</Form.Label>
+              <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
                 style={{ height: 100 }}

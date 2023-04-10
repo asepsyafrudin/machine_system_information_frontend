@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./capabilityForm.css";
 import TitleSection from "../TitleSection";
 import { VscGraphLine } from "react-icons/vsc";
@@ -37,11 +37,13 @@ import { FaRegSadCry } from "react-icons/fa";
 import RECOMENDATION from "../../Config/recomendationOfCapability";
 import { BsDiamondFill } from "react-icons/bs";
 import { RiStopMiniLine } from "react-icons/ri";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import ModalAlert from "../ModalAlert";
 
 function CapabilityForm() {
   const { id } = useParams();
   const [userId, setUserId] = useState("");
+  const [userIdDataView, setUserIdDataView] = useState("");
   const [updateMode, setUpdateMode] = useState(false);
   const [tableProduct, setTableProduct] = useState("");
   const [tableLine, setTableLine] = useState("");
@@ -62,6 +64,8 @@ function CapabilityForm() {
   const [inputData, setInputData] = useState("");
   const [listData, setListData] = useState([]);
   const [actionValue, setActionValue] = useState(0);
+  const [showModalAlert, setShowModalAlert] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     axios
@@ -83,10 +87,10 @@ function CapabilityForm() {
     });
 
     axios.get(getCapabilityByIdApi(id)).then((response) => {
-      const result = response.data.data.result;
-      const data = response.data.data.data;
+      const result = response.data.data;
       if (result.length > 0) {
         setMachine(result[0].machine_id);
+        setUserIdDataView(result[0].user_id);
         setProduct(result[0].product_id);
         setLine(result[0].line_id);
         setPartName(result[0].part_name);
@@ -101,8 +105,8 @@ function CapabilityForm() {
           setStandard(result[0].standard);
         }
         setRemark(result[0].description);
-        if (data.length > 0) {
-          setListData(data);
+        if (result[0].data.length > 0) {
+          setListData(result[0].data);
         }
         setUpdateMode(true);
       }
@@ -356,7 +360,7 @@ function CapabilityForm() {
 
             {data.category.map((value, index) => {
               return (
-                <Fragment key={index} className="mb-3">
+                <div key={index} className="mb-3">
                   <Row style={{ textAlign: "left" }}>
                     <Col>
                       <BsDiamondFill /> {value.title}
@@ -375,7 +379,7 @@ function CapabilityForm() {
                       </Row>
                     );
                   })}
-                </Fragment>
+                </div>
               );
             })}
           </>
@@ -418,12 +422,15 @@ function CapabilityForm() {
     setListData([]);
   };
 
-  const handleBack = () => {};
+  const navigate = useNavigate();
+  const handleBack = () => {
+    navigate("/capabilityList");
+  };
 
   const handleSave = (e) => {
     e.preventDefault();
     let data = {
-      userId: userId,
+      user_id: userId,
       machine_id: machine,
       part_name: partName,
       part_number: partNumber,
@@ -441,36 +448,100 @@ function CapabilityForm() {
         .post(createCapabilityApi, data)
         .then((response) => {
           handleReset();
+          setMessage("Data Berhasil di Input");
+          setShowModalAlert(true);
         })
         .then((error) => console.log(error));
     } else {
       data = { ...data, id: id };
       axios.patch(updateCapabilityApi, data).then((response) => {
-        handleReset();
+        setMessage("Data Berhasil di Update");
+        setShowModalAlert(true);
       });
     }
   };
+
+  const doubleStandardDisabled = () => {
+    if (type === DOUBLE_STANDARD) {
+      if (updateMode) {
+        if (userId === userIdDataView) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+      return false;
+    }
+    return true;
+  };
+
+  const singleStandardDisabled = () => {
+    if (type !== DOUBLE_STANDARD && type !== "") {
+      if (updateMode) {
+        if (userId === userIdDataView) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+      return false;
+    }
+    return true;
+  };
+
   return (
     <>
       <div className="capabilityFormContainer">
         <div className="capabilityForm">
           <Form onSubmit={handleSave}>
-            <Row className="mb-3">
-              <Col style={{ textAlign: "right" }}>
-                <Button type="submit" style={{ marginRight: 5 }}>
-                  Save
-                </Button>
-                {updateMode ? (
-                  <Button type="button" onClick={handleBack}>
-                    Back
-                  </Button>
-                ) : (
-                  <Button type="button" onClick={handleReset}>
-                    Clear
-                  </Button>
+            {updateMode
+              ? userId === userIdDataView
+                ? listData.length > 0 && (
+                    <Row className="mb-3">
+                      <Col style={{ textAlign: "right" }}>
+                        <Button type="submit" style={{ marginRight: 5 }}>
+                          {updateMode ? "Update" : "Save"}
+                        </Button>
+                        {updateMode ? (
+                          <Button
+                            type="button"
+                            variant="success"
+                            onClick={handleBack}
+                          >
+                            Back
+                          </Button>
+                        ) : (
+                          <Button type="button" onClick={handleReset}>
+                            Clear
+                          </Button>
+                        )}
+                      </Col>
+                    </Row>
+                  )
+                : ""
+              : listData.length > 0 && (
+                  <Row className="mb-3">
+                    <Col style={{ textAlign: "right" }}>
+                      <Button type="submit" style={{ marginRight: 5 }}>
+                        {updateMode ? "Update" : "Save"}
+                      </Button>
+                      {updateMode ? (
+                        <Button
+                          type="button"
+                          variant="success"
+                          onClick={handleBack}
+                        >
+                          Back
+                        </Button>
+                      ) : (
+                        <Button type="button" onClick={handleReset}>
+                          Clear
+                        </Button>
+                      )}
+                    </Col>
+                  </Row>
                 )}
-              </Col>
-            </Row>
+
             <TitleSection
               title="FORM CAPABILITY"
               icon={<VscGraphLine style={{ marginRight: 5 }} />}
@@ -482,6 +553,13 @@ function CapabilityForm() {
                   value={product}
                   onChange={handleSetProduct}
                   required
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
                 >
                   <option value={""} disabled>
                     Open This
@@ -491,7 +569,18 @@ function CapabilityForm() {
               </Form.Group>
               <Form.Group as={Col}>
                 <Form.Label>Select Line</Form.Label>
-                <Form.Select value={line} onChange={handleSetLine} required>
+                <Form.Select
+                  value={line}
+                  onChange={handleSetLine}
+                  required
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
+                >
                   <option value={""} disabled>
                     Open This
                   </option>
@@ -504,6 +593,13 @@ function CapabilityForm() {
                   value={machine}
                   onChange={(e) => setMachine(e.target.value)}
                   required
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
                 >
                   <option value={""} disabled>
                     Open This
@@ -518,6 +614,13 @@ function CapabilityForm() {
                   placeholder="Enter Part Name"
                   value={partName}
                   onChange={(e) => setPartName(e.target.value)}
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
                 />
               </Form.Group>
             </Row>
@@ -529,6 +632,13 @@ function CapabilityForm() {
                   placeholder="Enter Part Number"
                   value={partNumber}
                   onChange={(e) => setPartNumber(e.target.value)}
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
                 />
               </Form.Group>
               <Form.Group as={Col}>
@@ -538,11 +648,29 @@ function CapabilityForm() {
                   placeholder="Enter Item Check"
                   value={itemCheck}
                   onChange={(e) => setItemCheck(e.target.value)}
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
                 />
               </Form.Group>
               <Form.Group as={Col}>
                 <Form.Label>Select Type</Form.Label>
-                <Form.Select value={type} onChange={handleSetType} required>
+                <Form.Select
+                  value={type}
+                  onChange={handleSetType}
+                  required
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
+                >
                   <option value={""} disabled>
                     Open This
                   </option>
@@ -557,6 +685,13 @@ function CapabilityForm() {
                   value={sigma}
                   onChange={(e) => setSigma(e.target.value)}
                   required
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
                 >
                   <option value={""} disabled>
                     Open This
@@ -575,7 +710,7 @@ function CapabilityForm() {
                   value={standardMin}
                   onChange={(e) => setStandardMin(e.target.value)}
                   required={type === DOUBLE_STANDARD ? true : false}
-                  disabled={type === DOUBLE_STANDARD ? false : true}
+                  disabled={doubleStandardDisabled()}
                 />
               </Form.Group>
               <Form.Group as={Col}>
@@ -586,7 +721,7 @@ function CapabilityForm() {
                   value={standardMax}
                   onChange={(e) => setStandardMax(e.target.value)}
                   required={type === DOUBLE_STANDARD ? true : false}
-                  disabled={type === DOUBLE_STANDARD ? false : true}
+                  disabled={doubleStandardDisabled()}
                 />
               </Form.Group>
 
@@ -600,9 +735,7 @@ function CapabilityForm() {
                   required={
                     type !== DOUBLE_STANDARD && type !== "" ? true : false
                   }
-                  disabled={
-                    type !== DOUBLE_STANDARD && type !== "" ? false : true
-                  }
+                  disabled={singleStandardDisabled()}
                 />
               </Form.Group>
               <Form.Group as={Col}>
@@ -612,6 +745,13 @@ function CapabilityForm() {
                   style={{ height: 100 }}
                   value={remark}
                   onChange={(e) => setRemark(e.target.value)}
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
                 ></Form.Control>
               </Form.Group>
             </Row>
@@ -626,24 +766,50 @@ function CapabilityForm() {
                 title="Data Input"
                 icon={<VscGraphLine style={{ marginRight: 5 }} />}
               />
-              <Form onSubmit={handleAddData}>
-                <Row>
-                  <Col sm={9}>
-                    <Form.Control
-                      type="number"
-                      placeholder="Enter Value"
-                      value={inputData}
-                      onChange={(e) => setInputData(e.target.value)}
-                      lang="en"
-                      step={".001"}
-                      required
-                    />
-                  </Col>
-                  <Col sm={3} style={{ textAlign: "right" }}>
-                    <Button type="submit">ADD</Button>
-                  </Col>
-                </Row>
-              </Form>
+              {updateMode ? (
+                userId === userIdDataView ? (
+                  <Form onSubmit={handleAddData}>
+                    <Row>
+                      <Col sm={9}>
+                        <Form.Control
+                          type="number"
+                          placeholder="Enter Value"
+                          value={inputData}
+                          onChange={(e) => setInputData(e.target.value)}
+                          lang="en"
+                          step={".001"}
+                          required
+                        />
+                      </Col>
+                      <Col sm={3} style={{ textAlign: "right" }}>
+                        <Button type="submit">ADD</Button>
+                      </Col>
+                    </Row>
+                  </Form>
+                ) : (
+                  ""
+                )
+              ) : (
+                <Form onSubmit={handleAddData}>
+                  <Row>
+                    <Col sm={9}>
+                      <Form.Control
+                        type="number"
+                        placeholder="Enter Value"
+                        value={inputData}
+                        onChange={(e) => setInputData(e.target.value)}
+                        lang="en"
+                        step={".001"}
+                        required
+                      />
+                    </Col>
+                    <Col sm={3} style={{ textAlign: "right" }}>
+                      <Button type="submit">ADD</Button>
+                    </Col>
+                  </Row>
+                </Form>
+              )}
+
               <div>
                 {listData.length > 0 && (
                   <Table>
@@ -651,7 +817,15 @@ function CapabilityForm() {
                       <tr>
                         <th>No</th>
                         <th>Data</th>
-                        <th>Action</th>
+                        {updateMode ? (
+                          userId === userIdDataView ? (
+                            <th>Action</th>
+                          ) : (
+                            ""
+                          )
+                        ) : (
+                          <th>Action</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
@@ -660,16 +834,33 @@ function CapabilityForm() {
                           <tr key={index}>
                             <td>{index + 1}</td>
                             <td>{value.data}</td>
-                            <td>
-                              <Button
-                                id={index}
-                                type="button"
-                                size="sm"
-                                onClick={handleDeleteData}
-                              >
-                                Delete
-                              </Button>
-                            </td>
+                            {updateMode ? (
+                              userId === userIdDataView ? (
+                                <td>
+                                  <Button
+                                    id={index}
+                                    type="button"
+                                    size="sm"
+                                    onClick={handleDeleteData}
+                                  >
+                                    Delete
+                                  </Button>
+                                </td>
+                              ) : (
+                                ""
+                              )
+                            ) : (
+                              <td>
+                                <Button
+                                  id={index}
+                                  type="button"
+                                  size="sm"
+                                  onClick={handleDeleteData}
+                                >
+                                  Delete
+                                </Button>
+                              </td>
+                            )}
                           </tr>
                         );
                       })}
@@ -758,6 +949,13 @@ function CapabilityForm() {
             </div>
           </Col>
         </Row>
+        <ModalAlert
+          show={showModalAlert}
+          onHandleClose={(e) => {
+            setShowModalAlert(e);
+          }}
+          message={message}
+        />
       </div>
     </>
   );

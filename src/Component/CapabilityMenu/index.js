@@ -27,7 +27,7 @@ function CapabilityMenu() {
               </Link>
             </div>
             <div className="ag-courses_item">
-              <Link to={"/capabilityForm"} className="ag-courses-item_link">
+              <Link to={"/capabilityList"} className="ag-courses-item_link">
                 <div className="ag-courses-item_bg"></div>
                 <div className="ag-courses-item_title">
                   <ImList style={{ marginRight: 5 }} /> List Capability Data

@@ -4,7 +4,6 @@ import {
   CartesianGrid,
   ComposedChart,
   Legend,
-  Line,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -39,7 +38,7 @@ function GraphNormalDistribution(props) {
 
     const setDataValue = () => {
       let arrayList = [];
-      const totalRender = 500;
+      const totalRender = 50;
       let startGraph = 0;
       let endGraph = 0;
 
@@ -73,7 +72,7 @@ function GraphNormalDistribution(props) {
         if (checkValueY > 0.001) {
           arrayList.push({
             name: index + 1,
-            xValue: (Math.round(startGraph * 100) / 100).toFixed(2),
+            xValue: startGraph,
             yValue: checkValueY,
           });
         }
@@ -111,7 +110,7 @@ function GraphNormalDistribution(props) {
             fill="#8884d8"
             stroke="#8884d8"
           />
-          <Line type="monotone" dataKey="yValue" stroke="#ff7300" />
+          {/* <Line type="monotone" dataKey="yValue" stroke="#ff7300" /> */}
           <ReferenceLine
             x={standardMin}
             stroke="blue"

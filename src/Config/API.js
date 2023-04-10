@@ -191,3 +191,7 @@ export const getCapabilityByUserIdApi = (page, userId) => {
 export const getCapabilityByIdApi = (id) => {
   return `${port}/api/capability/getCapabilityById/${id}`;
 };
+
+export const searchCapabilityApi = (searchValue, page) => {
+  return `${port}/api/capability/search/${searchValue}/${page}`;
+};

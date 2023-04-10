@@ -11,6 +11,7 @@ import Video from "../Video";
 import Openai from "../OpenAI";
 import ProtectedRouteAdmin from "../../Component/ProtectedRouteAdmin";
 import CapabilityFormPage from "../CapabilityFormPage";
+import ListCapabilityPage from "../ListCapabilityPage";
 
 function LayoutPage() {
   return (
@@ -20,6 +21,8 @@ function LayoutPage() {
         <Route path="/:token" element={<Login />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/capabilityForm" element={<CapabilityFormPage />} />
+          <Route path="/capabilityForm/:id" element={<CapabilityFormPage />} />
+          <Route path="/capabilityList" element={<ListCapabilityPage />} />
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />
           <Route path="/openai" element={<Openai />} />
           <Route path="/searching_page" element={<SearchEnginePage />} />
