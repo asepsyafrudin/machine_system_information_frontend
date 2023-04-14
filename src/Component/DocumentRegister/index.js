@@ -477,16 +477,16 @@ function DocumentRegister(props) {
               </Form.Select>
             </Form.Group>
             <Form.Group as={Col}>
-              <Form.Label>Input File</Form.Label>
+              <Form.Label>Input File (support multiple file)</Form.Label>
               <Form.Control
                 type="file"
-                accept=".png , .jpeg, .JPEG, .PNG, .pdf"
+                accept=".png , .jpeg, .JPEG, .PNG, .pdf, .xlsx , .ppt , .pptx, .doc, .docx"
                 placeholder="Enter JPG, PNG or PDF File"
                 onChange={handleMultipleDocument}
                 ref={refVidoe}
                 multiple
               />
-              *forbidden to use # in filenames
+              *forbidden to use symbol in filenames
             </Form.Group>
           </Row>
           <Row>
@@ -651,11 +651,7 @@ function DocumentRegister(props) {
                     <td>{value.product_name}</td>
                     <td>{value.line_name}</td>
                     <td>{value.machine_name}</td>
-                    <td>
-                      {moment(value.create_date).format(
-                        "MMMM Do YYYY, h:mm:ss a"
-                      )}
-                    </td>
+                    <td>{moment(value.create_date).format("lll")}</td>
                     <td>{value.status}</td>
                     <td>
                       <Button

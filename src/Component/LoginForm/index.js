@@ -14,8 +14,11 @@ import {
 import { CHANGE_PASSWORD } from "../../Config/const";
 import ModalAlert from "../ModalAlert";
 import { GrValidate } from "react-icons/gr";
+import { SAVEUSERLOGIN } from "../../Context/const";
+import { GlobalConsumer } from "../../Context/store";
 
-function LoginForm() {
+function LoginForm(props) {
+  const { dispatch } = props;
   const { token } = useParams();
   const [npk, setNpk] = useState("");
   const [password, setPassword] = useState("");
@@ -48,10 +51,24 @@ function LoginForm() {
       .post(loginApi, data)
       .then((response) => {
         const user = response.data.data[0];
+        const { id, username, npk, email, section, product, photo, position } =
+          user;
         if (user) {
           localStorage.setItem("user", JSON.stringify(user));
           navigate("/searching_page");
-          // dispatch(loginUser({ type: "login", payload: user }));
+          dispatch({
+            type: SAVEUSERLOGIN,
+            payload: {
+              user_id: id,
+              username: username,
+              npk: npk,
+              email: email,
+              section: section,
+              product: product,
+              photo: photo,
+              position: position,
+            },
+          });
         } else {
           setAlert(true);
         }
@@ -234,4 +251,4 @@ function LoginForm() {
   );
 }
 
-export default LoginForm;
+export default GlobalConsumer(LoginForm);

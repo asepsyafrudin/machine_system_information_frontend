@@ -318,9 +318,15 @@ function CapabilityForm() {
             </Badge>
           </>
         );
+      } else {
+        return (
+          <>
+            <Badge bg="danger" style={{ fontSize: 15 }}>
+              <FaRegSadCry style={{ marginRight: 5 }} /> No Good
+            </Badge>
+          </>
+        );
       }
-
-      return "";
     }
   };
 
@@ -389,7 +395,7 @@ function CapabilityForm() {
           </Row>
         );
       }
-    } else if (listData.length > 1 && listData.length < 24) {
+    } else if (listData.length > 1 && listData.length < 30) {
       return (
         <>
           <Spinner animation="grow" variant="primary" />

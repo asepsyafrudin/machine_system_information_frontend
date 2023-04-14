@@ -1,4 +1,4 @@
-const port = "http://172.31.73.34:8080";
+const port = "http://172.31.73.34:8081";
 
 //users Api
 export const registerUserApi = `${port}/api/users/create_users`;
@@ -32,6 +32,10 @@ export const changePasswordUserApi = `${port}/api/users/changePassword`;
 
 export const checkUserPassword = `${port}/api/users/comparePassword`;
 export const loginApi = `${port}/login`;
+
+export const resetPhotoProfileApi = (id) => {
+  return `${port}/api/users/resetPhoto/${id}`;
+};
 
 //product Api
 
@@ -112,6 +116,11 @@ export const deleteCommentApi = (id) => {
   return `${port}/api/comment/delete/${id}`;
 };
 
+//feedback
+export const getFeedbackByIdApi = (id) => {
+  return `${port}/api/feedback/getFeedbackById/${id}`;
+};
+
 //document Api
 export const registerDocumentApi = `${port}/api/document/create`;
 export const updateDocumentApi = `${port}/api/document/update`;
@@ -141,9 +150,18 @@ export const getDocumentByIdApi = (id) => {
   return `${port}/api/document/getDocumentById/${id}`;
 };
 
+export const getDocumentGeneralBypageApi = (page) => {
+  return `${port}/api/document/getDocumentForGeneralByPage/${page}`;
+};
+
 //file
 export const deleteFileByIdApi = (id) => {
   return `${port}/api/file/delete/${id}`;
+};
+
+//recentdata
+export const getAllRecentDataApi = (page) => {
+  return `${port}/api/allItem/getAll/${page}`;
 };
 
 //comment feedback

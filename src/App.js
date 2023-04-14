@@ -1,16 +1,13 @@
-import { Provider } from "react-redux";
 import "./App.css";
+import { GlobalProvider } from "./Context/store";
 import LayoutPage from "./Page/LayoutPage";
-import store from "../src/redux/store";
 
 function App() {
   return (
-    <Provider store={store}>
-      <div className="App">
-        <LayoutPage />
-      </div>
-    </Provider>
+    <div className="App">
+      <LayoutPage />
+    </div>
   );
 }
 
-export default App;
+export default GlobalProvider(App);

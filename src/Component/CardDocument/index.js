@@ -23,7 +23,7 @@ function CardDocument(props) {
         case "Others":
           return "dark";
         default:
-          break;
+          return "light";
       }
     }
   };

@@ -7,8 +7,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import photoBluePrint from "../../Asset/ImageGeneral/profile.jpg";
 import { Nav, NavDropdown } from "react-bootstrap";
+import { RESETUSERLOGIN } from "../../Context/const";
+import axios from "axios";
+import { getUserByUserIdApi } from "../../Config/API";
+import { GlobalConsumer } from "../../Context/store";
 
-function Header() {
+function Header(props) {
+  const { dispatch } = props;
   const [username, setUsername] = useState("");
   const [photo, setPhoto] = useState("");
   const [position, setPosition] = useState("");
@@ -16,9 +21,15 @@ function Header() {
   useEffect(() => {
     if (localStorage.getItem("user")) {
       const user = JSON.parse(localStorage.getItem("user"));
-      setUsername(user.username);
-      setPhoto(user.photo);
-      setPosition(user.position);
+      const { id } = user;
+      axios.get(getUserByUserIdApi(id)).then((response) => {
+        const dataUser = response.data.data;
+        if (dataUser.length > 0) {
+          setUsername(dataUser[0].username);
+          setPhoto(dataUser[0].photo);
+          setPosition(dataUser[0].position);
+        }
+      });
     }
   }, []);
   const photoProfile = () => {
@@ -50,6 +61,9 @@ function Header() {
       }
     } else {
       localStorage.clear();
+      dispatch({
+        type: RESETUSERLOGIN,
+      });
       navigate("/");
     }
   };
@@ -85,7 +99,7 @@ function Header() {
               >
                 <NavDropdown.Item eventKey="logout">logout</NavDropdown.Item>
                 <NavDropdown.Item eventKey="userDashboard">
-                  UserDashboard
+                  User Dashboard
                 </NavDropdown.Item>
               </NavDropdown>
             </Nav>
@@ -121,4 +135,4 @@ function Header() {
   );
 }
 
-export default Header;
+export default GlobalConsumer(Header);

@@ -551,11 +551,7 @@ function VideoListAdmin(props) {
                     <td>{value.product_name}</td>
                     <td>{value.line_name}</td>
                     <td>{value.machine_name}</td>
-                    <td>
-                      {moment(value.create_date).format(
-                        "MMMM Do YYYY, h:mm:ss a"
-                      )}
-                    </td>
+                    <td>{moment(value.create_date).format("lll")}</td>
                     <td>{value.status}</td>
                     <td>
                       <Button

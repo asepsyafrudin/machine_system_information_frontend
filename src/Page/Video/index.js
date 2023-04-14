@@ -7,6 +7,7 @@ import {
   deleteCommentApi,
   deleteFeedbackComment,
   getCommentByVideoIdApi,
+  getFeedbackByIdApi,
   getUserByUserIdApi,
   getVideoByIdApi,
   postCommentApi,
@@ -30,6 +31,7 @@ function Video() {
   const [actionState, setActionState] = useState(0);
   const [commentId, setCommentId] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [feedbackId, setFeedbackId] = useState("");
   const [page, setPage] = useState(1);
   const [totalPageData, setTotalPageData] = useState(1);
 
@@ -88,20 +90,34 @@ function Video() {
     }
   };
 
-  const handleFeedBackComment = (e) => {
+  const handleFeedBackComment = async (e) => {
     e.preventDefault();
-    let data = {
-      comment_id: commentId,
-      user_id: currentUserId,
-      feedback: feedback,
-      selected_id: id,
-      selected_item: "video",
-    };
+    const commentData = await axios.get(getFeedbackByIdApi(feedbackId));
+    let data;
+    if (commentData.data.data.length > 0) {
+      data = {
+        comment_id: commentData.data.data[0].comment_id,
+        user_id: currentUserId,
+        feedback: feedback,
+        selected_id: id,
+        selected_item: "video",
+      };
+    } else {
+      data = {
+        comment_id: commentId,
+        user_id: currentUserId,
+        feedback: feedback,
+        selected_id: id,
+        selected_item: "video",
+      };
+    }
+
     axios
       .post(postFeedbackComment, data)
       .then((response) => {
         resetComment();
         setFeedback("");
+        setFeedbackId("");
         setCommentId("");
         setActionState(actionState + 1);
       })
@@ -122,6 +138,12 @@ function Video() {
         .catch((error) => console.log(error));
     }
   };
+
+  const handleSetFeedbackId = (e) => {
+    const id = e.target.id;
+    setFeedbackId(id);
+  };
+
   const videoShow = () => {
     if (video && user) {
       return (
@@ -155,11 +177,7 @@ function Video() {
                 </Row>
                 <Row>
                   <Col>
-                    <span>
-                      {moment(video[0].create_date).format(
-                        "MMMM Do YYYY, h:mm:ss a"
-                      )}
-                    </span>
+                    <span>{moment(video[0].create_date).format("lll")}</span>
                   </Col>
                 </Row>
               </Col>
@@ -278,9 +296,7 @@ function Video() {
                       </Col>
                       <Col sm={4} style={{ textAlign: "right" }}>
                         <span style={{ fontSize: 12 }}>
-                          {moment(value.create_date).format(
-                            "MMMM Do YYYY, h:mm:ss a"
-                          )}
+                          {moment(value.create_date).format("lll")}
                         </span>
                       </Col>
                     </Row>
@@ -343,6 +359,14 @@ function Video() {
                                     </span>
                                   </Col>
                                   <Col sm={3}>
+                                    <span
+                                      id={value.id}
+                                      className={"buttonReply"}
+                                      type="button"
+                                      onClick={handleSetFeedbackId}
+                                    >
+                                      Balas
+                                    </span>
                                     {value.user_id === currentUserId && (
                                       <span
                                         id={value.id}
@@ -357,13 +381,55 @@ function Video() {
                                   </Col>
                                   <Col sm={4} style={{ textAlign: "right" }}>
                                     <span style={{ fontSize: 12 }}>
-                                      {value.create_date}
+                                      {moment(value.create_date).format("lll")}
                                     </span>
                                   </Col>
                                 </Row>
                                 <Row>
                                   <Col>
                                     <p>{value.feedback}</p>
+                                  </Col>
+                                </Row>
+                                <Row>
+                                  <Col>
+                                    {parseInt(feedbackId) ===
+                                      parseInt(value.id) && (
+                                      <Form onSubmit={handleFeedBackComment}>
+                                        <Form.Control
+                                          type="text"
+                                          placeholder="Enter Your Comment"
+                                          value={feedback}
+                                          required
+                                          onChange={(e) =>
+                                            setFeedback(e.target.value)
+                                          }
+                                        />
+                                        <div
+                                          style={{
+                                            textAlign: "right",
+                                            marginTop: 10,
+                                          }}
+                                        >
+                                          <Button
+                                            variant="primary"
+                                            size="sm"
+                                            type="submit"
+                                            disabled={feedback ? false : true}
+                                            style={{ marginRight: 5 }}
+                                          >
+                                            Comment
+                                          </Button>
+                                          <Button
+                                            variant="primary"
+                                            size="sm"
+                                            type="button"
+                                            onClick={(e) => setFeedbackId("")}
+                                          >
+                                            Batal
+                                          </Button>
+                                        </div>
+                                      </Form>
+                                    )}
                                   </Col>
                                 </Row>
                               </Col>

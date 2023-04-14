@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Alert, Button, Form, Row, Col, Toast } from "react-bootstrap";
+import { Alert, Button, Form, Row, Col, Toast, Table } from "react-bootstrap";
 import { GoSmiley } from "react-icons/go";
 import TitleSection from "../TitleSection";
 import imageBluPrint from "../../Asset/ImageGeneral/profile.jpg";
@@ -10,14 +10,16 @@ import {
   checkUserPassword,
   getNotificationByUserId,
   getUserByUserIdApi,
+  resetPhotoProfileApi,
   updateUserApi,
 } from "../../Config/API";
-import { GrValidate } from "react-icons/gr";
+import { GrApps, GrValidate } from "react-icons/gr";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import moment from "moment/moment";
 
 function UserDashboard(props) {
   const { actionState, actionStateValue } = props;
+  const [id, setId] = useState("");
   const [updateMode, setUpdateMode] = useState(false);
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
@@ -40,6 +42,7 @@ function UserDashboard(props) {
     const user = JSON.parse(localStorage.getItem("user"));
     setOldPassword(user.password);
     const id = parseInt(user.id);
+    setId(id);
     axios(getUserByUserIdApi(id)).then((response) => {
       const dataForEdit = response.data.data;
       setEmail(dataForEdit[0].email);
@@ -62,7 +65,6 @@ function UserDashboard(props) {
   }, [actionStateValue]);
 
   const resetForm = () => {
-    setMessage("");
     setPassword("");
     setCurrentPassword("");
     setRePassword("");
@@ -92,6 +94,7 @@ function UserDashboard(props) {
             .patch(updateUserApi, formData)
             .then((response) => {
               setMessage("Update Successfully");
+
               setNotifSuccess(true);
               resetForm();
               setAlert(false);
@@ -100,10 +103,12 @@ function UserDashboard(props) {
             .catch((error) => console.log(error));
         } else {
           setMessage("Please Check New Password, New Password is not Same");
+          setNotifSuccess(false);
           setAlert(true);
         }
       } else {
         setMessage("Your Current Password Wrong!!");
+        setNotifSuccess(false);
         setAlert(true);
       }
     }
@@ -132,8 +137,10 @@ function UserDashboard(props) {
   };
 
   const resetImagePreview = () => {
-    setPhoto("");
-    setPhotoPreview(imageBluPrint);
+    axios.patch(resetPhotoProfileApi(id)).then((response) => {
+      setPhoto("");
+      setPhotoPreview(imageBluPrint);
+    });
   };
 
   const optionProduct = () => {
@@ -210,6 +217,12 @@ function UserDashboard(props) {
     });
   };
 
+  const cancelHandle = () => {
+    setUpdateMode(false);
+    resetForm();
+    setAlert(false);
+    setNotifSuccess(false);
+  };
   return (
     <div>
       <div className="userListContainer">
@@ -367,7 +380,7 @@ function UserDashboard(props) {
                           variant="primary"
                           type="button"
                           style={{ marginRight: 10 }}
-                          onClick={(e) => setUpdateMode(false)}
+                          onClick={cancelHandle}
                         >
                           {" "}
                           cancel
@@ -494,6 +507,32 @@ function UserDashboard(props) {
                   })}
               </Col>
             </Row>
+          </div>
+        </Col>
+        <Col sm={6}>
+          <div className="dashboardNotifListContainer">
+            <TitleSection
+              title="Other Application"
+              icon={<GrApps style={{ marginRight: 5 }} />}
+            />
+            <Table responsive>
+              <tbody>
+                <tr>
+                  <td style={{ textAlign: "left" }}>
+                    EPIC [e-Part and Inventory Control]
+                  </td>
+                  <td style={{ textAlign: "left" }}>
+                    <a
+                      href="http://172.31.3.216/PTICDNIA/index.php"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Button size="sm">Open</Button>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </Table>
           </div>
         </Col>
       </Row>

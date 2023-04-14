@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { getAllDocumentByPage } from "../../Config/API";
+import { getAllRecentDataApi } from "../../Config/API";
 import CardDocument from "../CardDocument";
 import PaginationTable from "../Pagination";
 
@@ -13,10 +13,9 @@ function RecentlyListComponent(props) {
   useEffect(() => {
     setTimeout(() => {
       setRecentUpdate(recentUpdate + 1);
-      console.log("update");
     }, [5000]);
     axios
-      .get(getAllDocumentByPage(page))
+      .get(getAllRecentDataApi(page))
       .then((response) => {
         setDocumentList(response.data.data);
         setTotalPageData(response.data.totalPageData);

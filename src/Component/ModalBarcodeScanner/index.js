@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import Modal from "react-bootstrap/Modal";
-import { QrReader } from "react-qr-reader";
 import { useNavigate } from "react-router-dom";
 import "./modalBarcodeScanner.css";
+import { QrReader } from "react-qr-reader";
 
 function ModalBarcodeScanner(props) {
   const { onHandleShow, onHandleClose } = props;
@@ -15,10 +15,6 @@ function ModalBarcodeScanner(props) {
   const [data, setData] = useState("");
 
   const closeCam = async () => {
-    await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: true,
-    });
     // the rest of the cleanup code
     window.location.reload();
   };
@@ -60,6 +56,7 @@ function ModalBarcodeScanner(props) {
               console.info(error);
             }
           }}
+          delay={300}
           style={{ width: "100%" }}
         />
       </Modal.Body>

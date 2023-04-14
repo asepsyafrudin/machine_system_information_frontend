@@ -7,6 +7,7 @@ import { getAllCapabilityApi, searchCapabilityApi } from "../../Config/API";
 import PaginationTable from "../Pagination";
 import moment from "moment";
 import { Link } from "react-router-dom";
+import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 
 function ListContentCapability() {
   const [tableCapability, setTableCapability] = useState([]);
@@ -68,7 +69,7 @@ function ListContentCapability() {
                 <th>No</th>
                 <th>Product</th>
                 <th>Line</th>
-                <th>Machine_Name</th>
+                <th>Machine Name</th>
                 <th>Part Name</th>
                 <th>Part Number</th>
                 <th>Item Check</th>
@@ -90,7 +91,7 @@ function ListContentCapability() {
                       <td>{value.part_number}</td>
                       <td>{value.item_check}</td>
                       <td>{moment(value.create_date).format("LLL")}</td>
-                      <td>{value.username}</td>
+                      <td>{CapitalCaseFirstWord(value.username)}</td>
                       <td>
                         <Link to={`/capabilityForm/${value.id}`}>
                           <Button
