@@ -346,7 +346,7 @@ function CapabilityForm() {
         return (
           <>
             <Row style={{ textAlign: "left" }} className="mb-3">
-              <Col sm={3}>Analyzing Result : </Col>
+              <Col sm={3}>Result : </Col>
               <Col sm={9}>
                 {data.role.map((value, index) => {
                   return (
