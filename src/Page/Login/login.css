@@ -2,7 +2,6 @@
     display: flex;
     justify-content: right;
     align-items: center;
-    flex-direction: row;
     height: 90vh;
     background-image: url('../../Asset/ImageGeneral/backgroundLogin.png');
     background-size: cover;

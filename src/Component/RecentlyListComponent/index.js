@@ -38,6 +38,7 @@ function RecentlyListComponent(props) {
                 description={value.description}
                 createDate={value.create_date}
                 id={value.id}
+                link_detail={value.link_detail}
               />
             );
           })

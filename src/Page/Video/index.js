@@ -45,10 +45,16 @@ function Video() {
     });
 
     const user = JSON.parse(localStorage.getItem("user"));
-    setCurrentUserId(user.id);
-    setCurrentUserName(user.username);
-    setCurrentPhoto(user.photo);
-
+    if (user) {
+      axios.get(getUserByUserIdApi(user.id)).then((response) => {
+        const dataUser = response.data.data;
+        if (dataUser.length > 0) {
+          setCurrentUserId(dataUser[0].id);
+          setCurrentPhoto(dataUser[0].photo);
+          setCurrentUserName(dataUser[0].username);
+        }
+      });
+    }
     const fetchComment = async () => {
       const list = await axios(getCommentByVideoIdApi(id, page));
       setCommentList(list.data.data);

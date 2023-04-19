@@ -7,7 +7,8 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 
 function CardDocument(props) {
-  const { title, fileType, username, description, createDate, id } = props;
+  const { title, fileType, username, description, createDate, link_detail } =
+    props;
 
   const colorBadge = () => {
     if (fileType) {
@@ -23,7 +24,7 @@ function CardDocument(props) {
         case "Others":
           return "dark";
         default:
-          return "light";
+          return "success";
       }
     }
   };
@@ -33,7 +34,7 @@ function CardDocument(props) {
       <Row>
         <Col xs={12} md={8}>
           <div className="titleDocument">
-            <Link className="linkTitle" to={`/document/${id}`}>
+            <Link className="linkTitle" to={link_detail}>
               {CapitalCaseFirstWord(title)}
             </Link>
           </div>

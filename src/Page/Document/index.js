@@ -10,6 +10,7 @@ import {
   deleteFeedbackComment,
   getCommentByVideoIdApi,
   getDocumentByIdApi,
+  getUserByUserIdApi,
   postCommentApi,
   postFeedbackComment,
 } from "../../Config/API";
@@ -37,10 +38,16 @@ function Document() {
     axios.get(getDocumentByIdApi(id)).then((response) => {
       setTableDocument(response.data.data);
     });
+
     const user = JSON.parse(localStorage.getItem("user"));
-    setCurrentUserId(user.id);
-    setCurrentUserName(user.username);
-    setCurrentPhoto(user.photo);
+    axios.get(getUserByUserIdApi(user.id)).then((response) => {
+      const dataUser = response.data.data;
+      if (dataUser.length > 0) {
+        setCurrentUserId(dataUser[0].id);
+        setCurrentPhoto(dataUser[0].photo);
+        setCurrentUserName(dataUser[0].username);
+      }
+    });
 
     const fetchComment = async () => {
       const list = await axios(getCommentByVideoIdApi(id, page));
@@ -49,13 +56,6 @@ function Document() {
     };
     fetchComment();
   }, [id, comment, actionState, page]);
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    setCurrentUserId(user.id);
-    setCurrentUserName(user.username);
-    setCurrentPhoto(user.photo);
-  }, [currentUserId]);
 
   const colorBadge = () => {
     if (tableDocument) {

@@ -45,7 +45,7 @@ function DocumentListComponent(props) {
                 username={value.username}
                 description={value.description}
                 createDate={value.create_date}
-                id={value.id}
+                link_detail={`/document/${value.id}`}
               />
             );
           })
