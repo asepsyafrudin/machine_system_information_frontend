@@ -19,6 +19,7 @@ import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { GoDesktopDownload } from "react-icons/go";
 import photoBluePrint from "../../Asset/ImageGeneral/profile.jpg";
 import PaginationTable from "../../Component/Pagination";
+import { fileName } from "../../Config/fileName";
 
 function Document() {
   const { id } = useParams();
@@ -40,14 +41,16 @@ function Document() {
     });
 
     const user = JSON.parse(localStorage.getItem("user"));
-    axios.get(getUserByUserIdApi(user.id)).then((response) => {
-      const dataUser = response.data.data;
-      if (dataUser.length > 0) {
-        setCurrentUserId(dataUser[0].id);
-        setCurrentPhoto(dataUser[0].photo);
-        setCurrentUserName(dataUser[0].username);
-      }
-    });
+    if (user) {
+      axios.get(getUserByUserIdApi(user.id)).then((response) => {
+        const dataUser = response.data.data;
+        if (dataUser.length > 0) {
+          setCurrentUserId(dataUser[0].id);
+          setCurrentPhoto(dataUser[0].photo);
+          setCurrentUserName(dataUser[0].username);
+        }
+      });
+    }
 
     const fetchComment = async () => {
       const list = await axios(getCommentByVideoIdApi(id, page));
@@ -198,7 +201,9 @@ function Document() {
                   return (
                     <tr key={index}>
                       <td>{index + 1}</td>
-                      <td>{value.name}</td>
+                      <td style={{ textAlign: "left", paddingLeft: 20 }}>
+                        {fileName(value.name)}
+                      </td>
                       <td>
                         <a href={value.file} target="_blank" rel="noreferrer">
                           <Button size="sm">

@@ -767,7 +767,7 @@ function CapabilityForm() {
                 />
               </Form.Group>
               <Form.Group as={Col}>
-                <Form.Label>Remark</Form.Label>
+                <Form.Label>Purpose</Form.Label>
                 <Form.Control
                   as="textarea"
                   style={{ height: 100 }}

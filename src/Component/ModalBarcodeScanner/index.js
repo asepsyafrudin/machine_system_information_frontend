@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import { useNavigate } from "react-router-dom";
 import "./modalBarcodeScanner.css";
-import { QrReader } from "react-qr-reader";
+import QrReader from "react-qr-reader-private";
 
 function ModalBarcodeScanner(props) {
   const { onHandleShow, onHandleClose } = props;
@@ -26,7 +26,14 @@ function ModalBarcodeScanner(props) {
       closeCam();
     }
   });
-
+  const handleScan = (data) => {
+    if (data) {
+      setData(data.text);
+    }
+  };
+  const handleError = (err) => {
+    console.error(err);
+  };
   return (
     <Modal
       show={onHandleShow}
@@ -47,16 +54,9 @@ function ModalBarcodeScanner(props) {
       </Modal.Header>
       <Modal.Body>
         <QrReader
-          onResult={(result, error) => {
-            if (!!result) {
-              setData(result?.text);
-            }
-
-            if (!!error) {
-              console.info(error);
-            }
-          }}
           delay={300}
+          onError={handleError}
+          onScan={handleScan}
           style={{ width: "100%" }}
         />
       </Modal.Body>
