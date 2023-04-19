@@ -32,11 +32,16 @@ function CapabilityMenu() {
                 <div className="ag-courses-item_title">
                   <ImList style={{ marginRight: 5 }} /> List Capability Data
                 </div>
-                {/* 
-                <div className="ag-courses-item_date-box">
-                  Start:
-                  <span className="ag-courses-item_date">04.11.2022</span>
-                </div> */}
+              </Link>
+            </div>
+            <div class="ag-courses_item">
+              <Link to={"/repeatabilityForm"} className="ag-courses-item_link">
+                <div className="ag-courses-item_bg"></div>
+
+                <div className="ag-courses-item_title">
+                  <VscGraphLine style={{ marginRight: 5 }} /> Create
+                  Repeatability
+                </div>
               </Link>
             </div>
           </div>

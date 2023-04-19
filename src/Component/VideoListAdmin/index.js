@@ -244,7 +244,7 @@ function VideoListAdmin(props) {
           setPercentProgress(0);
         })
         .catch((error) => {
-          setMessage("Hubungi Developer");
+          setMessage("Internet Error");
           setAlert(true);
           console.log(error);
         });
@@ -256,17 +256,23 @@ function VideoListAdmin(props) {
       }
       formData.append("id", id);
       axios
-        .patch(updateVideoApi, formData)
+        .patch(updateVideoApi, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress,
+        })
         .then((response) => {
           handleResetForm();
-          setMessage("Update Success !!!");
+          setMessage("Update Success!!!");
           setNotifSuccess(true);
           setAlert(false);
           setLoading(false);
           actionState(1);
+          setPercentProgress(0);
         })
         .catch((error) => {
-          setMessage("Hubungi Developer");
+          setMessage("Internet Error");
           setAlert(true);
           console.log(error);
         });

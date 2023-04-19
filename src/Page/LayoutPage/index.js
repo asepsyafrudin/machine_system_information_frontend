@@ -12,6 +12,7 @@ import Openai from "../OpenAI";
 import ProtectedRouteAdmin from "../../Component/ProtectedRouteAdmin";
 import CapabilityFormPage from "../CapabilityFormPage";
 import ListCapabilityPage from "../ListCapabilityPage";
+import RepeatabilityFormPage from "../RepeatabilityFormPage";
 
 function LayoutPage() {
   return (
@@ -21,6 +22,10 @@ function LayoutPage() {
         <Route path="/:token" element={<Login />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/capabilityForm" element={<CapabilityFormPage />} />
+          <Route
+            path="/repeatabilityForm"
+            element={<RepeatabilityFormPage />}
+          />
           <Route path="/capabilityForm/:id" element={<CapabilityFormPage />} />
           <Route path="/capabilityList" element={<ListCapabilityPage />} />
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />
