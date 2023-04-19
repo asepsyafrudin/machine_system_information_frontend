@@ -15,7 +15,7 @@ import DocumentRegister from "../DocumentRegister";
 import { ImAttachment } from "react-icons/im";
 import UserDashboard from "../UserDashboard";
 import { GrSettingsOption } from "react-icons/gr";
-import CapabilityMenu from "../CapabilityMenu";
+import EngineeringTools from "../EngineeringTools";
 import { SlGraph } from "react-icons/sl";
 
 function NavigationAdmin() {
@@ -71,7 +71,7 @@ function NavigationAdmin() {
             <Nav.Item>
               <Nav.Link eventKey={"capabilityMenu"} className="tabTitle">
                 <SlGraph style={{ marginRight: 5 }} />
-                Capability Menu
+                Engineering Tools
               </Nav.Link>
             </Nav.Item>
           </Nav>
@@ -121,7 +121,7 @@ function NavigationAdmin() {
               />
             </Tab.Pane>
             <Tab.Pane eventKey={"capabilityMenu"}>
-              <CapabilityMenu
+              <EngineeringTools
                 actionState={(value) => setActionState(actionState + value)}
                 actionStateValue={actionState}
               />

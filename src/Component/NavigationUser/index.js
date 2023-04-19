@@ -6,7 +6,7 @@ import { MdOutlineVideoSettings } from "react-icons/md";
 import UserDashboard from "../UserDashboard";
 import DocumentRegister from "../DocumentRegister";
 import { ImAttachment } from "react-icons/im";
-import CapabilityMenu from "../CapabilityMenu";
+import EngineeringTools from "../EngineeringTools";
 import { SlGraph } from "react-icons/sl";
 
 function NavigationUser() {
@@ -41,7 +41,7 @@ function NavigationUser() {
             <Nav.Item>
               <Nav.Link eventKey={"capabilityMenu"} className="tabTitle">
                 <SlGraph style={{ marginRight: 5 }} />
-                Capability Menu
+                Engineering Tools
               </Nav.Link>
             </Nav.Item>
           </Nav>
@@ -67,7 +67,7 @@ function NavigationUser() {
               />
             </Tab.Pane>
             <Tab.Pane eventKey={"capabilityMenu"}>
-              <CapabilityMenu
+              <EngineeringTools
                 actionState={(value) => setActionState(actionState + value)}
                 actionStateValue={actionState}
               />

@@ -6,7 +6,7 @@ import { VscGraphLine } from "react-icons/vsc";
 import { Link } from "react-router-dom";
 import { ImList } from "react-icons/im";
 
-function CapabilityMenu() {
+function EngineeringTools() {
   return (
     <div className="userListContainer">
       <TitleSection
@@ -51,4 +51,4 @@ function CapabilityMenu() {
   );
 }
 
-export default CapabilityMenu;
+export default EngineeringTools;
