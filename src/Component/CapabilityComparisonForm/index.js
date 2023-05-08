@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./capabilityForm.css";
 import TitleSection from "../TitleSection";
 import { VscGraphLine } from "react-icons/vsc";
 import {
   Badge,
   Button,
   Col,
+  FloatingLabel,
   Form,
   Row,
   Spinner,
@@ -31,7 +31,6 @@ import {
   THREE_SIGMA,
 } from "../../Config/const";
 import GraphCapabilityLine from "../GraphCapabilityLine";
-import GraphCapabilityDistribution from "../GraphCapabilityDistribution";
 import GraphNormalDistribution from "../GraphNormalDistribution";
 import { SlEmotsmile } from "react-icons/sl";
 import { FaRegSadCry } from "react-icons/fa";
@@ -44,10 +43,10 @@ import ModalConfirm from "../ModalConfirm";
 import { ExcelRenderer } from "react-excel-renderer";
 import { HiDownload } from "react-icons/hi";
 import { BiReset } from "react-icons/bi";
-import CapabilityFormatExcel from "../../Asset/File/Format Excel Import Capability.xlsx";
+import CapabilityFormatExcel from "../../Asset/File/Format Excel Import Capability Comparison.xlsx";
 import GraphDistribution from "../GraphDistribution";
 
-function CapabilityForm() {
+function CapabilityComparisonForm() {
   const { id } = useParams();
   const [userId, setUserId] = useState("");
   const [userIdDataView, setUserIdDataView] = useState("");
@@ -75,6 +74,8 @@ function CapabilityForm() {
   const [message, setMessage] = useState("");
   const [showModalConfirm, setShowModalConfirm] = useState(false);
   const fileRef = useRef(null);
+  const [inputData2, setInputData2] = useState("");
+  const [listData2, setListData2] = useState([]);
 
   useEffect(() => {
     axios
@@ -114,8 +115,12 @@ function CapabilityForm() {
           setStandard(result[0].standard);
         }
         setRemark(result[0].description);
+
         if (result[0].data1.length > 0) {
           setListData(result[0].data1);
+        }
+        if (result[0].data2.length > 0) {
+          setListData2(result[0].data2);
         }
         setUpdateMode(true);
       }
@@ -210,6 +215,16 @@ function CapabilityForm() {
     setInputData("");
   };
 
+  const handleAddData2 = (e) => {
+    e.preventDefault();
+    const data = {
+      no: listData2.length + 1,
+      data: inputData2,
+    };
+    setListData2((prev) => [...prev, data]);
+    setInputData2("");
+  };
+
   const handleChangeFile = (event) => {
     const file = event.target.files[0];
     ExcelRenderer(file, (err, response) => {
@@ -218,7 +233,6 @@ function CapabilityForm() {
       } else {
         setListData([]);
         const rows = response.rows;
-        console.log(rows);
         if (rows.length > 1) {
           for (let index = 0; index < rows.length - 1; index++) {
             let data = {
@@ -226,6 +240,14 @@ function CapabilityForm() {
               data: rows[index + 1][1],
             };
             setListData((prev) => [...prev, data]);
+          }
+
+          for (let index = 0; index < rows.length - 1; index++) {
+            let data = {
+              no: listData.length + 1,
+              data: rows[index + 1][2],
+            };
+            setListData2((prev) => [...prev, data]);
           }
         }
       }
@@ -240,43 +262,51 @@ function CapabilityForm() {
     setActionValue(actionValue + 1);
   };
 
-  const averageData = (listData) => {
+  const handleDeleteData2 = (e) => {
+    const index = e.target.id;
+    let array = listData2;
+    array.splice(index, 1);
+    setListData2(array);
+    setActionValue(actionValue + 1);
+  };
+
+  const averageData = (data) => {
     let average = 0;
-    if (listData.length > 0) {
+    if (data.length > 0) {
       let value = 0;
-      for (let index = 0; index < listData.length; index++) {
-        value = value + parseFloat(listData[index].data);
+      for (let index = 0; index < data.length; index++) {
+        value = value + parseFloat(data[index].data);
       }
-      average = value / listData.length;
+      average = value / data.length;
       let number = (Math.round(average * 1000) / 1000).toFixed(3);
       return number;
     }
     return average;
   };
 
-  const sigmaData = (listData) => {
+  const sigmaData = (data) => {
     let sigma = 0;
-    let average = averageData(listData);
+    let average = averageData(data);
 
-    if (listData.length > 1) {
+    if (data.length > 1) {
       let sum = 0;
-      for (let index = 0; index < listData.length; index++) {
-        sum += Math.pow(parseFloat(listData[index].data) - average, 2);
+      for (let index = 0; index < data.length; index++) {
+        sum += Math.pow(parseFloat(data[index].data) - average, 2);
       }
 
-      sigma = Math.sqrt(sum / (listData.length - 1));
+      sigma = Math.sqrt(sum / (data.length - 1));
       let number = (Math.round(sigma * 1000) / 1000).toFixed(3);
       return number;
     }
     return sigma;
   };
 
-  const cpData = (listData) => {
+  const cpData = (data) => {
     let cp = 0;
-    let sigmaValue = sigmaData(listData);
-    let average = averageData(listData);
+    let sigmaValue = sigmaData(data);
+    let average = averageData(data);
 
-    if (listData.length > 1) {
+    if (data.length > 1) {
       if (type === DOUBLE_STANDARD) {
         cp =
           (parseFloat(standardMax) - parseFloat(standardMin)) /
@@ -292,13 +322,13 @@ function CapabilityForm() {
     return cp;
   };
 
-  const cpkData = (listData) => {
+  const cpkData = (data) => {
     let cpk = 0;
-    let sigmaValue = sigmaData(listData);
-    let average = averageData(listData);
+    let sigmaValue = sigmaData(data);
+    let average = averageData(data);
     let centerData = (parseFloat(standardMax) + parseFloat(standardMin)) / 2;
 
-    if (listData.length > 1) {
+    if (data.length > 1) {
       if (type === DOUBLE_STANDARD) {
         if (average > centerData) {
           cpk =
@@ -358,8 +388,8 @@ function CapabilityForm() {
     }
   };
 
-  const recomendationHandle = () => {
-    if (listData.length >= 30) {
+  const recomendationHandle = (data) => {
+    if (data.length >= 30) {
       const data = RECOMENDATION(
         listData,
         standardMax,
@@ -473,8 +503,9 @@ function CapabilityForm() {
       standard_max: standardMax,
       standard_min: standardMin,
       description: remark,
-      status: "single",
-      data: listData,
+      data1: listData,
+      data2: listData2,
+      status: "compare",
     };
     if (!updateMode) {
       axios
@@ -857,105 +888,251 @@ function CapabilityForm() {
               </Row>
               {updateMode ? (
                 userId === userIdDataView ? (
-                  <Form onSubmit={handleAddData}>
-                    <Row>
-                      <Col sm={9}>
-                        <Form.Control
-                          type="number"
-                          placeholder="Enter Value"
-                          value={inputData}
-                          onChange={(e) => setInputData(e.target.value)}
-                          lang="en"
-                          step={".001"}
-                          required
-                        />
-                      </Col>
-                      <Col sm={3} style={{ textAlign: "right" }}>
-                        <Button type="submit">ADD</Button>
-                      </Col>
-                    </Row>
-                  </Form>
+                  <Row>
+                    <Col sm={6}>
+                      <Form onSubmit={handleAddData}>
+                        <Row>
+                          <Col sm={8}>
+                            <FloatingLabel
+                              label="Data Before"
+                              controlId="floatingDataBefore"
+                            >
+                              <Form.Control
+                                type="number"
+                                placeholder="Enter Value"
+                                value={inputData}
+                                onChange={(e) => setInputData(e.target.value)}
+                                lang="en"
+                                step={".001"}
+                                required
+                                size="sm"
+                              />
+                            </FloatingLabel>
+                          </Col>
+                          <Col sm={3} style={{ textAlign: "right" }}>
+                            <Row>
+                              <Col></Col>
+                            </Row>
+                            <Row>
+                              <Col>
+                                <Button type="submit">ADD</Button>
+                              </Col>
+                            </Row>
+                          </Col>
+                        </Row>
+                      </Form>
+                    </Col>
+                    <Col sm={6}>
+                      <Form onSubmit={handleAddData2}>
+                        <Row>
+                          <Col sm={8}>
+                            <FloatingLabel
+                              label="Data After"
+                              controlId="floatingDataBefore"
+                            >
+                              <Form.Control
+                                type="number"
+                                placeholder="Enter Value"
+                                value={inputData2}
+                                onChange={(e) => setInputData2(e.target.value)}
+                                lang="en"
+                                step={".001"}
+                                required
+                              />
+                            </FloatingLabel>
+                          </Col>
+                          <Col sm={3} style={{ textAlign: "right" }}>
+                            <Button type="submit">ADD</Button>
+                          </Col>
+                        </Row>
+                      </Form>
+                    </Col>
+                  </Row>
                 ) : (
                   ""
                 )
               ) : (
-                <Form onSubmit={handleAddData}>
-                  <Row>
-                    <Col sm={9}>
-                      <Form.Control
-                        type="number"
-                        placeholder="Enter Value"
-                        value={inputData}
-                        onChange={(e) => setInputData(e.target.value)}
-                        lang="en"
-                        step={".001"}
-                        required
-                      />
-                    </Col>
-                    <Col sm={3} style={{ textAlign: "right" }}>
-                      <Button type="submit">ADD</Button>
-                    </Col>
-                  </Row>
-                </Form>
+                <Row>
+                  <Col sm={6}>
+                    <Form onSubmit={handleAddData}>
+                      <Row>
+                        <Col sm={8}>
+                          <FloatingLabel
+                            label="Data Before"
+                            controlId="floatingDataBefore"
+                          >
+                            <Form.Control
+                              type="number"
+                              placeholder="Enter Value"
+                              value={inputData}
+                              onChange={(e) => setInputData(e.target.value)}
+                              lang="en"
+                              step={".001"}
+                              required
+                              size="sm"
+                            />
+                          </FloatingLabel>
+                        </Col>
+                        <Col sm={3} style={{ textAlign: "right" }}>
+                          <Row>
+                            <Col></Col>
+                          </Row>
+                          <Row>
+                            <Col>
+                              <Button type="submit">ADD</Button>
+                            </Col>
+                          </Row>
+                        </Col>
+                      </Row>
+                    </Form>
+                  </Col>
+                  <Col sm={6}>
+                    <Form onSubmit={handleAddData2}>
+                      <Row>
+                        <Col sm={8}>
+                          <FloatingLabel
+                            label="Data After"
+                            controlId="floatingDataBefore"
+                          >
+                            <Form.Control
+                              type="number"
+                              placeholder="Enter Value"
+                              value={inputData2}
+                              onChange={(e) => setInputData2(e.target.value)}
+                              lang="en"
+                              step={".001"}
+                              required
+                            />
+                          </FloatingLabel>
+                        </Col>
+                        <Col sm={3} style={{ textAlign: "right" }}>
+                          <Button type="submit">ADD</Button>
+                        </Col>
+                      </Row>
+                    </Form>
+                  </Col>
+                </Row>
               )}
 
               <div>
-                {listData.length > 0 && (
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th>No</th>
-                        <th>Data</th>
-                        {updateMode ? (
-                          userId === userIdDataView ? (
-                            <th>Action</th>
-                          ) : (
-                            ""
-                          )
-                        ) : (
-                          <th>Action</th>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {listData.map((value, index) => {
-                        return (
-                          <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{value.data}</td>
+                <Row>
+                  <Col sm={6}>
+                    {listData.length > 0 && (
+                      <Table>
+                        <thead>
+                          <tr>
+                            <th>No</th>
+                            <th>Data</th>
                             {updateMode ? (
                               userId === userIdDataView ? (
-                                <td>
-                                  <Button
-                                    id={index}
-                                    type="button"
-                                    size="sm"
-                                    onClick={handleDeleteData}
-                                  >
-                                    Delete
-                                  </Button>
-                                </td>
+                                <th>Action</th>
                               ) : (
                                 ""
                               )
                             ) : (
-                              <td>
-                                <Button
-                                  id={index}
-                                  type="button"
-                                  size="sm"
-                                  onClick={handleDeleteData}
-                                >
-                                  Delete
-                                </Button>
-                              </td>
+                              <th>Action</th>
                             )}
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Table>
-                )}
+                        </thead>
+                        <tbody>
+                          {listData.map((value, index) => {
+                            return (
+                              <tr key={index}>
+                                <td>{index + 1}</td>
+                                <td>{value.data}</td>
+                                {updateMode ? (
+                                  userId === userIdDataView ? (
+                                    <td>
+                                      <Button
+                                        id={index}
+                                        type="button"
+                                        size="sm"
+                                        onClick={handleDeleteData}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </td>
+                                  ) : (
+                                    ""
+                                  )
+                                ) : (
+                                  <td>
+                                    <Button
+                                      id={index}
+                                      type="button"
+                                      size="sm"
+                                      onClick={handleDeleteData}
+                                    >
+                                      Delete
+                                    </Button>
+                                  </td>
+                                )}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </Table>
+                    )}
+                  </Col>
+                  <Col sm={6}>
+                    {listData2.length > 0 && (
+                      <Table>
+                        <thead>
+                          <tr>
+                            <th>No</th>
+                            <th>Data</th>
+                            {updateMode ? (
+                              userId === userIdDataView ? (
+                                <th>Action</th>
+                              ) : (
+                                ""
+                              )
+                            ) : (
+                              <th>Action</th>
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {listData2.map((value, index) => {
+                            return (
+                              <tr key={index}>
+                                <td>{index + 1}</td>
+                                <td>{value.data}</td>
+                                {updateMode ? (
+                                  userId === userIdDataView ? (
+                                    <td>
+                                      <Button
+                                        id={index}
+                                        type="button"
+                                        size="sm"
+                                        onClick={handleDeleteData2}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </td>
+                                  ) : (
+                                    ""
+                                  )
+                                ) : (
+                                  <td>
+                                    <Button
+                                      id={index}
+                                      type="button"
+                                      size="sm"
+                                      onClick={handleDeleteData2}
+                                    >
+                                      Delete
+                                    </Button>
+                                  </td>
+                                )}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </Table>
+                    )}
+                  </Col>
+                </Row>
               </div>
             </div>
           </Col>
@@ -979,23 +1156,9 @@ function CapabilityForm() {
                     sigma={sigmaData(listData)}
                     type={type}
                     listData={listData}
-                    listData2={[]}
+                    listData2={listData2}
                     actionValue={actionValue}
-                    status="single"
-                  />
-                </Tab>
-                <Tab eventKey={"graph-capability-2"} title="Graph Histogram">
-                  <GraphCapabilityDistribution
-                    standardMax={standardMax}
-                    standardMin={standardMin}
-                    standard={standard}
-                    sigma={sigmaData(listData)}
-                    type={type}
-                    listData={listData}
-                    listData2={[]}
-                    actionValue={actionValue}
-                    average={averageData(listData)}
-                    status="single"
+                    status="compare"
                   />
                 </Tab>
                 <Tab
@@ -1009,10 +1172,12 @@ function CapabilityForm() {
                     sigma={sigmaData(listData)}
                     type={type}
                     listData={listData}
-                    listData2={[]}
+                    listData2={listData2}
                     actionValue={actionValue}
                     average={averageData(listData)}
-                    status="single"
+                    average2={averageData(listData2)}
+                    sigma2={sigmaData(listData2)}
+                    status="compare"
                   />
                 </Tab>
                 <Tab eventKey={"graph-capability-4"} title="Graph Distribution">
@@ -1021,12 +1186,14 @@ function CapabilityForm() {
                     standardMin={standardMin}
                     standard={standard}
                     sigma={sigmaData(listData)}
+                    sigma2={sigmaData(listData2)}
                     type={type}
                     listData={listData}
-                    listData2={[]}
+                    listData2={listData2}
                     actionValue={actionValue}
                     average={averageData(listData)}
-                    status="single"
+                    average2={averageData(listData2)}
+                    status="compare"
                   />
                 </Tab>
               </Tabs>
@@ -1037,6 +1204,9 @@ function CapabilityForm() {
                 icon={<VscGraphLine style={{ marginRight: 5 }} />}
               />
               <div>
+                <div style={{ textAlign: "center", fontWeight: "bold" }}>
+                  Data Before
+                </div>
                 <Row className="mb-3">
                   <Col>Average : {averageData(listData)} </Col>
                   <Col>Sigma : {sigmaData(listData)}</Col>
@@ -1049,12 +1219,34 @@ function CapabilityForm() {
                     {judgement(type, cpData(listData), cpkData(listData))}
                   </Col>
                 </Row>
+                <div style={{ textAlign: "center", fontWeight: "bold" }}>
+                  Data After
+                </div>
+                <Row className="mb-3">
+                  <Col>Average : {averageData(listData2)} </Col>
+                  <Col>Sigma : {sigmaData(listData2)}</Col>
+                  <Col>Cp : {cpData(listData2)}</Col>
+                  <Col>Cpk : {cpkData(listData2)}</Col>
+                </Row>
+                <Row className="mb-3">
+                  <Col>
+                    Judgment :{" "}
+                    {judgement(type, cpData(listData2), cpkData(listData2))}
+                  </Col>
+                </Row>
               </div>
               <TitleSection
                 title="Charts Analyzer"
                 icon={<VscGraphLine style={{ marginRight: 5 }} />}
               />
-              {recomendationHandle()}
+              <div style={{ textAlign: "center", fontWeight: "bold" }}>
+                Data Before
+              </div>
+              <div>{recomendationHandle(listData)}</div>
+              <div style={{ textAlign: "center", fontWeight: "bold" }}>
+                Data After
+              </div>
+              <div>{recomendationHandle(listData2)}</div>
             </div>
           </Col>
         </Row>
@@ -1079,4 +1271,4 @@ function CapabilityForm() {
   );
 }
 
-export default CapabilityForm;
+export default CapabilityComparisonForm;

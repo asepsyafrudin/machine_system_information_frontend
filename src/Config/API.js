@@ -1,4 +1,4 @@
-const port = "http://172.31.73.34:8080";
+const port = "https://172.31.73.34:8080";
 
 //users Api
 export const registerUserApi = `${port}/api/users/create_users`;

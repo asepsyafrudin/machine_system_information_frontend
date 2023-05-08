@@ -12,3 +12,30 @@
   padding: 20px 20px 20px 20px;
   margin-bottom: 15px;
 }
+
+
+.inputfile{
+  width: 500px;
+  max-width: 100%;
+  color: #444;
+  padding: 5px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #555;
+  margin-bottom: 10px;
+}
+
+.inputfile::file-selector-button {
+  margin-right: 20px;
+  border: none;
+  background: #084cdf;
+  padding: 10px 20px;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: background .2s ease-in-out;
+}
+
+.inputfile::file-selector-button:hover {
+  background: #0d45a5;
+}

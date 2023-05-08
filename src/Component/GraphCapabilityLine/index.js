@@ -18,21 +18,42 @@ import {
 } from "../../Config/const";
 
 function GraphCapabilityLine(props) {
-  const { standardMax, standardMin, standard, type, listData, actionValue } =
-    props;
+  const {
+    standardMax,
+    standardMin,
+    standard,
+    type,
+    listData,
+    actionValue,
+    listData2,
+    status,
+  } = props;
   const [data, setData] = useState([]);
   useEffect(() => {
-    if (listData.length > 0) {
+    let totalDataLengthMax = 0;
+    if (status === "compare") {
+      if (listData.length > listData2.length) {
+        totalDataLengthMax = listData.length;
+      } else {
+        totalDataLengthMax = listData2.length;
+      }
+    } else {
+      totalDataLengthMax = listData.length;
+    }
+
+    if (totalDataLengthMax > 0) {
       let newData = [];
-      for (let index = 0; index < listData.length; index++) {
+      for (let index = 0; index < totalDataLengthMax; index++) {
         newData.push({
           no: index + 1,
-          data: listData[index].data,
+          data: index < listData.length && listData[index].data,
+          data2: index < listData2.length && listData2[index].data,
         });
       }
+
       setData(newData);
     }
-  }, [listData, actionValue]);
+  }, [listData, actionValue, listData2, status]);
 
   const min = () => {
     if (type === DOUBLE_STANDARD) {
@@ -124,7 +145,20 @@ function GraphCapabilityLine(props) {
           )}
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="data" stroke="#8884d8" />
+          <Line
+            type="monotone"
+            dataKey="data"
+            stroke="#8884d8"
+            name="Current"
+          />
+          {status === "compare" && (
+            <Line
+              type="monotone"
+              dataKey={"data2"}
+              stroke="#8cc3a9"
+              name="After"
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>

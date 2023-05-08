@@ -93,16 +93,29 @@ function ListContentCapability() {
                       <td>{moment(value.create_date).format("LLL")}</td>
                       <td>{CapitalCaseFirstWord(value.username)}</td>
                       <td>
-                        <Link to={`/capabilityForm/${value.id}`}>
-                          <Button
-                            size="sm"
-                            style={{ marginRight: 2 }}
-                            variant="secondary"
-                            id={value.id}
-                          >
-                            View
-                          </Button>
-                        </Link>
+                        {value.status === "compare" ? (
+                          <Link to={`/capabilityComparisonForm/${value.id}`}>
+                            <Button
+                              size="sm"
+                              style={{ marginRight: 2 }}
+                              variant="secondary"
+                              id={value.id}
+                            >
+                              View
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Link to={`/capabilityForm/${value.id}`}>
+                            <Button
+                              size="sm"
+                              style={{ marginRight: 2 }}
+                              variant="secondary"
+                              id={value.id}
+                            >
+                              View
+                            </Button>
+                          </Link>
+                        )}
                       </td>
                     </tr>
                   );

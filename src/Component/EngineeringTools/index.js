@@ -34,13 +34,16 @@ function EngineeringTools() {
                 </div>
               </Link>
             </div>
-            <div class="ag-courses_item">
-              <Link to={"/repeatabilityForm"} className="ag-courses-item_link">
+            <div className="ag-courses_item">
+              <Link
+                to={"/capabilityComparisonForm"}
+                className="ag-courses-item_link"
+              >
                 <div className="ag-courses-item_bg"></div>
 
                 <div className="ag-courses-item_title">
-                  <VscGraphLine style={{ marginRight: 5 }} /> Create
-                  Repeatability
+                  <VscGraphLine style={{ marginRight: 5 }} /> Create Capability
+                  Comparison
                 </div>
               </Link>
             </div>

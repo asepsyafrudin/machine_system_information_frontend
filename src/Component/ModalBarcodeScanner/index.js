@@ -28,7 +28,7 @@ function ModalBarcodeScanner(props) {
   });
   const handleScan = (data) => {
     if (data) {
-      setData(data.text);
+      setData(data);
     }
   };
   const handleError = (err) => {

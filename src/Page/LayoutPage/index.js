@@ -13,6 +13,7 @@ import ProtectedRouteAdmin from "../../Component/ProtectedRouteAdmin";
 import CapabilityFormPage from "../CapabilityFormPage";
 import ListCapabilityPage from "../ListCapabilityPage";
 import RepeatabilityFormPage from "../RepeatabilityFormPage";
+import CapabilityCompareFormPage from "../CapabilityCompareFormPage";
 
 function LayoutPage() {
   return (
@@ -25,6 +26,14 @@ function LayoutPage() {
           <Route
             path="/repeatabilityForm"
             element={<RepeatabilityFormPage />}
+          />
+          <Route
+            path="/capabilityComparisonForm"
+            element={<CapabilityCompareFormPage />}
+          />
+          <Route
+            path="/capabilityComparisonForm/:id"
+            element={<CapabilityCompareFormPage />}
           />
           <Route path="/capabilityForm/:id" element={<CapabilityFormPage />} />
           <Route path="/capabilityList" element={<ListCapabilityPage />} />

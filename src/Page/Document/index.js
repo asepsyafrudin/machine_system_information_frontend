@@ -184,9 +184,14 @@ function Document() {
             <Col sm={8}>: {tableDocument[0].machine_name}</Col>
           </Row>
           <Row style={{ textAlign: "left" }}>
+            <Col sm={2}>Status Document </Col>
+            <Col sm={8}>: {tableDocument[0].status}</Col>
+          </Row>
+          <Row style={{ textAlign: "left" }}>
             <Col sm={2}>Description </Col>
             <Col sm={8}>: {tableDocument[0].description}</Col>
           </Row>
+
           {tableDocument[0].file.length !== 0 && (
             <Table>
               <thead>

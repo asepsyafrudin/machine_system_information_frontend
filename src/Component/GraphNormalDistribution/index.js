@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
   Area,
+  AreaChart,
   CartesianGrid,
-  ComposedChart,
   Legend,
   ReferenceLine,
   ResponsiveContainer,
@@ -20,18 +20,22 @@ function GraphNormalDistribution(props) {
     listData,
     sigma,
     average,
+    average2,
+    sigma2,
     actionValue,
+    status,
   } = props;
   const [data, setData] = useState([]);
   const [minXAxis, setMinXAxis] = useState(0);
   const [maxXAxis, setMaxXAxis] = useState(0);
 
   useEffect(() => {
-    const yValue = (xValue) => {
+    const yValue = (xValue, averageData, sigmaData) => {
       let a =
-        (-1 / 2) * ((xValue - parseFloat(average)) / parseFloat(sigma)) ** 2;
+        (-1 / 2) *
+        ((xValue - parseFloat(averageData)) / parseFloat(sigmaData)) ** 2;
       let b = Math.E ** a;
-      let c = 1 / (sigma * Math.sqrt(2 * Math.PI));
+      let c = 1 / (sigmaData * Math.sqrt(2 * Math.PI));
       let result = c * b;
       return result;
     };
@@ -67,16 +71,33 @@ function GraphNormalDistribution(props) {
         setMaxXAxis(maxXAxis);
       }
       let range = (endGraph - startGraph) / totalRender;
-      for (let index = 0; index < totalRender; index++) {
-        let checkValueY = yValue(startGraph);
-        if (checkValueY > 0.001) {
-          arrayList.push({
-            name: index + 1,
-            xValue: startGraph,
-            yValue: checkValueY,
-          });
+
+      if (status === "compare") {
+        for (let index = 0; index < totalRender; index++) {
+          let checkValueY = yValue(startGraph, average, sigma);
+          let checkValueY2 = yValue(startGraph, average2, sigma2);
+          if (checkValueY > 0.001 || checkValueY2 > 0.001) {
+            arrayList.push({
+              name: index + 1,
+              xValue: startGraph,
+              yValue: checkValueY,
+              yValue2: checkValueY2,
+            });
+          }
+          startGraph += range;
         }
-        startGraph += range;
+      } else {
+        for (let index = 0; index < totalRender; index++) {
+          let checkValueY = yValue(startGraph, average, sigma);
+          if (checkValueY > 0.001) {
+            arrayList.push({
+              name: index + 1,
+              xValue: startGraph,
+              yValue: checkValueY,
+            });
+          }
+          startGraph += range;
+        }
       }
       setData(arrayList);
     };
@@ -90,15 +111,28 @@ function GraphNormalDistribution(props) {
     type,
     standard,
     actionValue,
+    average2,
+    sigma2,
+    status,
   ]);
 
   return (
     <div>
       <ResponsiveContainer width="100%" height={300}>
-        <ComposedChart
+        <AreaChart
           data={data}
           margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
         >
+          <defs>
+            <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
+            </linearGradient>
+          </defs>
           <XAxis dataKey="xValue" type="number" domain={[minXAxis, maxXAxis]} />
           <CartesianGrid strokeDasharray="3 3" />
           <Tooltip />
@@ -107,9 +141,20 @@ function GraphNormalDistribution(props) {
           <Area
             type="monotone"
             dataKey="yValue"
-            fill="#8884d8"
+            fill="url(#colorUv)"
             stroke="#8884d8"
+            name="Current"
           />
+          <CartesianGrid stroke="#f5f5f5" />
+          {status === "compare" && (
+            <Area
+              type="monotone"
+              dataKey="yValue2"
+              name="After"
+              fill="url(#colorPv)"
+              stroke="#8884d8"
+            />
+          )}
           {/* <Line type="monotone" dataKey="yValue" stroke="#ff7300" /> */}
           <ReferenceLine
             x={standardMin}
@@ -136,7 +181,7 @@ function GraphNormalDistribution(props) {
             }}
             strokeDasharray="3 3"
           />
-        </ComposedChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );
