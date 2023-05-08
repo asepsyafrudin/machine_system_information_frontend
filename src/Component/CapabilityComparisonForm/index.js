@@ -482,6 +482,7 @@ function CapabilityComparisonForm() {
     setStandardMin("");
     setInputData("");
     setListData([]);
+    setListData2([]);
   };
 
   const navigate = useNavigate();
