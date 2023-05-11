@@ -20,6 +20,7 @@ import { GoDesktopDownload } from "react-icons/go";
 import photoBluePrint from "../../Asset/ImageGeneral/profile.jpg";
 import PaginationTable from "../../Component/Pagination";
 import { fileName } from "../../Config/fileName";
+import { getExtFileName } from "../../Config/fileType";
 
 function Document() {
   const { id } = useParams();
@@ -198,6 +199,7 @@ function Document() {
                 <tr>
                   <th>No</th>
                   <th>File Name</th>
+                  <th>File Type</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -209,6 +211,7 @@ function Document() {
                       <td style={{ textAlign: "left", paddingLeft: 20 }}>
                         {fileName(value.name)}
                       </td>
+                      <td>{getExtFileName(value.name)}</td>
                       <td>
                         <a href={value.file} target="_blank" rel="noreferrer">
                           <Button size="sm">
