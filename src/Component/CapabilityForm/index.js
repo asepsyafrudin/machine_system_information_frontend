@@ -43,9 +43,11 @@ import ModalAlert from "../ModalAlert";
 import ModalConfirm from "../ModalConfirm";
 import { ExcelRenderer } from "react-excel-renderer";
 import { HiDownload } from "react-icons/hi";
-import { BiReset } from "react-icons/bi";
+import { BiExport, BiReset } from "react-icons/bi";
 import CapabilityFormatExcel from "../../Asset/File/Format Excel Import Capability.xlsx";
 import GraphDistribution from "../GraphDistribution";
+import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
 
 function CapabilityForm() {
   const { id } = useParams();
@@ -459,6 +461,25 @@ function CapabilityForm() {
     navigate("/capabilityList");
   };
 
+  const handleExportData = () => {
+    const dataExport = [];
+    for (let index = 0; index < listData.length; index++) {
+      dataExport.push({
+        no: index + 1,
+        data: listData[index].data,
+      });
+    }
+
+    const fileType =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const ws1 = XLSX.utils.json_to_sheet(dataExport);
+    const wb1 = { Sheets: { data: ws1 }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb1, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, "data-before" + fileExtension);
+  };
+
   const handleSave = (e) => {
     e.preventDefault();
     let data = {
@@ -829,7 +850,7 @@ function CapabilityForm() {
                 icon={<VscGraphLine style={{ marginRight: 5 }} />}
               />
               <Row>
-                <Col sm={8}>
+                <Col sm={6}>
                   <input
                     type="file"
                     accept=".xlsx, .xls"
@@ -840,7 +861,7 @@ function CapabilityForm() {
                     ref={fileRef}
                   />
                 </Col>
-                <Col sm={4}>
+                <Col sm={6}>
                   <a
                     href={CapabilityFormatExcel}
                     target="_blank"
@@ -850,8 +871,15 @@ function CapabilityForm() {
                       <HiDownload style={{ pointerEvents: "none" }} />
                     </Button>
                   </a>
-                  <Button title="Reset" onClick={handleResetInputData}>
+                  <Button
+                    style={{ marginRight: 5 }}
+                    title="Reset"
+                    onClick={handleResetInputData}
+                  >
                     <BiReset style={{ pointerEvents: "none" }} />
+                  </Button>
+                  <Button title="Export Data" onClick={handleExportData}>
+                    <BiExport style={{ pointerEvents: "none" }} />
                   </Button>
                 </Col>
               </Row>

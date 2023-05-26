@@ -156,31 +156,57 @@ function GraphNormalDistribution(props) {
             />
           )}
           {/* <Line type="monotone" dataKey="yValue" stroke="#ff7300" /> */}
-          <ReferenceLine
-            x={standardMin}
-            stroke="blue"
-            label={{
-              value: "Minimum",
-              position: "left",
-            }}
-          />
-          <ReferenceLine
-            x={standardMax}
-            stroke="red"
-            label={{
-              value: "Maximum",
-              position: "right",
-            }}
-          />
-          <ReferenceLine
-            x={`${(parseFloat(standardMax) + parseFloat(standardMin)) / 2}`}
-            stroke="green"
-            label={{
-              value: "center",
-              position: "inside",
-            }}
-            strokeDasharray="3 3"
-          />
+          {type === DOUBLE_STANDARD ? (
+            <>
+              <ReferenceLine
+                x={standardMin}
+                stroke="blue"
+                label={{
+                  value: "Minimum",
+                  position: "left",
+                }}
+              />
+              <ReferenceLine
+                x={standardMax}
+                stroke="red"
+                label={{
+                  value: "Maximum",
+                  position: "right",
+                }}
+              />
+              <ReferenceLine
+                x={`${(parseFloat(standardMax) + parseFloat(standardMin)) / 2}`}
+                stroke="green"
+                label={{
+                  value: "center",
+                  position: "inside",
+                }}
+                strokeDasharray="3 3"
+              />
+            </>
+          ) : type === SINGLE_STANDARD_MIN ? (
+            <>
+              <ReferenceLine
+                x={standard}
+                stroke="blue"
+                label={{
+                  value: "Minimum",
+                  position: "right",
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <ReferenceLine
+                x={standard}
+                stroke="red"
+                label={{
+                  value: "Maximum",
+                  position: "left",
+                }}
+              />
+            </>
+          )}
         </AreaChart>
       </ResponsiveContainer>
     </div>

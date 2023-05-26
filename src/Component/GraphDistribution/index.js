@@ -72,9 +72,8 @@ function GraphDistribution(props) {
       setBatasAtas(parseFloat(standardMax));
       setBatasBawah(parseFloat(standardMin));
     } else if (type === SINGLE_STANDARD_MAX) {
-      const batasBawah = Math.min([buluKiri, buluKiri2]);
-      setBatasBawah(batasBawah);
-      setBatasAtas(standard);
+      setBatasBawah(0);
+      setBatasAtas(parseFloat(standard));
     } else {
       const batasAtas = Math.max([buluKanan, buluKanan2]);
       setBatasAtas(batasAtas);
@@ -99,14 +98,20 @@ function GraphDistribution(props) {
       return (
         <>
           <ReferenceLine x={parseFloat(batasBawah)} stroke="red">
-            <Label position={"bottom"} value={parseFloat(batasBawah)} />
+            <Label
+              position={"bottom"}
+              value={parseFloat(parseFloat(batasBawah).toFixed(2))}
+            />
           </ReferenceLine>
           <ReferenceLine
             x={parseFloat(batasBawah) + gap}
             stroke="#dfdfdf"
             strokeDasharray="3 3"
           >
-            <Label position={"bottom"} value={parseFloat(batasBawah) + gap} />
+            <Label
+              position={"bottom"}
+              value={parseFloat((parseFloat(batasBawah) + gap).toFixed(2))}
+            />
           </ReferenceLine>
           <ReferenceLine
             x={parseFloat(batasBawah) + 2 * gap}
@@ -115,7 +120,7 @@ function GraphDistribution(props) {
           >
             <Label
               position={"bottom"}
-              value={parseFloat(batasBawah) + 2 * gap}
+              value={parseFloat((parseFloat(batasBawah) + 2 * gap).toFixed(2))}
             />
           </ReferenceLine>
           <ReferenceLine
@@ -125,7 +130,7 @@ function GraphDistribution(props) {
           >
             <Label
               position={"bottom"}
-              value={parseFloat(batasBawah) + 3 * gap}
+              value={parseFloat((parseFloat(batasBawah) + 3 * gap).toFixed(2))}
             />
           </ReferenceLine>
           <ReferenceLine
@@ -135,7 +140,7 @@ function GraphDistribution(props) {
           >
             <Label
               position={"bottom"}
-              value={parseFloat(batasBawah) + 4 * gap}
+              value={parseFloat((parseFloat(batasBawah) + 4 * gap).toFixed(2))}
             />
           </ReferenceLine>
           <ReferenceLine
@@ -145,7 +150,7 @@ function GraphDistribution(props) {
           >
             <Label
               position={"bottom"}
-              value={parseFloat(batasBawah) + 5 * gap}
+              value={parseFloat((parseFloat(batasBawah) + 5 * gap).toFixed(2))}
             />
           </ReferenceLine>
           <ReferenceLine
@@ -155,7 +160,7 @@ function GraphDistribution(props) {
           >
             <Label
               position={"bottom"}
-              value={parseFloat(batasBawah) + 6 * gap}
+              value={parseFloat((parseFloat(batasBawah) + 6 * gap).toFixed(2))}
             />
           </ReferenceLine>
           <ReferenceLine
@@ -165,13 +170,13 @@ function GraphDistribution(props) {
           >
             <Label
               position={"bottom"}
-              value={parseFloat(batasBawah) + 7 * gap}
+              value={parseFloat((parseFloat(batasBawah) + 7 * gap).toFixed(2))}
             />
           </ReferenceLine>
           <ReferenceLine x={parseFloat(batasBawah) + 8 * gap} stroke="red">
             <Label
               position={"bottom"}
-              value={parseFloat(batasBawah) + 8 * gap}
+              value={parseFloat((parseFloat(batasBawah) + 8 * gap).toFixed(2))}
             />
           </ReferenceLine>
         </>

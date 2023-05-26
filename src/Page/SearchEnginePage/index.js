@@ -6,8 +6,7 @@ import "./searchEnginePage.css";
 import { MdOutlineScreenSearchDesktop } from "react-icons/md";
 import { BiBarcodeReader } from "react-icons/bi";
 import ModalBarcodeScanner from "../../Component/ModalBarcodeScanner";
-import { Link, useNavigate } from "react-router-dom";
-import { SiOpenai } from "react-icons/si";
+import { useNavigate } from "react-router-dom";
 
 function SearchEnginePage(props) {
   const [showModalBarcode, setShowModalBarcode] = useState(false);
@@ -29,7 +28,8 @@ function SearchEnginePage(props) {
           <br />
           <span className="searchTitle2">
             {" "}
-            You can find information here to check machine story and others
+            You can find information here to check machine document, video, and
+            others
           </span>
           <br />
           <br />
@@ -57,11 +57,11 @@ function SearchEnginePage(props) {
               >
                 <BiBarcodeReader size={22} /> Scan
               </Button>
-              <Link to="/openai">
+              {/* <Link to="/openai">
                 <Button type="button" variant="dark" style={{ marginLeft: 5 }}>
                   <SiOpenai size={22} /> Need Assitance?
                 </Button>
-              </Link>
+              </Link> */}
             </Form>
           </div>
         </div>

@@ -29,6 +29,9 @@ function GraphCapabilityLine(props) {
     status,
   } = props;
   const [data, setData] = useState([]);
+  const [minDomain, setMinDomain] = useState("auto");
+  const [maxDomain, setMaxDomain] = useState("auto");
+
   useEffect(() => {
     let totalDataLengthMax = 0;
     if (status === "compare") {
@@ -53,58 +56,63 @@ function GraphCapabilityLine(props) {
 
       setData(newData);
     }
-  }, [listData, actionValue, listData2, status]);
 
-  const min = () => {
-    if (type === DOUBLE_STANDARD) {
-      let newValue =
-        parseFloat(standardMin) -
-        (parseFloat(standardMax) - parseFloat(standardMin)) / 2;
-      let number = (Math.round(newValue * 100) / 100).toFixed(2);
-      return parseFloat(number);
-    } else if (type === SINGLE_STANDARD_MIN) {
-      let newValue = parseFloat(standard) - parseFloat(standard) / 2;
-      let number = (Math.round(newValue * 100) / 100).toFixed(2);
-      return parseFloat(number);
-    }
-    return "auto";
-  };
-
-  const max = () => {
-    if (type === DOUBLE_STANDARD) {
-      let newValue =
-        parseFloat(standardMax) +
-        (parseFloat(standardMax) - parseFloat(standardMin)) / 2;
-      let number = (Math.round(newValue * 100) / 100).toFixed(2);
-      return parseFloat(number);
-    } else if (SINGLE_STANDARD_MAX) {
-      let newValue = parseFloat(standard) + parseFloat(standard) / 4;
-      let number = (Math.round(newValue * 100) / 100).toFixed(2);
-      return parseFloat(number);
-    }
-    return "auto";
-  };
-
-  const domain = (type) => {
-    let dataCheck = [];
-    for (let index = 0; index < data.length; index++) {
-      dataCheck.push(data[index].data);
-    }
-    if (type === DOUBLE_STANDARD) {
-      return [min(), max()];
-    } else if (type === SINGLE_STANDARD_MAX) {
-      if (parseFloat(standard) < 0) {
-        let minData = Math.min(...dataCheck);
-        let minYAxis = minData * 1.2;
-        return [minYAxis, parseFloat(standard) + parseFloat(standard) * -0.2];
+    const min = () => {
+      if (type === DOUBLE_STANDARD) {
+        let newValue =
+          parseFloat(standardMin) -
+          (parseFloat(standardMax) - parseFloat(standardMin)) / 2;
+        let number = (Math.round(newValue * 100) / 100).toFixed(2);
+        return parseFloat(number);
+      } else if (type === SINGLE_STANDARD_MIN) {
+        let newValue = parseFloat(standard) - parseFloat(standard) / 2;
+        let number = (Math.round(newValue * 100) / 100).toFixed(2);
+        return parseFloat(number);
       }
-      return [0, max(parseFloat(standard))];
-    } else if (type === SINGLE_STANDARD_MIN) {
-      return [min(), "auto"];
-    }
+      return "auto";
+    };
 
-    return [0, "auto"];
-  };
+    const max = () => {
+      if (type === DOUBLE_STANDARD) {
+        let newValue =
+          parseFloat(standardMax) +
+          (parseFloat(standardMax) - parseFloat(standardMin)) / 2;
+        let number = (Math.round(newValue * 100) / 100).toFixed(2);
+        return parseFloat(number);
+      } else if (type === SINGLE_STANDARD_MAX) {
+        let newValue = parseFloat(standard) + parseFloat(standard) / 4;
+        let number = (Math.round(newValue * 100) / 100).toFixed(2);
+        console.log(newValue);
+        return parseFloat(number);
+      }
+      return "auto";
+    };
+
+    let dataCheck = [];
+    for (let index = 0; index < listData.length; index++) {
+      dataCheck.push(listData[index].data);
+    }
+    for (let index = 0; index < listData2.length; index++) {
+      dataCheck.push(listData[index].data);
+    }
+    if (type === DOUBLE_STANDARD) {
+      setMinDomain(min());
+      setMaxDomain(max());
+    } else if (type === SINGLE_STANDARD_MAX) {
+      setMaxDomain(max());
+    } else if (type === SINGLE_STANDARD_MIN) {
+      setMinDomain(min());
+    }
+  }, [
+    listData,
+    actionValue,
+    listData2,
+    status,
+    standardMin,
+    standardMax,
+    type,
+    standard,
+  ]);
 
   return (
     <div>
@@ -115,7 +123,7 @@ function GraphCapabilityLine(props) {
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="no" />
-          <YAxis domain={domain(type)} />
+          <YAxis domain={[minDomain, maxDomain]} />
           {type === DOUBLE_STANDARD ? (
             <>
               <ReferenceLine y={standardMax} stroke="red">
@@ -161,6 +169,24 @@ function GraphCapabilityLine(props) {
           )}
         </LineChart>
       </ResponsiveContainer>
+      <div>
+        Set Y Axis Value Min :{" "}
+        <input
+          type="number"
+          lang="en"
+          step={".001"}
+          onChange={(e) => setMinDomain(parseFloat(e.target.value))}
+          value={minDomain}
+        />{" "}
+        Max :{" "}
+        <input
+          type="number"
+          lang="en"
+          step={".001"}
+          onChange={(e) => setMaxDomain(parseFloat(e.target.value))}
+          value={maxDomain}
+        />
+      </div>
     </div>
   );
 }
