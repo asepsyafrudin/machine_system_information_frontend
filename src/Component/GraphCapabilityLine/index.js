@@ -88,13 +88,13 @@ function GraphCapabilityLine(props) {
       return "auto";
     };
 
-    let dataCheck = [];
-    for (let index = 0; index < listData.length; index++) {
-      dataCheck.push(listData[index].data);
-    }
-    for (let index = 0; index < listData2.length; index++) {
-      dataCheck.push(listData[index].data);
-    }
+    // let dataCheck = [];
+    // for (let index = 0; index < listData.length; index++) {
+    //   dataCheck.push(listData[index].data);
+    // }
+    // for (let index = 0; index < listData2.length; index++) {
+    //   dataCheck.push(listData[index].data);
+    // }
     if (type === DOUBLE_STANDARD) {
       setMinDomain(min());
       setMaxDomain(max());

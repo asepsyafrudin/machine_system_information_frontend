@@ -480,7 +480,6 @@ function DocumentRegister(props) {
               <Form.Label>Input File (support multiple file)</Form.Label>
               <Form.Control
                 type="file"
-                accept=".png , .jpeg, .JPEG, .PNG, .pdf, .xlsx , .ppt , .pptx, .doc, .docx"
                 placeholder="Enter JPG, PNG or PDF File"
                 onChange={handleMultipleDocument}
                 ref={refVidoe}

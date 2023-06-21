@@ -2,9 +2,13 @@ import React from "react";
 import TitleSection from "../TitleSection";
 import { SlGraph } from "react-icons/sl";
 import "./capabilityMenu.css";
-import { VscGraphLine } from "react-icons/vsc";
 import { Link } from "react-router-dom";
-import { ImList } from "react-icons/im";
+import CardMenuEngineering from "../CardMenuEngineering";
+import CapabiityFormImage from "../../Asset/ImageGeneral/Performance overview-rafiki.png";
+import CapabilityListImage from "../../Asset/ImageGeneral/Reading list-rafiki.png";
+import FTAImage from "../../Asset/ImageGeneral/Robotics-amico.png";
+import CapabilityCompareImage from "../../Asset/ImageGeneral/Data analysis-rafiki.png";
+import FTAListImage from "../../Asset/ImageGeneral/Completed-rafiki.png";
 
 function EngineeringTools() {
   return (
@@ -15,40 +19,30 @@ function EngineeringTools() {
       />
 
       <div className="cardCapability">
-        <div className="ag-format-container">
-          <div className="ag-courses_box">
-            <div className="ag-courses_item">
-              <Link to={"/capabilityForm"} className="ag-courses-item_link">
-                <div className="ag-courses-item_bg"></div>
-                <div className="ag-courses-item_title">
-                  <VscGraphLine style={{ marginRight: 5 }} />
-                  Create Capability Form
-                </div>
-              </Link>
-            </div>
-            <div className="ag-courses_item">
-              <Link to={"/capabilityList"} className="ag-courses-item_link">
-                <div className="ag-courses-item_bg"></div>
-                <div className="ag-courses-item_title">
-                  <ImList style={{ marginRight: 5 }} /> List Capability Data
-                </div>
-              </Link>
-            </div>
-            <div className="ag-courses_item">
-              <Link
-                to={"/capabilityComparisonForm"}
-                className="ag-courses-item_link"
-              >
-                <div className="ag-courses-item_bg"></div>
-
-                <div className="ag-courses-item_title">
-                  <VscGraphLine style={{ marginRight: 5 }} /> Create Capability
-                  Comparison
-                </div>
-              </Link>
-            </div>
-          </div>
-        </div>
+        <Link to={"/capabilityForm"} className="link">
+          <CardMenuEngineering
+            image={CapabiityFormImage}
+            title="Create Capability"
+          />
+        </Link>
+        <Link to={"/capabilityList"} className="link">
+          <CardMenuEngineering
+            image={CapabilityListImage}
+            title="List of Capability"
+          />
+        </Link>
+        <Link to={"/capabilityComparisonForm"} className="link">
+          <CardMenuEngineering
+            image={CapabilityCompareImage}
+            title="Capability Comparison"
+          />
+        </Link>
+        <Link to={"/FTA"} className="link">
+          <CardMenuEngineering image={FTAImage} title="Failure Tree Analysis" />
+        </Link>
+        <Link to={"/FTAList"} className="link">
+          <CardMenuEngineering image={FTAListImage} title="FTA List" />
+        </Link>
       </div>
     </div>
   );

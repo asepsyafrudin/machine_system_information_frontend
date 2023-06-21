@@ -1,0 +1,19 @@
+.image-card-engineering {
+    height: 200px;
+    width: auto;
+}
+
+@font-face {
+    font-family: googlefontface;
+    src: url(../../Asset/Font/Roboto-Medium.ttf);
+}
+
+.card-menu-container {
+    width: 200px;
+    height: 250px;
+    font-family: googlefontface;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+

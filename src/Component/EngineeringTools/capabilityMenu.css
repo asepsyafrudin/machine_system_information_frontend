@@ -3,7 +3,11 @@
     margin: 0 auto;
   }
   
-  
+  .cardCapability {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
   
   .ag-courses_box {
     display: -webkit-box;
@@ -35,6 +39,11 @@
   
     position: relative;
   }
+
+.link {
+  text-decoration: none;
+}
+
   .ag-courses-item_link:hover,
   .ag-courses-item_link:hover .ag-courses-item_date {
     text-decoration: none;

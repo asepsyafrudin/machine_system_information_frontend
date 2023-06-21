@@ -1,0 +1,17 @@
+.analysis-card-list {
+    background-color: #fcfee8;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+@font-face {
+    font-family: googlefont;
+    src: url(../../Asset/Font/Roboto-Medium.ttf);
+}
+.capabilityForm {
+    font-family: googlefont;
+}
+
+.tableAttachment {
+    width: 100%;
+    text-align: left;
+}

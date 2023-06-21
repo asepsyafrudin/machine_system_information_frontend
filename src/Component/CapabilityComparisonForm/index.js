@@ -146,7 +146,7 @@ function CapabilityComparisonForm() {
   };
   const productOption = () => {
     let option = [];
-    if (tableProduct) {
+    if (tableProduct.length>0) {
       for (let index = 0; index < tableProduct.length; index++) {
         option.push(
           <option key={index} value={tableProduct[index].id}>
@@ -160,7 +160,7 @@ function CapabilityComparisonForm() {
 
   const lineOption = () => {
     let option = [];
-    if (product && tableLine) {
+    if (product && tableLine.length>0) {
       const lineFilter = tableLine.filter(
         (value) =>
           value.product_id === parseInt(product) && value.status === "Active"
@@ -181,7 +181,7 @@ function CapabilityComparisonForm() {
 
   const machineOption = () => {
     let option = [];
-    if (line && tableMachine) {
+    if (line && tableMachine.length>0) {
       const machineFilter = tableMachine.filter(
         (value) => value.line_id === parseInt(line) && value.status === "Active"
       );

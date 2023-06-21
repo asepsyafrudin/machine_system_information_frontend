@@ -14,6 +14,8 @@ import CapabilityFormPage from "../CapabilityFormPage";
 import ListCapabilityPage from "../ListCapabilityPage";
 import RepeatabilityFormPage from "../RepeatabilityFormPage";
 import CapabilityCompareFormPage from "../CapabilityCompareFormPage";
+import FTAFormPage from "../FTAFormPage";
+import FTAListPage from "../FTAListPage";
 
 function LayoutPage() {
   return (
@@ -35,6 +37,9 @@ function LayoutPage() {
             path="/capabilityComparisonForm/:id"
             element={<CapabilityCompareFormPage />}
           />
+          <Route path="/FTA" element={<FTAFormPage />} />
+          <Route path="/FTA/:id" element={<FTAFormPage />} />
+          <Route path="/FTAList" element={<FTAListPage />} />
           <Route path="/capabilityForm/:id" element={<CapabilityFormPage />} />
           <Route path="/capabilityList" element={<ListCapabilityPage />} />
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />

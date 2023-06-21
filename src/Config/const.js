@@ -14,3 +14,8 @@ export const SINGLE_STANDARD_MIN = "1 batasan bawah";
 export const DOUBLE_STANDARD = "2 batasan";
 export const THREE_SIGMA = 3;
 export const FOUR_SIGMA = 4;
+
+//type analysis
+
+export const FIRSTANALYSIS = "first_analysis";
+export const SECONDANALYSIS = "second_analysis";

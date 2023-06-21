@@ -158,6 +158,9 @@ export const getDocumentGeneralBypageApi = (page) => {
 export const deleteFileByIdApi = (id) => {
   return `${port}/api/file/delete/${id}`;
 };
+export const getFileByIdApi = (id) => {
+  return `${port}/api/file/getFileByDocumentId/${id}`;
+};
 
 //recentdata
 export const getAllRecentDataApi = (page) => {
@@ -212,4 +215,20 @@ export const getCapabilityByIdApi = (id) => {
 
 export const searchCapabilityApi = (searchValue, page) => {
   return `${port}/api/capability/search/${searchValue}/${page}`;
+};
+
+//problem
+export const createProblemApi = `${port}/api/problem/create`;
+export const createFtaLv1Api = `${port}/api/ftaLv1/create`;
+export const createFtaLv2Api = `${port}/api/ftaLv2/create`;
+export const getAllProblemApi = (page) => {
+  return `${port}/api/problem/getAllProblem/${page}`;
+};
+
+export const getProblemByIdApi = (id) => {
+  return `${port}/api/problem/getProblemById/${id}`;
+};
+
+export const deleteProblemByIdApi = (id) => {
+  return `${port}/api/problem/deleteProblem/${id}`;
 };
