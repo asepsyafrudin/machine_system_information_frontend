@@ -14,7 +14,7 @@ function EngineeringTools() {
   return (
     <div className="userListContainer">
       <TitleSection
-        title="Menu Capability"
+        title="Engineering Tools"
         icon={<SlGraph style={{ marginRight: 5 }} />}
       />
 

@@ -6,6 +6,7 @@ import VideoListComponent from "../VideoListComponent";
 import DocumentListComponent from "../DocumentListComponent";
 import { BiNews } from "react-icons/bi";
 import RecentlyListComponent from "../RecentlyListComponent";
+import FTAPage from "../../Page/FTAPage";
 
 function NavigationTab(props) {
   const { searchValue, pageNumber } = props;
@@ -32,6 +33,12 @@ function NavigationTab(props) {
                 Recently
               </Nav.Link>
             </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey={"fta"}>
+                <BiNews style={{ marginRight: 5 }} />
+                Failure Tree Analysis
+              </Nav.Link>
+            </Nav.Item>
           </Nav>
         </Col>
       </Row>
@@ -55,6 +62,9 @@ function NavigationTab(props) {
                 searchValue={searchValue}
                 pageNumber={pageNumber}
               />
+            </Tab.Pane>
+            <Tab.Pane eventKey={"fta"}>
+              <FTAPage searchValue={searchValue} pageNumber={pageNumber} />
             </Tab.Pane>
           </Tab.Content>
         </Col>

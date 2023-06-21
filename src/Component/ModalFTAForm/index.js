@@ -5,7 +5,6 @@ import "./modalFTAForm.css";
 import { SECONDANALYSIS } from "../../Config/const";
 import { fileName } from "../../Config/fileName";
 import { getExtFileName } from "../../Config/fileType";
-import { Link } from "react-router-dom";
 import { deleteFileByIdApi } from "../../Config/API";
 import axios from "axios";
 
@@ -159,11 +158,6 @@ function ModalFTAForm(props) {
                         >
                           Delete
                         </Button>
-                        <Link to={attachment[0].file} target="_blank">
-                          <Button type="button" id={attachment[0].id}>
-                            View
-                          </Button>
-                        </Link>
                       </td>
                     </tr>
                   </thead>

@@ -1,4 +1,4 @@
-const port = "https://172.31.73.34:8080";
+const port = "https://192.168.0.122:8080";
 
 //users Api
 export const registerUserApi = `${port}/api/users/create_users`;
@@ -231,4 +231,8 @@ export const getProblemByIdApi = (id) => {
 
 export const deleteProblemByIdApi = (id) => {
   return `${port}/api/problem/deleteProblem/${id}`;
+};
+
+export const getProblemByMachineIdApi = (machineId) => {
+  return `${port}/api/problem/getProblemByMachineId/${machineId}`;
 };

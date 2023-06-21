@@ -23,7 +23,7 @@ import { BsFillPlayFill } from "react-icons/bs";
 import { FIRSTANALYSIS, SECONDANALYSIS } from "../../Config/const";
 import { getExtFileName } from "../../Config/fileType";
 import { v4 as uuid } from "uuid";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 function FTAForm() {
   const { id } = useParams();
@@ -153,7 +153,6 @@ function FTAForm() {
     if (mode === FIRSTANALYSIS) {
       const checkData = analysis1.find((value) => value.id === data.id);
       if (checkData) {
-        console.log(analysis1[0].id === data.id);
         const oldData = analysis1.filter((value) => value.id !== data.id);
         oldData.push(data);
         setAnalysis1(oldData);
@@ -290,6 +289,9 @@ function FTAForm() {
     setDataEdit("");
     setMode("");
   };
+
+  const navigate = useNavigate();
+
   const handleSaveFTA = async (e) => {
     e.preventDefault();
     const problemId = uuid();
@@ -324,7 +326,6 @@ function FTAForm() {
           console.log(response);
         }
       } else {
-        handleReset();
         setShowAfterSave(true);
       }
     };
@@ -345,7 +346,6 @@ function FTAForm() {
           console.log(response);
         }
       } else {
-        handleReset();
         setShowAfterSave(true);
       }
     };
@@ -385,14 +385,17 @@ function FTAForm() {
       await saveAnalysis1();
       await saveAnalysis2();
     }
-
-    handleReset();
     setShowAfterSave(true);
+    setTimeout(() => {
+      navigate("/ftaList");
+    }, [1000]);
   };
 
   const handleHideModal = (e) => {
     setShowModal(e);
-    handleReset("");
+    setIdAnalysis("");
+    setDataEdit("");
+    setMode("");
   };
   return (
     <div className="capabilityFormContainer">

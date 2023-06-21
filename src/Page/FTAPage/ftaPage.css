@@ -1,0 +1,10 @@
+.imageFTAButton {
+    width: 200px;
+}
+
+.FTAPageContainer {
+ height: 80vh;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+}

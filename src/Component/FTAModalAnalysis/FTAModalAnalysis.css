@@ -1,0 +1,10 @@
+.bodyModalFtaAnalysis {
+    max-height: 300px;
+    overflow: scroll;
+    scroll-behavior: smooth;
+}
+
+.footerModalAnalysis {
+    padding: 1rem 1rem 1rem 1rem;
+    margin-bottom: 20px;
+}
