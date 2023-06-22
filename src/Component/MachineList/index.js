@@ -269,6 +269,7 @@ function MachineList(props) {
             <td>{index + 1}</td>
             <td>{CapitalCaseFirstWord(tableMachine[index].product_name)}</td>
             <td>{tableMachine[index].line_name}</td>
+            <td>{tableMachine[index].id}</td>
             <td>{tableMachine[index].machine_name}</td>
             <td>{tableMachine[index].cycletime}</td>
             <td>{tableMachine[index].operation_ratio}</td>
@@ -478,6 +479,7 @@ function MachineList(props) {
               <th>No</th>
               <th>Product</th>
               <th>Line</th>
+              <th>Machine Id</th>
               <th>Machine Name</th>
               <th>Cycle time (sec)</th>
               <th>Operatio Ratio (%)</th>

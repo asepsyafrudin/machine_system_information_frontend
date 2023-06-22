@@ -28,11 +28,11 @@ function NavigationAdmin() {
     >
       <Row>
         <Col sm={2} className="navigationAdmin">
-          <div className="menuListAdmin tabTitle">Menu Admin</div>
+          <div className="menuListAdmin tabTitle">Admin Dashboard</div>
           <Nav variant="pills" className="flex-column">
             <Nav.Item>
               <Nav.Link eventKey={"userDashboard"} className="tabTitle">
-                <GrSettingsOption style={{ marginRight: 5 }} /> User Dashboard
+                <GrSettingsOption style={{ marginRight: 5 }} /> Admin Profile
               </Nav.Link>
             </Nav.Item>
             <Nav.Item>

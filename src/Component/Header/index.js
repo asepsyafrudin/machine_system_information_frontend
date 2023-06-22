@@ -59,12 +59,14 @@ function Header(props) {
       } else {
         navigate("/dashboardUsers");
       }
-    } else {
+    } else if (eventKey === "logout") {
       localStorage.clear();
       dispatch({
         type: RESETUSERLOGIN,
       });
       navigate("/");
+    } else {
+      navigate("/projectPage");
     }
   };
 
@@ -97,10 +99,13 @@ function Header(props) {
                 id="nav-dropdown"
                 style={{ width: 100 }}
               >
-                <NavDropdown.Item eventKey="logout">logout</NavDropdown.Item>
                 <NavDropdown.Item eventKey="userDashboard">
                   User Dashboard
                 </NavDropdown.Item>
+                <NavDropdown.Item eventKey="projectDashboard">
+                  Project Dashboard
+                </NavDropdown.Item>
+                <NavDropdown.Item eventKey="logout">logout</NavDropdown.Item>
               </NavDropdown>
             </Nav>
           </Navbar.Collapse>

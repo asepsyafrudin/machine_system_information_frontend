@@ -16,6 +16,7 @@ import RepeatabilityFormPage from "../RepeatabilityFormPage";
 import CapabilityCompareFormPage from "../CapabilityCompareFormPage";
 import FTAFormPage from "../FTAFormPage";
 import FTAListPage from "../FTAListPage";
+import ProjectPage from "../ProjectPage";
 
 function LayoutPage() {
   return (
@@ -45,6 +46,7 @@ function LayoutPage() {
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />
           <Route path="/openai" element={<Openai />} />
           <Route path="/searching_page" element={<SearchEnginePage />} />
+          <Route path="/projectPage" element={<ProjectPage />} />
           <Route
             path="/searching_page/:searchValue"
             element={<SearchListPage />}

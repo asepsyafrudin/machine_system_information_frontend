@@ -1,0 +1,79 @@
+@font-face {
+    font-family: roboto;
+    src: url(../../Asset//Font//Roboto-Medium.ttf);
+}
+
+.titleTotalProject {
+    font-size: 20px;
+}
+
+.valueTotalProject {
+    font-family: roboto;
+    font-size: 45px;
+    color: #00ADEB;
+}
+
+.totalProjectCard {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    padding: 20px 20px 20px 20px;
+    margin-bottom: 15px;
+    min-height: 210px;
+  }
+
+.projectList {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    padding: 20px 20px 20px 20px;
+    margin-bottom: 100px;
+    height: 300px;
+    overflow: scroll;
+
+}
+
+.projectLaunch {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    padding: 20px 20px 20px 20px;
+    margin-bottom: 100px;
+    min-height: 300px;
+}
+  .filterTotalProject {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    padding: 20px 20px 20px 20px;
+    margin-bottom: 15px;
+  }
+
+  .progressSummary {
+    font-family: roboto;
+    font-size: 18px;
+  }
+  .box {
+    height: 30px;
+    display: inline-block;
+    width: 30px;
+    border: 1px solid black;
+    cursor: pointer;
+  }
+
+  .blue {
+    background-color: blue;
+  }
+
+  .red {
+    background-color: red;
+  }
+
+  .yellow {
+    background-color: yellow;
+  }
+
+  .green {
+    background-color: green;
+  }
+  

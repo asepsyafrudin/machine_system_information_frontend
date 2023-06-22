@@ -19,11 +19,11 @@ function NavigationUser() {
     >
       <Row>
         <Col sm={2} className="navigationAdmin">
-          <div className="menuListAdmin tabTitle">Menu User</div>
+          <div className="menuListAdmin tabTitle">User Dashboard</div>
           <Nav variant="pills" className="flex-column">
             <Nav.Item>
               <Nav.Link eventKey={"userDashboard"} className="tabTitle">
-                <CgUserlane style={{ marginRight: 5 }} /> User Dashboard
+                <CgUserlane style={{ marginRight: 5 }} /> User Profile
               </Nav.Link>
             </Nav.Item>
             <Nav.Item>

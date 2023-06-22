@@ -29,18 +29,21 @@ function FTAModalAnalysis(props) {
   };
 
   useEffect(() => {
-    axios
-      .get(getProblemByMachineIdApi(search))
-      .then((response) => {
-        const result = response.data.data;
-        setTableProblem(result);
-      })
-      .then((error) => console.log(error));
-
-    axios.get(getProblemByIdApi(problemId)).then((response) => {
-      setTableAnalysis1(response.data.dataFTA1);
-      setTableAnalysis2(response.data.dataFTA2);
-    });
+    if (search !== "") {
+      axios
+        .get(getProblemByMachineIdApi(search))
+        .then((response) => {
+          const result = response.data.data;
+          setTableProblem(result);
+        })
+        .then((error) => console.log(error));
+    }
+    if (problemId !== "") {
+      axios.get(getProblemByIdApi(problemId)).then((response) => {
+        setTableAnalysis1(response.data.dataFTA1);
+        setTableAnalysis2(response.data.dataFTA2);
+      });
+    }
   }, [search, problemId]);
 
   const content = () => {
@@ -191,6 +194,11 @@ function FTAModalAnalysis(props) {
     }
   };
 
+  const handleFeedback = () => {
+    setSendFeedback(true);
+  };
+
+  const saveFeedback = () => {};
   return (
     <Modal
       show={showModal}
@@ -211,7 +219,7 @@ function FTAModalAnalysis(props) {
               disabled={feedBackValue === "" ? true : false}
               type="submit"
               variant="success"
-              onClick={sendFeedback}
+              onClick={saveFeedback}
             >
               Save Feedback
             </Button>
@@ -219,7 +227,7 @@ function FTAModalAnalysis(props) {
             <Button
               disabled={problemId === "" ? true : false}
               variant="success"
-              onClick={() => setSendFeedback(true)}
+              onClick={handleFeedback}
             >
               Send Feedback
             </Button>
