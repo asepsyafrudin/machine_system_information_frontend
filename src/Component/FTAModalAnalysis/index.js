@@ -78,7 +78,7 @@ function FTAModalAnalysis(props) {
               </>
             );
           } else {
-            return <>Data Is Not Available</>;
+            return <>Please Scan by Barcode or Enter Machine Number</>;
           }
         } else {
           if (tableAnalysis1.length > 0) {

@@ -6,7 +6,11 @@ import { Button, Form, Table } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import axios from "axios";
-import { getAllMachineApi, getAllProblemApi } from "../../Config/API";
+import {
+  getAllMachineApi,
+  getAllProblemApi,
+  searchProblemByMachineIdApi,
+} from "../../Config/API";
 import PaginationTable from "../Pagination";
 
 function FTAListComponent() {
@@ -22,19 +26,29 @@ function FTAListComponent() {
     axios.get(getAllMachineApi).then((response) => {
       setTableMachine(response.data.data);
     });
-
-    axios
-      .get(getAllProblemApi(page))
-      .then((response) => {
-        setTableFTA(response.data.data);
-        setTotalPageData(response.data.totalPageData);
-        setNumberStart(response.data.numberStart);
-      })
-      .catch((error) => console.log(error));
+    if (searchByMachine === "") {
+      axios
+        .get(getAllProblemApi(page))
+        .then((response) => {
+          setTableFTA(response.data.data);
+          setTotalPageData(response.data.totalPageData);
+          setNumberStart(response.data.numberStart);
+        })
+        .catch((error) => console.log(error));
+    } else {
+      axios
+        .get(searchProblemByMachineIdApi(searchByMachine, page))
+        .then((response) => {
+          setTableFTA(response.data.data);
+          setTotalPageData(response.data.totalPageData);
+          setNumberStart(response.data.numberStart);
+        })
+        .catch((error) => console.log(error));
+    }
 
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
-  }, [page]);
+  }, [page, searchByMachine]);
 
   const machineOption = () => {
     let option = [];

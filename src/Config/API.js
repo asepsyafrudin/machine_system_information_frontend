@@ -236,3 +236,7 @@ export const deleteProblemByIdApi = (id) => {
 export const getProblemByMachineIdApi = (machineId) => {
   return `${port}/api/problem/getProblemByMachineId/${machineId}`;
 };
+
+export const searchProblemByMachineIdApi = (machineId, page) => {
+  return `${port}/api/problem/searchProblemByMachineId/${machineId}/${page}`;
+};
