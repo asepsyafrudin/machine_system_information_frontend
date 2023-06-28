@@ -1,4 +1,4 @@
-const port = "https://192.168.0.122:8080";
+const port = "https://172.31.71.10:8080";
 
 //users Api
 export const registerUserApi = `${port}/api/users/create_users`;
@@ -50,6 +50,10 @@ export const deleteProductApi = (id) => {
 
 export const searchProductApi = (searchValue) => {
   return `${port}/api/product/${searchValue}`;
+};
+
+export const getProductByProductId = (id) => {
+  return `${port}/api/product/getProductById/${id}`;
 };
 
 //line
@@ -240,3 +244,17 @@ export const getProblemByMachineIdApi = (machineId) => {
 export const searchProblemByMachineIdApi = (machineId, page) => {
   return `${port}/api/problem/searchProblemByMachineId/${machineId}/${page}`;
 };
+
+export const createProjectApi = `${port}/api/project/create`;
+export const updateProjectApi = `${port}/api/project/update`;
+export const getAllProjectApi = (page) => {
+  return `${port}/api/project/getAllProjectByPage/${page}`;
+};
+export const updateStatusProjectApi = `${port}/api/project/updateStatus`;
+export const getProjectByIdApi = (id) => {
+  return `${port}/api/project/getProjectById/${id}`;
+};
+
+//activity api
+export const createActivityApi = `${port}/api/activity/create`;
+export const updateActivityApi = `${port}/api/activity/update`;

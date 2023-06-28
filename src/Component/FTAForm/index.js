@@ -222,7 +222,7 @@ function FTAForm() {
     setShowModal(true);
   };
 
-  const handleSolution = (id) => {
+  const handleSolution = (id, indexNumber) => {
     const solution = analysis2.filter((value) => value.id === id);
     let arraySolutionTable = [];
     if (solution.length > 0) {
@@ -231,7 +231,12 @@ function FTAForm() {
           <Table style={{ marginLeft: 20, textAlign: "left" }} key={index}>
             <tbody>
               <tr style={{ textAlign: "left" }}>
-                <td>
+                <td width={30}>
+                  <b>
+                    {indexNumber + 1}.{index + 1}
+                  </b>
+                </td>
+                <td width={200}>
                   <BsFillPlayFill />
                   Solution
                 </td>
@@ -263,8 +268,10 @@ function FTAForm() {
                       {solution[index].attachment.map((value, index2) => {
                         return (
                           <tr key={index2}>
-                            <td>{index2 + 1}</td>
-                            <td>{value.name}</td>
+                            <td style={{ paddingLeft: 30 }}>
+                              {"Attachment ==>"}
+                            </td>
+                            <td style={{ paddingLeft: 30 }}>{value.name}</td>
                             <td>{getExtFileName(value.name)}</td>
                           </tr>
                         );
@@ -488,7 +495,10 @@ function FTAForm() {
               <Table style={{ textAlign: "left" }}>
                 <tbody>
                   <tr style={{ textAlign: "left" }}>
-                    <td>{value.type}</td>
+                    <td style={{ width: 30 }}>
+                      <b>{index + 1}.</b>
+                    </td>
+                    <td width={200}>{value.type}</td>
                     <td>{value.name}</td>
                     <td>
                       <Button
@@ -527,7 +537,9 @@ function FTAForm() {
                           {value.attachment.map((value2, index2) => {
                             return (
                               <tr key={index2}>
-                                <td>{index2 + 1}</td>
+                                <td style={{ paddingLeft: 30 }}>
+                                  {"Attachment ==>"}
+                                </td>
                                 <td>{value2.name}</td>
                                 <td>{getExtFileName(value2.name)}</td>
                               </tr>
@@ -539,7 +551,7 @@ function FTAForm() {
                   </tr>
                 </tbody>
               </Table>
-              {handleSolution(value.id)}
+              {handleSolution(value.id, index)}
             </div>
           );
         })}

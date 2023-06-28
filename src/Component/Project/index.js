@@ -1,15 +1,42 @@
 import React from "react";
 import TitleSection from "../TitleSection";
-import { FaUserAlt } from "react-icons/fa";
-import { Button, Col, Form, Row } from "react-bootstrap";
+import {
+  Badge,
+  Button,
+  CloseButton,
+  Col,
+  Form,
+  Modal,
+  Row,
+  Table,
+} from "react-bootstrap";
 import { useEffect } from "react";
-import { getAllProductApi, getAllUsersApi } from "../../Config/API";
+import {
+  createProjectApi,
+  getAllProductApi,
+  getAllProjectApi,
+  getAllUsersApi,
+  updateProjectApi,
+  updateStatusProjectApi,
+} from "../../Config/API";
 import { useState } from "react";
 import axios from "axios";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
+import { v4 as uuid } from "uuid";
+import { STATUSFINISH, STATUSOPEN } from "../../Config/const";
+import { BsListNested } from "react-icons/bs";
+import { RiCreativeCommonsNdFill } from "react-icons/ri";
+import moment from "moment";
+import PaginationTable from "../Pagination";
+import { MdDeleteForever, MdEmail, MdVideoLibrary } from "react-icons/md";
+import { GrEdit } from "react-icons/gr";
+import { GoGitCompare } from "react-icons/go";
+import { Link } from "react-router-dom";
 
-function Project() {
+function Project(props) {
+  const { actionState, actionStateValue } = props;
   const [tableProduct, setTableProduct] = useState([]);
+  const [tableProject, setTableProject] = useState([]);
   const [product, setProduct] = useState("");
   const [projectName, setProjectName] = useState("");
   const [manager, setManager] = useState("");
@@ -18,8 +45,16 @@ function Project() {
   const [savingCost, setSavingCost] = useState("");
   const [startDate, setStartDate] = useState("");
   const [sopDate, setSopDate] = useState("");
+  const [memberId, setMemberId] = useState("");
   const [member, setMember] = useState([]);
-
+  const [projectIdEdit, setProjectIdEdit] = useState("");
+  const [userId, setUserId] = useState("");
+  const [show, setShow] = useState(false);
+  const [message, setMessage] = useState("");
+  const [page, setPage] = useState(1);
+  const [numberStart, setNumberStart] = useState("");
+  const [totalPageData, setStotalPageData] = useState(1);
+  const maxPagesShow = 3;
   useEffect(() => {
     axios
       .get(getAllProductApi)
@@ -31,10 +66,44 @@ function Project() {
     axios
       .get(getAllUsersApi)
       .then((response) => {
-        setTableUser(response.data.data);
+        const tableUserSort = response.data.data;
+        setTableUser(
+          tableUserSort.sort((nameA, nameB) => {
+            let a = nameA.username;
+            let b = nameB.username;
+
+            if (a < b) {
+              return -1;
+            }
+            if (a > b) {
+              return 1;
+            }
+            return 0;
+          })
+        );
       })
       .catch((error) => console.log(error));
-  }, []);
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    setUserId(user.id);
+    axios.get(getAllProjectApi(page)).then((response) => {
+      const data = response.data.data;
+
+      let filter = [];
+      if (data.length > 0) {
+        for (let index = 0; index < data.length; index++) {
+          for (let index2 = 0; index2 < data[index].member.length; index2++) {
+            if (data[index].member[index2].user_id === parseInt(user.id)) {
+              filter.push(data[index]);
+            }
+          }
+        }
+      }
+      setTableProject(filter);
+      setStotalPageData(response.data.totalPageData);
+      setNumberStart(response.data.numberStart);
+    });
+  }, [actionStateValue, page]);
 
   const productOption = () => {
     let option = [];
@@ -64,17 +133,183 @@ function Project() {
     return <>{option}</>;
   };
 
-  const handleMember = (e) => {
-    setMember((prev) => [...prev, e.target.value]);
+  const handleMember = () => {
+    if (parseInt(memberId) !== parseInt(userId)) {
+      const check = member.find((value) => value === parseInt(memberId));
+      if (!check) {
+        setMember((prev) => [...prev, parseInt(memberId)]);
+      }
+    }
   };
+
+  const colorBgBadge = (value) => {
+    switch (value) {
+      case 1:
+        return "primary";
+      case 2:
+        return "secondary";
+      case 3:
+        return "success";
+      case 4:
+        return "danger";
+      case 5:
+        return "warning";
+      case 6:
+        return "info";
+      case 7:
+        return "dark";
+      default:
+        break;
+    }
+  };
+
+  const deleteMembers = (e) => {
+    const id = parseInt(e.target.id);
+    if (id !== userId) {
+      const array = member.filter((value) => value !== id);
+      setMember(array);
+    } else {
+      window.alert("Cannot delete");
+    }
+  };
+
+  const handleReset = () => {
+    setProduct("");
+    setProjectName("");
+    setManager("");
+    setBudget("");
+    setSavingCost("");
+    setStartDate("");
+    setSopDate("");
+    setMemberId("");
+    setMember([]);
+    setProjectIdEdit("");
+  };
+
+  const handleSaveCreateProject = (e) => {
+    e.preventDefault();
+    let data = {
+      product_id: product,
+      project_name: projectName,
+      manager_id: manager,
+      budget: budget,
+      saving_cost: savingCost,
+      start: startDate,
+      finish: sopDate,
+      member: projectIdEdit ? [...member] : [...member, userId],
+      user_id: userId,
+      status: STATUSOPEN,
+    };
+
+    if (projectIdEdit) {
+      let newData = { ...data, id: projectIdEdit };
+      axios.put(updateProjectApi, newData);
+      setMessage("Project already created");
+      setShow(true);
+      handleReset();
+      actionState(1);
+    } else {
+      let newData = { ...data, id: uuid() };
+      let confirm = window.confirm("Do you want to save?");
+      if (confirm) {
+        axios.post(createProjectApi, newData).then((response) => {
+          setMessage("Project already created");
+          setShow(true);
+          handleReset();
+          actionState(1);
+        });
+      }
+    }
+  };
+
+  const productNameFunction = (id) => {
+    const findProduct = tableProduct.find((value) => value.id === parseInt(id));
+    if (findProduct) {
+      return findProduct.product_name;
+    } else {
+      return "";
+    }
+  };
+
+  const userNameFunction = (id) => {
+    const findUser = tableUser.find((value) => value.id === parseInt(id));
+    if (findUser) {
+      return CapitalCaseFirstWord(findUser.username);
+    }
+    return "";
+  };
+
+  const statusFunction = (status, startDate, SOPDate) => {
+    if (status === STATUSFINISH) {
+      return <Badge bg="primary">Finish</Badge>;
+    } else {
+      let currentDate = new Date();
+      let start = new Date(startDate);
+      let sop = new Date(SOPDate);
+      if (start - currentDate > 0) {
+        return <Badge bg="warning">Not Yet Started</Badge>;
+      } else if (sop - currentDate < 0) {
+        return <Badge bg="danger">Delay</Badge>;
+      } else if (currentDate - start > 0) {
+        return <Badge bg="success">On Progress</Badge>;
+      }
+    }
+  };
+
+  const dateParse = (date) => {
+    return moment(date).format("YYYY-MM-DD");
+  };
+  const handleEdit = (e) => {
+    const id = e.target.id;
+    let confirm = window.confirm("Do you want to edit this item?");
+    if (confirm) {
+      let data = tableProject.find((value) => value.id === id);
+      if (data) {
+        setProjectIdEdit(data.id);
+        setProduct(data.product_id);
+        setProjectName(data.project_name);
+        setManager(data.manager_id);
+        setBudget(data.budget);
+        setSavingCost(data.saving_cost);
+        setStartDate(dateParse(data.start));
+        setSopDate(dateParse(data.finish));
+        let memberIddata = [];
+        for (let index = 0; index < data.member.length; index++) {
+          memberIddata.push(data.member[index].user_id);
+        }
+        setMember(memberIddata);
+      }
+    }
+  };
+
+  const changeStatusProject = (e) => {
+    const id = e.target.id;
+    const findData = tableProject.find((value) => value.id === id);
+    let status = "";
+    if (findData) {
+      if (findData.status === STATUSOPEN) {
+        status = STATUSFINISH;
+      } else {
+        status = STATUSOPEN;
+      }
+      const data = { id: id, status: status };
+      axios.put(updateStatusProjectApi, data).then((response) => {
+        setMessage("Status Project Already Changed");
+        setShow(true);
+        handleReset();
+        actionState(1);
+      });
+    }
+  };
+
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
         <TitleSection
           title="Create project"
-          icon={<FaUserAlt style={{ marginRight: 5 }} />}
+          icon={<RiCreativeCommonsNdFill style={{ marginRight: 5 }} />}
         />
-        <Form>
+        <Form onSubmit={handleSaveCreateProject}>
           <Row className="mb-3" style={{ textAlign: "left" }}>
             <Form.Group as={Col}>
               <Form.Label>Select Product</Form.Label>
@@ -100,7 +335,7 @@ function Project() {
               />
             </Form.Group>
             <Form.Group as={Col}>
-              <Form.Label>PIC Manager</Form.Label>
+              <Form.Label>PIC</Form.Label>
               <Form.Select
                 value={manager}
                 onChange={(e) => setManager(e.target.value)}
@@ -115,7 +350,7 @@ function Project() {
           </Row>
           <Row className="mb-3" style={{ textAlign: "left" }}>
             <Form.Group as={Col}>
-              <Form.Label>Budget</Form.Label>
+              <Form.Label>Budget (*Rupiah)</Form.Label>
               <Form.Control
                 type="number"
                 placeholder="Budget"
@@ -127,7 +362,7 @@ function Project() {
               />
             </Form.Group>
             <Form.Group as={Col}>
-              <Form.Label>Saving Cost Estimation</Form.Label>
+              <Form.Label>Saving Cost Estimation (*Rupiah)</Form.Label>
               <Form.Control
                 type="number"
                 placeholder="Saving Cost"
@@ -148,6 +383,8 @@ function Project() {
                 required
               />
             </Form.Group>
+          </Row>
+          <Row className="mb-3" style={{ textAlign: "left" }}>
             <Form.Group as={Col}>
               <Form.Label>SOP Project Date</Form.Label>
               <Form.Control
@@ -158,21 +395,195 @@ function Project() {
                 required
               />
             </Form.Group>
-          </Row>
-          <Row className="mb-3" style={{ textAlign: "left" }}>
             <Form.Group as={Col}>
-              <Form.Label>Members</Form.Label>
-              <Form.Select onChange={handleMember} required>
+              <Form.Label>Choose Members to Add</Form.Label>
+              <Form.Select
+                value={memberId}
+                onChange={(e) => setMemberId(e.target.value)}
+              >
                 <option value="" disabled>
                   Open This
                 </option>
                 {userOption()}
               </Form.Select>
             </Form.Group>
-            <Button>ADD</Button>
+            <Form.Group as={Col}>
+              <Form.Label></Form.Label> <br />
+              <Button type="button" onClick={handleMember}>
+                Click to Add Member
+              </Button>
+            </Form.Group>
+          </Row>
+          <Row className="mb-3" style={{ textAlign: "left" }}>
+            <Col>Our Members</Col>
+          </Row>
+          <Row className="mb-3" style={{ textAlign: "left" }}>
+            <Col>
+              {member.length > 0
+                ? member.map((value, index) => {
+                    return (
+                      <Badge
+                        key={index}
+                        style={{ marginRight: 2 }}
+                        bg={colorBgBadge(index + 1)}
+                      >
+                        <h6>
+                          {CapitalCaseFirstWord(
+                            tableUser.length > 0 &&
+                              tableUser.find(
+                                (value2) => value2.id === parseInt(value)
+                              ).username
+                          )}{" "}
+                          <CloseButton id={value} onClick={deleteMembers} />
+                        </h6>
+                      </Badge>
+                    );
+                  })
+                : "Data Is Not Available"}
+            </Col>
+          </Row>
+          <Row className="mb-3" style={{ textAlign: "right" }}>
+            <Col>
+              <Button type="submit" style={{ marginRight: 5 }}>
+                {projectIdEdit ? "Update" : "Save"}
+              </Button>
+              <Button type="button" onClick={handleReset}>
+                Reset
+              </Button>
+            </Col>
           </Row>
         </Form>
       </div>
+      <div className="capabilityForm">
+        <TitleSection
+          title="Project List"
+          icon={<BsListNested style={{ marginRight: 5 }} />}
+        />
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>NO</th>
+              <th>Project Name</th>
+              <th>Product</th>
+              <th>PIC</th>
+              <th>Budget</th>
+              <th>Saving</th>
+              <th>Start Date</th>
+              <th>SOP Date</th>
+              <th>Last Update</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tableProject.length > 0 ? (
+              tableProject.map((value, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{numberStart + index}</td>
+                    <td>{value.project_name}</td>
+                    <td>{productNameFunction(value.product_id)}</td>
+                    <td>{userNameFunction(value.manager_id)}</td>
+                    <td>{parseFloat(value.budget).toLocaleString()}</td>
+                    <td>{parseFloat(value.saving_cost).toLocaleString()}</td>
+                    <td>{moment(value.start).format("LL")}</td>
+                    <td>{moment(value.finish).format("LL")}</td>
+                    <td>{moment(value.create_date).format("LL")}</td>
+                    <td>
+                      {statusFunction(value.status, value.start, value.finish)}
+                    </td>
+                    <td>
+                      {value.user_id === userId && (
+                        <Button
+                          title="Delete"
+                          size="sm"
+                          style={{ marginRight: 2 }}
+                          id={value.id}
+                        >
+                          <MdDeleteForever style={{ pointerEvents: "none" }} />
+                        </Button>
+                      )}
+                      <Button
+                        title="Edit"
+                        size="sm"
+                        style={{ marginRight: 2 }}
+                        variant="success"
+                        id={value.id}
+                        onClick={handleEdit}
+                      >
+                        <GrEdit style={{ pointerEvents: "none" }} />
+                      </Button>
+                      <Button
+                        title="Change Status"
+                        size="sm"
+                        style={{ marginRight: 2 }}
+                        variant="warning"
+                        id={value.id}
+                        onClick={changeStatusProject}
+                      >
+                        <GoGitCompare style={{ pointerEvents: "none" }} />
+                      </Button>
+                      <Link to={`/projectActivity/${value.id}`}>
+                        <Button
+                          title="View"
+                          size="sm"
+                          style={{ marginRight: 2 }}
+                          id={value.id}
+                          variant="dark"
+                        >
+                          <MdVideoLibrary style={{ pointerEvents: "none" }} />
+                        </Button>
+                      </Link>
+                      <Button
+                        title="SendEmail"
+                        size="sm"
+                        style={{ marginRight: 2 }}
+                        id={value.id}
+                        variant="dark"
+                      >
+                        <MdEmail style={{ pointerEvents: "none" }} />
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={11}>Data is Not Available</td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+        <div className="paginationTableProduct">
+          <PaginationTable
+            totalPage={totalPageData}
+            maxPagesShow={maxPagesShow}
+            onChangePage={(e) => setPage(e)}
+            pageActive={page}
+          />
+        </div>
+      </div>
+      <Modal
+        show={show}
+        onHide={() => {
+          setShow(false);
+        }}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{message}</Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShow(false);
+            }}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

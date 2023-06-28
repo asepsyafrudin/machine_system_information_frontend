@@ -17,6 +17,7 @@ import CapabilityCompareFormPage from "../CapabilityCompareFormPage";
 import FTAFormPage from "../FTAFormPage";
 import FTAListPage from "../FTAListPage";
 import ProjectPage from "../ProjectPage";
+import ProjectActivityPage from "../ProjectActivitypPage";
 
 function LayoutPage() {
   return (
@@ -37,6 +38,10 @@ function LayoutPage() {
           <Route
             path="/capabilityComparisonForm/:id"
             element={<CapabilityCompareFormPage />}
+          />
+          <Route
+            path="/projectActivity/:id"
+            element={<ProjectActivityPage />}
           />
           <Route path="/FTA" element={<FTAFormPage />} />
           <Route path="/FTA/:id" element={<FTAFormPage />} />

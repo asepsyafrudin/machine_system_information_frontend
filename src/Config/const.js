@@ -19,3 +19,8 @@ export const FOUR_SIGMA = 4;
 
 export const FIRSTANALYSIS = "first_analysis";
 export const SECONDANALYSIS = "second_analysis";
+
+//status project
+
+export const STATUSOPEN = "open";
+export const STATUSFINISH = "finish";
