@@ -13,9 +13,10 @@ import {
 import { useEffect } from "react";
 import {
   createProjectApi,
+  deleteProjectByProjectId,
   getAllProductApi,
-  getAllProjectApi,
   getAllUsersApi,
+  getProjectByPageAndUser,
   updateProjectApi,
   updateStatusProjectApi,
 } from "../../Config/API";
@@ -55,6 +56,7 @@ function Project(props) {
   const [numberStart, setNumberStart] = useState("");
   const [totalPageData, setStotalPageData] = useState(1);
   const maxPagesShow = 3;
+
   useEffect(() => {
     axios
       .get(getAllProductApi)
@@ -86,20 +88,9 @@ function Project(props) {
 
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
-    axios.get(getAllProjectApi(page)).then((response) => {
+    axios.get(getProjectByPageAndUser(page, user.id)).then((response) => {
       const data = response.data.data;
-
-      let filter = [];
-      if (data.length > 0) {
-        for (let index = 0; index < data.length; index++) {
-          for (let index2 = 0; index2 < data[index].member.length; index2++) {
-            if (data[index].member[index2].user_id === parseInt(user.id)) {
-              filter.push(data[index]);
-            }
-          }
-        }
-      }
-      setTableProject(filter);
+      setTableProject(data);
       setStotalPageData(response.data.totalPageData);
       setNumberStart(response.data.numberStart);
     });
@@ -134,10 +125,12 @@ function Project(props) {
   };
 
   const handleMember = () => {
-    if (parseInt(memberId) !== parseInt(userId)) {
-      const check = member.find((value) => value === parseInt(memberId));
-      if (!check) {
-        setMember((prev) => [...prev, parseInt(memberId)]);
+    if (memberId !== "") {
+      if (parseInt(memberId) !== parseInt(userId)) {
+        const check = member.find((value) => value === parseInt(memberId));
+        if (!check) {
+          setMember((prev) => [...prev, parseInt(memberId)]);
+        }
       }
     }
   };
@@ -239,20 +232,15 @@ function Project(props) {
     return "";
   };
 
-  const statusFunction = (status, startDate, SOPDate) => {
-    if (status === STATUSFINISH) {
-      return <Badge bg="primary">Finish</Badge>;
+  const statusFunction = (status) => {
+    if (status === "Finish") {
+      return <Badge bg="primary">{status}</Badge>;
+    } else if (status === "Not Yet Started") {
+      return <Badge bg="warning">{status}</Badge>;
+    } else if (status === "Delay") {
+      return <Badge bg="danger">{status}</Badge>;
     } else {
-      let currentDate = new Date();
-      let start = new Date(startDate);
-      let sop = new Date(SOPDate);
-      if (start - currentDate > 0) {
-        return <Badge bg="warning">Not Yet Started</Badge>;
-      } else if (sop - currentDate < 0) {
-        return <Badge bg="danger">Delay</Badge>;
-      } else if (currentDate - start > 0) {
-        return <Badge bg="success">On Progress</Badge>;
-      }
+      return <Badge bg="success">{status}</Badge>;
     }
   };
 
@@ -287,7 +275,7 @@ function Project(props) {
     const findData = tableProject.find((value) => value.id === id);
     let status = "";
     if (findData) {
-      if (findData.status === STATUSOPEN) {
+      if (findData.status !== STATUSFINISH) {
         status = STATUSFINISH;
       } else {
         status = STATUSOPEN;
@@ -302,6 +290,18 @@ function Project(props) {
     }
   };
 
+  const handleDelete = (e) => {
+    const id = e.target.id;
+    let confirm = window.confirm("Do you want to delete this item?");
+    if (confirm) {
+      axios.delete(deleteProjectByProjectId(id)).then((response) => {
+        setMessage("Project already delete");
+        setShow(true);
+        handleReset();
+        actionState(1);
+      });
+    }
+  };
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -499,6 +499,7 @@ function Project(props) {
                           size="sm"
                           style={{ marginRight: 2 }}
                           id={value.id}
+                          onClick={handleDelete}
                         >
                           <MdDeleteForever style={{ pointerEvents: "none" }} />
                         </Button>

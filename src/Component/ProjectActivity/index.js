@@ -7,15 +7,16 @@ import { useEffect } from "react";
 import axios from "axios";
 import {
   createActivityApi,
-  getAllProjectApi,
+  getActivityByProjectIdApi,
+  getAllUsersApi,
   getProjectByIdApi,
 } from "../../Config/API";
 import { SiStarbucks } from "react-icons/si";
 import TitleSection from "../TitleSection";
-import { BiPlusCircle } from "react-icons/bi";
 import { BsPlusCircleFill, BsSave } from "react-icons/bs";
 import moment from "moment";
 import { v4 as uuid } from "uuid";
+import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 const currentDate = new Date();
 
 let tasks = [
@@ -31,6 +32,7 @@ let tasks = [
 function ProjectActivity(props) {
   const { id } = props;
   const [project, setProject] = useState([]);
+  const [tableUser, setTableUser] = useState([]);
   const [activity, setActivity] = useState(tasks);
   const [titleProject, setTitleProject] = useState("");
   const [viewMode, setViewMode] = useState(ViewMode.Month);
@@ -41,7 +43,6 @@ function ProjectActivity(props) {
   const [type, setType] = useState("");
   const [dependencies, setDepedencies] = useState("");
   const [progress, setProgress] = useState("");
-  const [updateValue, setUpdateValue] = useState(0);
   const [idUpdate, setIdUpdate] = useState("");
   const [colWidth, setColWidth] = useState(60);
   const [showNotif, setShowNotif] = useState(false);
@@ -61,7 +62,7 @@ function ProjectActivity(props) {
         const data = {
           name: dataProject.project_name,
           id: dataProject.id,
-          progress: 25,
+          progress: dataProject.progress,
           type: "project",
           start: new Date(dataProject.start),
           end: new Date(dataProject.finish),
@@ -69,10 +70,34 @@ function ProjectActivity(props) {
         };
         let activityData = [];
         activityData.push(data);
-        setActivity(activityData);
+        axios
+          .get(getActivityByProjectIdApi(dataProject.id))
+          .then((response) => {
+            const dataActivity = response.data.data;
+            if (dataActivity.length > 0) {
+              for (let index = 0; index < dataActivity.length; index++) {
+                let pushData = {
+                  id: dataActivity[index].id,
+                  start: new Date(moment(dataActivity[index].start)),
+                  end: new Date(moment(dataActivity[index].end)),
+                  name: dataActivity[index].name,
+                  progress: dataActivity[index].progress,
+                  dependencies: dataActivity[index].dependencies,
+                  type: dataActivity[index].type,
+                  project: dataActivity[index].project,
+                };
+                activityData.push(pushData);
+              }
+            }
+            setActivity(activityData);
+          });
       });
     }
-  }, [id, updateValue, viewMode]);
+
+    axios.get(getAllUsersApi).then((response) => {
+      setTableUser(response.data.data);
+    });
+  }, [id, viewMode]);
 
   const resetForm = () => {
     setActivityName("");
@@ -81,14 +106,13 @@ function ProjectActivity(props) {
     setProgress("");
     setType("");
     setDepedencies("");
-    setIdUpdate("");
     setShow(false);
   };
   const handleAddActivity = (e) => {
     e.preventDefault();
     let data = {
       start: new Date(startDate),
-      end: new Date(finishDate),
+      end: new Date(type === "task" ? finishDate : startDate),
       name: activityName,
       progress: progress,
       dependencies: dependencies === "" ? [] : [dependencies],
@@ -115,6 +139,7 @@ function ProjectActivity(props) {
         }
       }
       setActivity(filterData);
+      setIdUpdate("");
       resetForm();
     }
   };
@@ -126,6 +151,7 @@ function ProjectActivity(props) {
   const handleDoubleClick = (task) => {
     const findData = activity.find((value) => value.id === task.id);
     if (findData) {
+      console.log(findData);
       setActivityName(findData.name);
       setFinishDate(dateParse(findData.end));
       setStartDate(dateParse(findData.start));
@@ -150,11 +176,21 @@ function ProjectActivity(props) {
     if (confirm) {
       const dataSave = activity.filter((value) => value.type !== "project");
       axios.post(createActivityApi, dataSave).then((response) => {
+        setIdUpdate("");
         setMessage("Data Already SAVE");
         setShowNotif(true);
       });
     }
   };
+
+  const userNameFunction = (id) => {
+    const findUser = tableUser.find((value) => value.id === parseInt(id));
+    if (findUser) {
+      return CapitalCaseFirstWord(findUser.username);
+    }
+    return "";
+  };
+
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -168,9 +204,15 @@ function ProjectActivity(props) {
           </Button>
         </div>
         <TitleSection
-          title={titleProject}
+          title={`Project Schedule ${titleProject}`}
           icon={<SiStarbucks style={{ marginRight: 5 }} />}
         />
+        <div>
+          <Row className="mb-3" style={{ textAlign: "left" }}>
+            <Col sm={1}>PIC</Col>
+            <Col sm={4}>: {userNameFunction(project.manager_id)}</Col>
+          </Row>
+        </div>
         <GanttChart
           tasks={activity}
           viewMode={viewMode}
@@ -263,18 +305,20 @@ function ProjectActivity(props) {
                   />
                 </Form.Group>
               </Row>
-              <Row className="mb-3">
-                <Form.Group as={Col}>
-                  <Form.Label>Finish</Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={finishDate}
-                    onChange={(e) => setFinishDate(e.target.value)}
-                    placeholder="Enter Aactivity Name"
-                    required
-                  />
-                </Form.Group>
-              </Row>
+              {type === "task" && (
+                <Row className="mb-3">
+                  <Form.Group as={Col}>
+                    <Form.Label>Finish</Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={finishDate}
+                      onChange={(e) => setFinishDate(e.target.value)}
+                      placeholder="Enter Aactivity Name"
+                      required
+                    />
+                  </Form.Group>
+                </Row>
+              )}
               <Row className="mb-3">
                 <Form.Group as={Col}>
                   <Form.Label>Dependencies</Form.Label>
@@ -317,7 +361,7 @@ function ProjectActivity(props) {
         <Modal
           show={showNotif}
           onHide={() => {
-            setShow(false);
+            setShowNotif(false);
           }}
         >
           <Modal.Header closeButton>

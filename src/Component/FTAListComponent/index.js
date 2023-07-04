@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import TitleSection from "../TitleSection";
 import { ImTree } from "react-icons/im";
 import "./FTAListComponent.css";
-import { Button, Form, Table } from "react-bootstrap";
+import { Button, Form, Modal, Table } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import axios from "axios";
 import {
+  deleteProblemByIdApi,
   getAllMachineApi,
   getAllProblemApi,
   searchProblemByMachineIdApi,
@@ -21,6 +22,8 @@ function FTAListComponent() {
   const [page, setPage] = useState(1);
   const [totalPageData, setTotalPageData] = useState("");
   const [userId, setUserId] = useState("");
+  const [showNotif, setShowNotif] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     axios.get(getAllMachineApi).then((response) => {
@@ -48,7 +51,7 @@ function FTAListComponent() {
 
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
-  }, [page, searchByMachine]);
+  }, [page, searchByMachine, showNotif]);
 
   const machineOption = () => {
     let option = [];
@@ -67,6 +70,17 @@ function FTAListComponent() {
   };
 
   const maxPagesShow = 3;
+
+  const handleDeleteProblem = (e) => {
+    const id = e.target.id;
+    let confirm = window.confirm("Do you want to delete this problem?");
+    if (confirm) {
+      axios.delete(deleteProblemByIdApi(id)).then((response) => {
+        setMessage("Data Already Delete");
+        setShowNotif(true);
+      });
+    }
+  };
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -113,24 +127,27 @@ function FTAListComponent() {
                       <td>{value.problem_name}</td>
                       <td>
                         {value.user_id === userId ? (
-                          <Link to={`/FTA/${value.id}`}>
-                            <Button
-                              size="sm"
-                              style={{ marginRight: 2 }}
-                              variant="secondary"
-                              id={value.id}
-                            >
-                              View
-                            </Button>
+                          <>
+                            <Link to={`/FTA/${value.id}`}>
+                              <Button
+                                size="sm"
+                                style={{ marginRight: 2 }}
+                                variant="secondary"
+                                id={value.id}
+                              >
+                                View
+                              </Button>
+                            </Link>
                             <Button
                               size="sm"
                               style={{ marginRight: 2 }}
                               variant="danger"
                               id={value.id}
+                              onClick={handleDeleteProblem}
                             >
                               Delete
                             </Button>
-                          </Link>
+                          </>
                         ) : (
                           "NO"
                         )}
@@ -153,6 +170,27 @@ function FTAListComponent() {
               pageActive={page}
             />
           </div>
+          <Modal
+            show={showNotif}
+            onHide={() => {
+              setShowNotif(false);
+            }}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Notification</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>{message}</Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowNotif(false);
+                }}
+              >
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </div>
       </div>
     </div>

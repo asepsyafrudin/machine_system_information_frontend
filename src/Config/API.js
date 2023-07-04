@@ -245,16 +245,39 @@ export const searchProblemByMachineIdApi = (machineId, page) => {
   return `${port}/api/problem/searchProblemByMachineId/${machineId}/${page}`;
 };
 
+//project
 export const createProjectApi = `${port}/api/project/create`;
 export const updateProjectApi = `${port}/api/project/update`;
-export const getAllProjectApi = (page) => {
+export const getAllProjectByPageApi = (page) => {
   return `${port}/api/project/getAllProjectByPage/${page}`;
 };
+
+export const getAllProjectApi = `${port}/api/project/getAllProject`;
+
 export const updateStatusProjectApi = `${port}/api/project/updateStatus`;
 export const getProjectByIdApi = (id) => {
   return `${port}/api/project/getProjectById/${id}`;
 };
+export const deleteProjectByProjectId = (id) => {
+  return `${port}/api/project/delete/${id}`;
+};
+
+export const getProjectByPageAndUser = (page, user) => {
+  return `${port}/api/project/getProjectByPageAndUser/${page}/${user}`;
+};
+
+export const searchProjectApi = `${port}/api/project/search`;
 
 //activity api
 export const createActivityApi = `${port}/api/activity/create`;
 export const updateActivityApi = `${port}/api/activity/update`;
+export const getActivityByProjectIdApi = (projectId) => {
+  return `${port}/api/activity/getActivityByProjectId/${projectId}`;
+};
+
+//todo
+
+export const createAndUpdateTodoApi = `${port}/api/todo/create`;
+export const getTodoByProjectIdApi = (id) => {
+  return `${port}/api/todo/getTodoByProjectId/${id}`;
+};
