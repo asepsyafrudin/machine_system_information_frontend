@@ -119,7 +119,11 @@ function ToDoList() {
       resetForm();
       setIdEdit("");
     } else {
-      data = { ...data, id: uuid() };
+      data = {
+        ...data,
+        id: uuid(),
+        actual_finish: status === "Finish" ? moment().format("YYYY-MM-DD") : "",
+      };
       setTodo((prev) => [...prev, data]);
       resetForm();
     }
@@ -139,20 +143,6 @@ function ToDoList() {
         return <Badge bg="danger">Delay</Badge>;
       }
     }
-  };
-
-  const userOption = () => {
-    let option = [];
-    if (tableUser.length > 0) {
-      for (let index = 0; index < tableUser.length; index++) {
-        option.push(
-          <option key={index} value={tableUser[index].id}>
-            {CapitalCaseFirstWord(tableUser[index].username)}
-          </option>
-        );
-      }
-    }
-    return <>{option}</>;
   };
 
   const handleClickStatus = (e) => {
