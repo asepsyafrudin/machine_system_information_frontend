@@ -194,13 +194,6 @@ function ToDoList() {
     return moment(date).format("YYYY-MM-DD");
   };
 
-  const userNameFunction = (id) => {
-    const findUser = tableUser.find((value) => value.id === parseInt(id));
-    if (findUser) {
-      return CapitalCaseFirstWord(findUser.username);
-    }
-    return "";
-  };
   const handleClickEdit = (e) => {
     const id = e.target.id;
     const findData = todo.find((value) => value.id === id);
@@ -258,7 +251,7 @@ function ToDoList() {
                     <td>{index + 1}</td>
                     <td>{value.item}</td>
                     <td>{value.due_date}</td>
-                    <td>{userNameFunction(value.pic)}</td>
+                    <td>{value.pic}</td>
                     <td>{statusFunction(value.status, value.due_date)}</td>
                     <td>
                       {value.status === "Finish" ? value.actual_finish : ""}
@@ -330,21 +323,20 @@ function ToDoList() {
             <Row className="mb-3">
               <Form.Group as={Col}>
                 <Form.Label>PIC</Form.Label>
-                <Form.Select
+                <Form.Control
                   value={pic}
                   onChange={(e) => setPic(e.target.value)}
-                >
-                  <option value="" disabled>
-                    Open This
-                  </option>
-                  {userOption()}
-                </Form.Select>
+                  type="text"
+                  placeholder="Enter PIC"
+                  required
+                />
               </Form.Group>
             </Row>
             <Row className="mb-3">
               <Form.Group as={Col}>
                 <Form.Label>Status</Form.Label>
                 <Form.Select
+                  required
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >
