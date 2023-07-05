@@ -173,7 +173,7 @@ function UserDashboard(props) {
             O2 Sensor 2WV
           </option>
           <option key="O2 Sensor 4WV" value={"O2 Sensor 4WV"}>
-            O2 Sensor 2WV
+            O2 Sensor 4WV
           </option>
         </Fragment>
       );
@@ -206,8 +206,38 @@ function UserDashboard(props) {
           </option>
         </Fragment>
       );
+    } else if (section === "Thermal") {
+      option.push(
+        <Fragment key={"Thermal"}>
+          <option key="Car AC" value={"Car AC"}>
+            Car AC
+          </option>
+          <option key="Bus AC" value={"Bus AC"}>
+            Bus AC
+          </option>
+          <option key="Al Radiator" value={"Al Radiator"}>
+            Al Radiator
+          </option>
+          <option key="N2R Radiator" value={"N2R Radiator"}>
+            N2R Radiator
+          </option>
+          <option key="Condensor" value={"Condensor"}>
+            Condensor
+          </option>
+          <option key="Hose & Tube" value={"Hose & Tube"}>
+            Hose & Tube
+          </option>
+          <option key="Molding" value={"Molding"}>
+            Molding
+          </option>
+          <option key="Stamping" value={"Stamping"}>
+            Stamping
+          </option>
+          <option value={"Common"}>Common</option>
+        </Fragment>
+      );
     } else {
-      option.push(<option value={"Common"}>Common</option>);
+      <option value={"Common"}>Common</option>;
     }
     return option;
   };

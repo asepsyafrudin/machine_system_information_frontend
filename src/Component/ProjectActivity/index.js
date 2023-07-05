@@ -17,6 +17,9 @@ import { BsPlusCircleFill, BsSave } from "react-icons/bs";
 import moment from "moment";
 import { v4 as uuid } from "uuid";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
+import { CHANGEDATA, SAVECHANGEDATA } from "../../Context/const";
+import { FaBackward } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 const currentDate = new Date();
 
 let tasks = [
@@ -30,7 +33,7 @@ let tasks = [
   },
 ];
 function ProjectActivity(props) {
-  const { id } = props;
+  const { id, dataChangeCount, dispatch } = props;
   const [project, setProject] = useState([]);
   const [tableUser, setTableUser] = useState([]);
   const [activity, setActivity] = useState(tasks);
@@ -44,16 +47,11 @@ function ProjectActivity(props) {
   const [dependencies, setDepedencies] = useState("");
   const [progress, setProgress] = useState(0);
   const [idUpdate, setIdUpdate] = useState("");
-  const [colWidth, setColWidth] = useState(60);
+  const [colWidth, setColWidth] = useState(120);
   const [showNotif, setShowNotif] = useState(false);
   const [message, setMessage] = useState(false);
 
   useEffect(() => {
-    if (viewMode === ViewMode.Month) {
-      setColWidth(200);
-    } else if (viewMode === ViewMode.Week) {
-      setColWidth(150);
-    }
     if (id) {
       axios.get(getProjectByIdApi(id)).then((response) => {
         const dataProject = response.data.data[0];
@@ -124,6 +122,7 @@ function ProjectActivity(props) {
       data = { ...data, id: `${activityName}-${uuid()}` };
       setActivity((prev) => [...prev, data]);
       resetForm();
+      dispatch({ type: CHANGEDATA });
     } else {
       let filterData = [];
       if (activity.length > 0) {
@@ -139,6 +138,7 @@ function ProjectActivity(props) {
         }
       }
       setActivity(filterData);
+      dispatch({ type: CHANGEDATA });
       setIdUpdate("");
       resetForm();
     }
@@ -151,7 +151,6 @@ function ProjectActivity(props) {
   const handleDoubleClick = (task) => {
     const findData = activity.find((value) => value.id === task.id);
     if (findData) {
-      console.log(findData);
       setActivityName(findData.name);
       setFinishDate(dateParse(findData.end));
       setStartDate(dateParse(findData.start));
@@ -168,6 +167,7 @@ function ProjectActivity(props) {
     if (confirm) {
       const filterData = activity.filter((value) => value.id !== task.id);
       setActivity(filterData);
+      dispatch({ type: CHANGEDATA });
     }
   };
 
@@ -179,6 +179,7 @@ function ProjectActivity(props) {
         setIdUpdate("");
         setMessage("Data Already SAVE");
         setShowNotif(true);
+        dispatch({ type: SAVECHANGEDATA });
       });
     }
   };
@@ -191,17 +192,39 @@ function ProjectActivity(props) {
     return "";
   };
 
+  const navigate = useNavigate();
+  const handleBackPage = () => {
+    if (dataChangeCount === 0) {
+      navigate("/projectPage");
+    } else {
+      let confirm = window.confirm(
+        "Your change don't save yet , do you want to next ?"
+      );
+      if (confirm) {
+        navigate("/projectPage");
+      }
+    }
+  };
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
         <div style={{ textAlign: "right", marginBottom: 2 }}>
-          <Button style={{ marginRight: 5 }} onClick={handleSaveData}>
-            <BsSave pointerEvents={"none"} /> Save
-          </Button>
-          <Button onClick={() => setShow(true)}>
-            <BsPlusCircleFill pointerEvents={"none"} />
-            Add
-          </Button>
+          <Row>
+            <Col sm={6} style={{ textAlign: "left" }}>
+              <Button style={{ marginRight: 5 }} onClick={handleBackPage}>
+                <FaBackward pointerEvents={"none"} /> Back to Project Page
+              </Button>
+            </Col>
+            <Col sm={6} style={{ textAlign: "right" }}>
+              <Button style={{ marginRight: 5 }} onClick={handleSaveData}>
+                <BsSave pointerEvents={"none"} /> Save
+              </Button>
+              <Button onClick={() => setShow(true)}>
+                <BsPlusCircleFill pointerEvents={"none"} />
+                Add
+              </Button>
+            </Col>
+          </Row>
         </div>
         <TitleSection
           title={`Project Schedule ${titleProject}`}

@@ -75,7 +75,7 @@ function SearchEnginePage(props) {
               </Button>
               <Link
                 to={
-                  position === "Administartor"
+                  position === "Administrator"
                     ? "/adminmenu"
                     : "/dashboardUsers"
                 }

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import { RiDeleteBin2Fill, RiTodoFill } from "react-icons/ri";
-import { useParams } from "react-router-dom";
 import TitleSection from "../TitleSection";
 import { useState } from "react";
 import { v4 as uuid } from "uuid";
@@ -29,9 +28,10 @@ import { CgAttachment } from "react-icons/cg";
 import { fileName } from "../../Config/fileName";
 import { getExtFileName } from "../../Config/fileType";
 import { GoDesktopDownload } from "react-icons/go";
+import { CHANGEDATA, SAVECHANGEDATA } from "../../Context/const";
 
-function ToDoList() {
-  const { id } = useParams();
+function ToDoList(props) {
+  const { id, dispatch } = props;
   const refAttachment = useRef();
   const [show, setShow] = useState(false);
   const [todo, setTodo] = useState([]);
@@ -49,7 +49,6 @@ function ToDoList() {
   const [showModalAttachment, setShowModalAttachment] = useState(false);
   const [percentProgress, setPercentProgress] = useState(0);
   const [actionState, setActionState] = useState(0);
-
   useEffect(() => {
     if (idTodo) {
       axios
@@ -82,6 +81,7 @@ function ToDoList() {
       axios.post(createAndUpdateTodoApi, todo).then((response) => {
         setMessage("Your Data Already Save");
         setShowNotif(true);
+        dispatch({ type: SAVECHANGEDATA });
       });
     }
   };
@@ -115,8 +115,12 @@ function ToDoList() {
               id: idEdit,
               actual_finish: status === "Finish" && todo[index].actual_finish,
             });
+
+            dispatch({ type: CHANGEDATA });
           } else {
             newListTodo.push(todo[index]);
+
+            dispatch({ type: CHANGEDATA });
           }
         }
       }
@@ -184,6 +188,7 @@ function ToDoList() {
         }
       }
       setTodo(newListTodo);
+      dispatch({ type: CHANGEDATA });
     }
   };
 
@@ -210,6 +215,7 @@ function ToDoList() {
     if (confirm) {
       const filterData = todo.filter((value) => value.id !== id);
       setTodo(filterData);
+      dispatch({ type: CHANGEDATA });
     }
   };
 
@@ -251,7 +257,8 @@ function ToDoList() {
           refAttachment.current.value = "";
           resetForm();
           setPercentProgress(0);
-          setActionState(actionState + 1);
+          setActionState(0);
+          dispatch({ type: CHANGEDATA });
         })
         .catch((error) => {
           console.log(error);
@@ -267,10 +274,12 @@ function ToDoList() {
         .delete(deleteFileByIdApi(id))
         .then((response) => {
           setActionState(actionState + 1);
+          dispatch({ type: CHANGEDATA });
         })
         .catch((error) => console.log(error));
     }
   };
+
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">

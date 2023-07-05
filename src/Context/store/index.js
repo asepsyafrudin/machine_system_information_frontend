@@ -1,5 +1,10 @@
 import React, { Component, createContext } from "react";
-import { RESETUSERLOGIN, SAVEUSERLOGIN } from "../const";
+import {
+  CHANGEDATA,
+  RESETUSERLOGIN,
+  SAVECHANGEDATA,
+  SAVEUSERLOGIN,
+} from "../const";
 
 const Context = createContext();
 const Provider = Context.Provider;
@@ -15,6 +20,7 @@ export const GlobalProvider = (Children) => {
       product: "",
       section: "",
       position: "",
+      dataChangeCount: 0,
     };
 
     dipatch = (action) => {
@@ -39,6 +45,14 @@ export const GlobalProvider = (Children) => {
         this.setState({ section: "" });
         this.setState({ position: "" });
       }
+
+      if (action.type === CHANGEDATA) {
+        this.setState({ dataChangeCount: this.state.dataChangeCount + 1 });
+      }
+
+      if (action.type === SAVECHANGEDATA) {
+        this.setState({ dataChangeCount: 0 });
+      }
     };
 
     render() {
@@ -53,6 +67,7 @@ export const GlobalProvider = (Children) => {
             product: this.state.product,
             section: this.state.section,
             position: this.state.position,
+            dataChangeCount: this.state.dataChangeCount,
             dispatch: this.dipatch,
           }}
         >
