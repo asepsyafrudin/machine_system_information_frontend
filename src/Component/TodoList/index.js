@@ -11,6 +11,7 @@ import {
   Modal,
   ProgressBar,
   Row,
+  Spinner,
   Table,
 } from "react-bootstrap";
 import { BsPlusCircleFill, BsSave } from "react-icons/bs";
@@ -35,6 +36,7 @@ function ToDoList(props) {
   const refAttachment = useRef();
   const [show, setShow] = useState(false);
   const [todo, setTodo] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [itemName, setItemName] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState("");
@@ -245,6 +247,8 @@ function ToDoList(props) {
           // console.log(`${loaded} bytes of ${total} bytes. ${percent}%`);
         }
       };
+
+      setLoading(true);
       axios
         .post(createFileApi, formData, {
           headers: {
@@ -257,7 +261,8 @@ function ToDoList(props) {
           refAttachment.current.value = "";
           resetForm();
           setPercentProgress(0);
-          setActionState(0);
+          setActionState((prev) => prev + 1);
+          setLoading(false);
           dispatch({ type: CHANGEDATA });
         })
         .catch((error) => {
@@ -278,6 +283,23 @@ function ToDoList(props) {
         })
         .catch((error) => console.log(error));
     }
+  };
+
+  const loadingPostData = (loadingData) => {
+    let loading = [];
+    if (loadingData) {
+      loading.push(
+        <Spinner
+          as="span"
+          animation="grow"
+          size="sm"
+          role="status"
+          aria-hidden="true"
+          key={new Date()}
+        />
+      );
+    }
+    return loading;
   };
 
   return (
@@ -478,7 +500,9 @@ function ToDoList(props) {
                     />
                   </Col>
                   <Col sm={4}>
-                    <Button type="submit">Submit</Button>
+                    <Button type="submit">
+                      {loadingPostData(loading)}Submit
+                    </Button>
                   </Col>
                 </Row>
               </Form.Group>
