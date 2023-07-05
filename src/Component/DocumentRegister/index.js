@@ -682,7 +682,7 @@ function DocumentRegister(props) {
                       >
                         <GrEdit style={{ pointerEvents: "none" }} />
                       </Button>
-                      <Link to={`/document/${value.id}`}>
+                      <Link to={`/document/${value.id}`} target="_blank">
                         <Button
                           title="View"
                           size="sm"

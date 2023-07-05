@@ -589,7 +589,7 @@ function VideoListAdmin(props) {
                       >
                         <GoGitCompare style={{ pointerEvents: "none" }} />
                       </Button>
-                      <Link to={`/video/${value.id}`}>
+                      <Link to={`/video/${value.id}`} target="_blank">
                         <Button
                           title="View"
                           size="sm"

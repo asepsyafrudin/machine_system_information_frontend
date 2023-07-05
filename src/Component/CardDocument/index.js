@@ -34,7 +34,7 @@ function CardDocument(props) {
       <Row>
         <Col xs={12} md={8}>
           <div className="titleDocument">
-            <Link className="linkTitle" to={link_detail}>
+            <Link className="linkTitle" to={link_detail} target="_blank">
               {CapitalCaseFirstWord(title)}
             </Link>
           </div>

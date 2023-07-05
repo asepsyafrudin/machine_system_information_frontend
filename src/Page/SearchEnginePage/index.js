@@ -7,16 +7,32 @@ import { MdOutlineScreenSearchDesktop } from "react-icons/md";
 import { BiBarcodeReader } from "react-icons/bi";
 import ModalBarcodeScanner from "../../Component/ModalBarcodeScanner";
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import axios from "axios";
+import { getUserByUserIdApi } from "../../Config/API";
 
 function SearchEnginePage(props) {
   const [showModalBarcode, setShowModalBarcode] = useState(false);
   const [searchingText, setSearchingText] = useState("");
+  const [position, setPosition] = useState("");
 
   const navigate = useNavigate();
   const handleSearch = () => {
     navigate(`/searching_page/${searchingText}`);
   };
 
+  useEffect(() => {
+    if (localStorage.getItem("user")) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const { id } = user;
+      axios.get(getUserByUserIdApi(id)).then((response) => {
+        const dataUser = response.data.data;
+        if (dataUser.length > 0) {
+          setPosition(dataUser[0].position);
+        }
+      });
+    }
+  }, []);
   return (
     <div>
       <Header />
@@ -57,7 +73,13 @@ function SearchEnginePage(props) {
               >
                 <BiBarcodeReader size={22} /> Scan
               </Button>
-              <Link to={"/dashboardUsers"}>
+              <Link
+                to={
+                  position === "Administartor"
+                    ? "/adminmenu"
+                    : "/dashboardUsers"
+                }
+              >
                 <Button type="button" style={{ marginLeft: 5 }}>
                   User Dashboard
                 </Button>

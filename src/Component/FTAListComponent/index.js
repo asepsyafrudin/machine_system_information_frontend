@@ -128,7 +128,7 @@ function FTAListComponent() {
                       <td>
                         {value.user_id === userId ? (
                           <>
-                            <Link to={`/FTA/${value.id}`}>
+                            <Link to={`/FTA/${value.id}`} target="_blank">
                               <Button
                                 size="sm"
                                 style={{ marginRight: 2 }}
