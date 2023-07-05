@@ -42,7 +42,7 @@ function ProjectActivity(props) {
   const [finishDate, setFinishDate] = useState("");
   const [type, setType] = useState("");
   const [dependencies, setDepedencies] = useState("");
-  const [progress, setProgress] = useState("");
+  const [progress, setProgress] = useState(0);
   const [idUpdate, setIdUpdate] = useState("");
   const [colWidth, setColWidth] = useState(60);
   const [showNotif, setShowNotif] = useState(false);

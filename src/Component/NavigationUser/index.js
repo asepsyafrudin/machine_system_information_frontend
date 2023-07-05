@@ -8,6 +8,8 @@ import DocumentRegister from "../DocumentRegister";
 import { ImAttachment } from "react-icons/im";
 import EngineeringTools from "../EngineeringTools";
 import { SlGraph } from "react-icons/sl";
+import { Link } from "react-router-dom";
+import { BsBack } from "react-icons/bs";
 
 function NavigationUser() {
   const [actionState, setActionState] = useState(1);
@@ -43,6 +45,12 @@ function NavigationUser() {
                 <SlGraph style={{ marginRight: 5 }} />
                 Engineering Tools
               </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Link to={"/searching_page"}>
+                <BsBack style={{ marginRight: 5 }} />
+                Back To Main Menu
+              </Link>
             </Nav.Item>
           </Nav>
         </Col>

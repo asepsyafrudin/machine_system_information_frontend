@@ -6,7 +6,7 @@ import "./searchEnginePage.css";
 import { MdOutlineScreenSearchDesktop } from "react-icons/md";
 import { BiBarcodeReader } from "react-icons/bi";
 import ModalBarcodeScanner from "../../Component/ModalBarcodeScanner";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function SearchEnginePage(props) {
   const [showModalBarcode, setShowModalBarcode] = useState(false);
@@ -57,6 +57,16 @@ function SearchEnginePage(props) {
               >
                 <BiBarcodeReader size={22} /> Scan
               </Button>
+              <Link to={"/dashboardUsers"}>
+                <Button type="button" style={{ marginLeft: 5 }}>
+                  User Dashboard
+                </Button>
+              </Link>
+              <Link to={"/projectPage"}>
+                <Button type="button" style={{ marginLeft: 5 }}>
+                  Project Dashboard
+                </Button>
+              </Link>
               {/* <Link to="/openai">
                 <Button type="button" variant="dark" style={{ marginLeft: 5 }}>
                   <SiOpenai size={22} /> Need Assitance?

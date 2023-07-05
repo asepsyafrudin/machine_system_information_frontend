@@ -165,6 +165,7 @@ export const deleteFileByIdApi = (id) => {
 export const getFileByIdApi = (id) => {
   return `${port}/api/file/getFileByDocumentId/${id}`;
 };
+export const createFileApi = `${port}/api/file/create`;
 
 //recentdata
 export const getAllRecentDataApi = (page) => {

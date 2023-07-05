@@ -1,24 +1,38 @@
-import React, { useEffect } from "react";
-import { RiTodoFill } from "react-icons/ri";
+import React, { useEffect, useRef } from "react";
+import { RiDeleteBin2Fill, RiTodoFill } from "react-icons/ri";
 import { useParams } from "react-router-dom";
 import TitleSection from "../TitleSection";
 import { useState } from "react";
 import { v4 as uuid } from "uuid";
-import { Badge, Button, Col, Form, Modal, Row, Table } from "react-bootstrap";
+import {
+  Badge,
+  Button,
+  Col,
+  Form,
+  Modal,
+  ProgressBar,
+  Row,
+  Table,
+} from "react-bootstrap";
 import { BsPlusCircleFill, BsSave } from "react-icons/bs";
 import moment from "moment";
 import axios from "axios";
 import {
   createAndUpdateTodoApi,
-  getAllUsersApi,
+  createFileApi,
+  deleteFileByIdApi,
+  getFileByIdApi,
   getTodoByProjectIdApi,
   getUserByUserIdApi,
 } from "../../Config/API";
-import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
+import { CgAttachment } from "react-icons/cg";
+import { fileName } from "../../Config/fileName";
+import { getExtFileName } from "../../Config/fileType";
+import { GoDesktopDownload } from "react-icons/go";
 
 function ToDoList() {
   const { id } = useParams();
-  const [tableUser, setTableUser] = useState([]);
+  const refAttachment = useRef();
   const [show, setShow] = useState(false);
   const [todo, setTodo] = useState([]);
   const [itemName, setItemName] = useState("");
@@ -27,31 +41,24 @@ function ToDoList() {
   const [userId, setUserId] = useState("");
   const [pic, setPic] = useState("");
   const [idEdit, setIdEdit] = useState("");
+  const [file, setFile] = useState([]);
+  const [tableFile, setTableFile] = useState([]);
   const [message, setMessage] = useState("");
   const [showNotif, setShowNotif] = useState(false);
+  const [idTodo, setIdTodo] = useState("");
+  const [showModalAttachment, setShowModalAttachment] = useState(false);
+  const [percentProgress, setPercentProgress] = useState(0);
+  const [actionState, setActionState] = useState(0);
 
   useEffect(() => {
-    axios
-      .get(getAllUsersApi)
-      .then((response) => {
-        const tableUserSort = response.data.data;
-        setTableUser(
-          tableUserSort.sort((nameA, nameB) => {
-            let a = nameA.username;
-            let b = nameB.username;
-
-            if (a < b) {
-              return -1;
-            }
-            if (a > b) {
-              return 1;
-            }
-            return 0;
-          })
-        );
-      })
-      .catch((error) => console.log(error));
-
+    if (idTodo) {
+      axios
+        .get(getFileByIdApi(idTodo))
+        .then((response) => {
+          setTableFile(response.data.data);
+        })
+        .catch((error) => console.log(error));
+    }
     axios
       .get(getTodoByProjectIdApi(id))
       .then((response) => {
@@ -67,7 +74,7 @@ function ToDoList() {
         }
       });
     }
-  }, [id]);
+  }, [id, idTodo, actionState]);
 
   const handleSaveData = () => {
     let confirm = window.confirm("Do You Want to Save Todo List?");
@@ -205,6 +212,65 @@ function ToDoList() {
       setTodo(filterData);
     }
   };
+
+  const handleShowAttachment = (e) => {
+    const id = e.target.id;
+    setIdTodo(id);
+    setShowModalAttachment(true);
+  };
+
+  const handleChangeFile = (e) => {
+    setFile([...e.target.files]);
+  };
+
+  const saveAttachment = (e) => {
+    e.preventDefault();
+    if (file.length > 0) {
+      let formData = new FormData();
+      formData.append("id", idTodo);
+      for (let index = 0; index < file.length; index++) {
+        formData.append("file", file[index]);
+      }
+      const onUploadProgress = (progressEvent) => {
+        const { loaded, total } = progressEvent;
+        let percent = Math.floor((loaded * 100) / total);
+        if (percent < 100) {
+          setPercentProgress(percent);
+          // console.log(`${loaded} bytes of ${total} bytes. ${percent}%`);
+        }
+      };
+      axios
+        .post(createFileApi, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress,
+        })
+
+        .then((response) => {
+          refAttachment.current.value = "";
+          resetForm();
+          setPercentProgress(0);
+          setActionState(actionState + 1);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  const handleDeleteFile = (e) => {
+    const id = e.target.id;
+    const confirm = window.confirm("Apakah file Akan di Hapus?");
+    if (confirm) {
+      axios
+        .delete(deleteFileByIdApi(id))
+        .then((response) => {
+          setActionState(actionState + 1);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -252,7 +318,7 @@ function ToDoList() {
                         style={{ marginRight: 5 }}
                         onClick={handleClickStatus}
                       >
-                        Click to {value.status === "Open" ? "Finish" : "Open"}
+                        Status {value.status === "Open" ? "Finish" : "Open"}
                       </Button>
                       <Button
                         style={{ marginRight: 5 }}
@@ -265,8 +331,17 @@ function ToDoList() {
                         variant="danger"
                         id={value.id}
                         onClick={handleDelete}
+                        style={{ marginRight: 5 }}
                       >
                         Delete
+                      </Button>
+                      <Button
+                        variant="success"
+                        id={value.id}
+                        onClick={handleShowAttachment}
+                        ref={refAttachment}
+                      >
+                        <CgAttachment style={{ pointerEvents: "none" }} />
                       </Button>
                     </td>
                   </tr>
@@ -362,6 +437,107 @@ function ToDoList() {
             variant="secondary"
             onClick={() => {
               setShowNotif(false);
+            }}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal
+        show={showModalAttachment}
+        centered
+        onHide={() => {
+          setShowModalAttachment(false);
+        }}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Attachment List</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={saveAttachment}>
+            <Row>
+              <Form.Group as={Col}>
+                <Form.Label>Upload Here</Form.Label>
+                <Row>
+                  <Col sm={8}>
+                    <Form.Control
+                      multiple
+                      type="file"
+                      required
+                      ref={refAttachment}
+                      onChange={handleChangeFile}
+                    />
+                  </Col>
+                  <Col sm={4}>
+                    <Button type="submit">Submit</Button>
+                  </Col>
+                </Row>
+              </Form.Group>
+            </Row>
+          </Form>
+          {percentProgress > 0 && (
+            <ProgressBar
+              animated
+              now={percentProgress}
+              label={`${percentProgress}%`}
+            />
+          )}
+          <Table>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>File Name</th>
+                <th>File Type</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableFile.length > 0 ? (
+                tableFile.map((value, index) => {
+                  return (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td style={{ textAlign: "left", paddingLeft: 20 }}>
+                        {fileName(value.name)}
+                      </td>
+                      <td>{getExtFileName(value.name)}</td>
+                      <td>
+                        <a href={value.file} target="_blank" rel="noreferrer">
+                          <Button size="sm" style={{ marginRight: 5 }}>
+                            <GoDesktopDownload
+                              style={{ marginRight: 5, pointerEvents: "none" }}
+                            />
+                            OPEN
+                          </Button>
+                        </a>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          id={value.id}
+                          onClick={handleDeleteFile}
+                        >
+                          <RiDeleteBin2Fill
+                            style={{ marginRight: 5, pointerEvents: "none" }}
+                          />
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr key={1}>
+                  <td colSpan={4}>No File</td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowModalAttachment(false);
             }}
           >
             Close

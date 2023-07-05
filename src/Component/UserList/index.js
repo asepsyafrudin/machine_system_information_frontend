@@ -235,9 +235,9 @@ function UserList(props) {
           </option>
         </Fragment>
       );
-    } else {
+    } else if (section === "Electronics") {
       option.push(
-        <Fragment key={"Electronic"}>
+        <Fragment key={"Electronics"}>
           <option key="Common" value={"Common"}>
             Common
           </option>
@@ -264,6 +264,8 @@ function UserList(props) {
           </option>
         </Fragment>
       );
+    } else {
+      option.push(<option value={"Common"}>Common</option>);
     }
     return option;
   };
@@ -323,7 +325,9 @@ function UserList(props) {
                       open this
                     </option>
                     <option value={"Power Train"}>Power Train</option>
-                    <option value={"Electronic"}>Electronics</option>
+                    <option value={"Electronics"}>Electronics</option>
+                    <option value={"Planning Center"}>Planning Center</option>
+                    <option value={"Thermal"}>Thermal</option>
                   </Form.Select>
                 </Form.Group>
                 <Form.Group as={Col}>

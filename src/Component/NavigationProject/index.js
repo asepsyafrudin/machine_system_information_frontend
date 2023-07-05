@@ -4,6 +4,8 @@ import TotalProject from "../TotalProject";
 import Project from "../Project";
 import { AiOutlineFundProjectionScreen } from "react-icons/ai";
 import { VscProject } from "react-icons/vsc";
+import { BsBack } from "react-icons/bs";
+import { Link } from "react-router-dom";
 
 function NavigationProject() {
   const [actionState, setActionState] = useState(1);
@@ -28,6 +30,12 @@ function NavigationProject() {
                 <VscProject style={{ marginRight: 5 }} />
                 Project
               </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Link to={"/searching_page"}>
+                <BsBack style={{ marginRight: 5 }} />
+                Back To Main Menu
+              </Link>
             </Nav.Item>
           </Nav>
         </Col>
