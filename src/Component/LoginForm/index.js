@@ -55,7 +55,7 @@ function LoginForm(props) {
           user;
         if (user) {
           localStorage.setItem("user", JSON.stringify(user));
-          navigate("/searching_page");
+          navigate("/home");
           dispatch({
             type: SAVEUSERLOGIN,
             payload: {

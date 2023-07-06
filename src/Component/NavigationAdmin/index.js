@@ -17,6 +17,8 @@ import UserDashboard from "../UserDashboard";
 import { GrSettingsOption } from "react-icons/gr";
 import EngineeringTools from "../EngineeringTools";
 import { SlGraph } from "react-icons/sl";
+import { BsBack } from "react-icons/bs";
+import { Link } from "react-router-dom";
 
 function NavigationAdmin() {
   const [actionState, setActionState] = useState(1);
@@ -73,6 +75,12 @@ function NavigationAdmin() {
                 <SlGraph style={{ marginRight: 5 }} />
                 Engineering Tools
               </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Link to={"/home"}>
+                <BsBack style={{ marginRight: 5 }} />
+                Back To Main Menu
+              </Link>
             </Nav.Item>
           </Nav>
         </Col>

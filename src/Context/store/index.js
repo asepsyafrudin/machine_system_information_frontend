@@ -3,7 +3,9 @@ import {
   CHANGEDATA,
   RESETUSERLOGIN,
   SAVECHANGEDATA,
+  SAVETODO,
   SAVEUSERLOGIN,
+  TODOCHANGECOUNT,
 } from "../const";
 
 const Context = createContext();
@@ -21,6 +23,7 @@ export const GlobalProvider = (Children) => {
       section: "",
       position: "",
       dataChangeCount: 0,
+      todoChangeCount: 0,
     };
 
     dipatch = (action) => {
@@ -53,6 +56,14 @@ export const GlobalProvider = (Children) => {
       if (action.type === SAVECHANGEDATA) {
         this.setState({ dataChangeCount: 0 });
       }
+
+      if (action.type === TODOCHANGECOUNT) {
+        this.setState({ todoChangeCount: this.state.todoChangeCount + 1 });
+      }
+
+      if (action.type === SAVETODO) {
+        this.setState({ todoChangeCount: 0 });
+      }
     };
 
     render() {
@@ -68,6 +79,7 @@ export const GlobalProvider = (Children) => {
             section: this.state.section,
             position: this.state.position,
             dataChangeCount: this.state.dataChangeCount,
+            todoChangeCount: this.state.todoChangeCount,
             dispatch: this.dipatch,
           }}
         >

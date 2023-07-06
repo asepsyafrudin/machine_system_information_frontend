@@ -48,8 +48,8 @@ function Header(props) {
     }
   };
 
-  const goToSearchEngine = () => {
-    navigate("/searching_page");
+  const goToHome = () => {
+    navigate("/home");
   };
 
   const handleSelect = (eventKey) => {
@@ -92,7 +92,6 @@ function Header(props) {
                       src={photoProfile()}
                       className="photoProfile"
                       alt="profile"
-                      onClick={handleClickUserProfile}
                     ></img>
                   </div>
                 }
@@ -127,7 +126,7 @@ function Header(props) {
               width="40"
               height="40"
               className="d-inline-block align-top logoHeader"
-              onClick={goToSearchEngine}
+              onClick={goToHome}
             />{" "}
           </Link>
           <span className="titlePEMS">

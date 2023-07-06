@@ -33,7 +33,7 @@ let tasks = [
   },
 ];
 function ProjectActivity(props) {
-  const { id, dataChangeCount, dispatch } = props;
+  const { id, dataChangeCount, dispatch, todoChangeCount } = props;
   const [project, setProject] = useState([]);
   const [tableUser, setTableUser] = useState([]);
   const [activity, setActivity] = useState(tasks);
@@ -194,7 +194,7 @@ function ProjectActivity(props) {
 
   const navigate = useNavigate();
   const handleBackPage = () => {
-    if (dataChangeCount === 0) {
+    if ((dataChangeCount === 0) & (todoChangeCount === 0)) {
       navigate("/projectPage");
     } else {
       let confirm = window.confirm(

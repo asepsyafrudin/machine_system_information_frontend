@@ -10,7 +10,7 @@ function Login() {
   const navigate = useNavigate();
   useEffect(() => {
     if (localStorage.getItem("user")) {
-      navigate("/searching_page");
+      navigate("/home");
     }
   }, [navigate]);
   return (

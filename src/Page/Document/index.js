@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Badge, Button, Col, Form, Row, Table } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Footer from "../../Component/Footer";
 import Header from "../../Component/Header";
 import moment from "moment";
@@ -21,6 +21,7 @@ import photoBluePrint from "../../Asset/ImageGeneral/profile.jpg";
 import PaginationTable from "../../Component/Pagination";
 import { fileName } from "../../Config/fileName";
 import { getExtFileName } from "../../Config/fileType";
+import { BsBack } from "react-icons/bs";
 
 function Document() {
   const { id } = useParams();
@@ -419,9 +420,20 @@ function Document() {
     }
   };
 
+  const navigate = useNavigate();
+  const backtoHome = () => {
+    navigate("/home");
+  };
+
   return (
     <div className="documentContainer">
       <Header />
+      <div style={{ marginTop: 5, textAlign: "left", marginLeft: 40 }}>
+        <Button onClick={backtoHome}>
+          <BsBack pointerEvents={"none"} style={{ marginRight: 2 }} />
+          Back to Main Menu
+        </Button>
+      </div>
       <div className="documentContent">{content()}</div>
       <div className="paginationVideo">
         <PaginationTable

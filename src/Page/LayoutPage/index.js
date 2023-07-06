@@ -18,6 +18,7 @@ import FTAFormPage from "../FTAFormPage";
 import FTAListPage from "../FTAListPage";
 import ProjectPage from "../ProjectPage";
 import ProjectActivityPage from "../ProjectActivitypPage";
+import Home from "../Home";
 
 function LayoutPage() {
   return (
@@ -50,6 +51,7 @@ function LayoutPage() {
           <Route path="/capabilityList" element={<ListCapabilityPage />} />
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />
           <Route path="/openai" element={<Openai />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/searching_page" element={<SearchEnginePage />} />
           <Route path="/projectPage" element={<ProjectPage />} />
           <Route

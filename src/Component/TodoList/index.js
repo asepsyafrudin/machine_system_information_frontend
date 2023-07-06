@@ -29,10 +29,10 @@ import { CgAttachment } from "react-icons/cg";
 import { fileName } from "../../Config/fileName";
 import { getExtFileName } from "../../Config/fileType";
 import { GoDesktopDownload } from "react-icons/go";
-import { CHANGEDATA, SAVECHANGEDATA } from "../../Context/const";
+import { CHANGEDATA, SAVECHANGEDATA, SAVETODO } from "../../Context/const";
 
 function ToDoList(props) {
-  const { id, dispatch } = props;
+  const { id, dispatch, todoChangeCount } = props;
   const refAttachment = useRef();
   const [show, setShow] = useState(false);
   const [todo, setTodo] = useState([]);
@@ -122,7 +122,7 @@ function ToDoList(props) {
           } else {
             newListTodo.push(todo[index]);
 
-            dispatch({ type: CHANGEDATA });
+            dispatch({ type: SAVETODO });
           }
         }
       }
@@ -138,6 +138,7 @@ function ToDoList(props) {
         actual_finish: status === "Finish" ? moment().format("YYYY-MM-DD") : "",
       };
       setTodo((prev) => [...prev, data]);
+      dispatch({ type: SAVETODO });
       resetForm();
     }
   };
@@ -190,7 +191,7 @@ function ToDoList(props) {
         }
       }
       setTodo(newListTodo);
-      dispatch({ type: CHANGEDATA });
+      dispatch({ type: SAVETODO });
     }
   };
 
@@ -217,14 +218,19 @@ function ToDoList(props) {
     if (confirm) {
       const filterData = todo.filter((value) => value.id !== id);
       setTodo(filterData);
-      dispatch({ type: CHANGEDATA });
+      dispatch({ type: SAVETODO });
     }
   };
 
   const handleShowAttachment = (e) => {
     const id = e.target.id;
-    setIdTodo(id);
-    setShowModalAttachment(true);
+    if (todoChangeCount === 0) {
+      setIdTodo(id);
+      setShowModalAttachment(true);
+    } else {
+      setMessage("Please Save Your Data First");
+      setShowNotif(true);
+    }
   };
 
   const handleChangeFile = (e) => {

@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Footer from "../../Component/Footer";
 import Header from "../../Component/Header";
 import {
@@ -19,6 +19,7 @@ import photoBluePrint from "../../Asset/ImageGeneral/profile.jpg";
 import { Button, Col, Form, Row } from "react-bootstrap";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import PaginationTable from "../../Component/Pagination";
+import { BsBack } from "react-icons/bs";
 function Video() {
   const { id } = useParams();
   const [user, setUser] = useState("");
@@ -456,9 +457,20 @@ function Video() {
     }
   };
 
+  const navigate = useNavigate();
+  const backtoHome = () => {
+    navigate("/home");
+  };
+
   return (
     <div className="videoPage">
       <Header />
+      <div style={{ marginTop: 5, textAlign: "left", marginLeft: 40 }}>
+        <Button onClick={backtoHome}>
+          <BsBack pointerEvents={"none"} style={{ marginRight: 2 }} />
+          Back to Main Menu
+        </Button>
+      </div>
       <div className="videoContent">
         <div>{videoShow()}</div>
       </div>
