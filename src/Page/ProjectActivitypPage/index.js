@@ -7,7 +7,7 @@ import ToDoList from "../../Component/TodoList";
 import { GlobalConsumer } from "../../Context/store";
 
 function ProjectActivityPage(props) {
-  const { dataChangeCount, dispatch } = props;
+  const { dataChangeCount, dispatch, todoChangeCount } = props;
   const { id } = useParams();
 
   return (
@@ -18,11 +18,13 @@ function ProjectActivityPage(props) {
           id={id}
           dataChangeCount={dataChangeCount}
           dispatch={dispatch}
+          todoChangeCount={todoChangeCount}
         />
         <ToDoList
           id={id}
           dataChangeCount={dataChangeCount}
           dispatch={dispatch}
+          todoChangeCount={todoChangeCount}
         />
       </div>
       <Footer />
