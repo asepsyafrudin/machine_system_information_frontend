@@ -29,7 +29,7 @@ import { CgAttachment } from "react-icons/cg";
 import { fileName } from "../../Config/fileName";
 import { getExtFileName } from "../../Config/fileType";
 import { GoDesktopDownload } from "react-icons/go";
-import { CHANGEDATA, SAVECHANGEDATA, SAVETODO } from "../../Context/const";
+import { SAVETODO, TODOCHANGECOUNT } from "../../Context/const";
 
 function ToDoList(props) {
   const { id, dispatch, todoChangeCount } = props;
@@ -83,7 +83,7 @@ function ToDoList(props) {
       axios.post(createAndUpdateTodoApi, todo).then((response) => {
         setMessage("Your Data Already Save");
         setShowNotif(true);
-        dispatch({ type: SAVECHANGEDATA });
+        dispatch({ type: SAVETODO });
       });
     }
   };
@@ -118,11 +118,11 @@ function ToDoList(props) {
               actual_finish: status === "Finish" && todo[index].actual_finish,
             });
 
-            dispatch({ type: CHANGEDATA });
+            dispatch({ type: TODOCHANGECOUNT });
           } else {
             newListTodo.push(todo[index]);
 
-            dispatch({ type: SAVETODO });
+            dispatch({ type: TODOCHANGECOUNT });
           }
         }
       }
@@ -138,7 +138,7 @@ function ToDoList(props) {
         actual_finish: status === "Finish" ? moment().format("YYYY-MM-DD") : "",
       };
       setTodo((prev) => [...prev, data]);
-      dispatch({ type: SAVETODO });
+      dispatch({ type: TODOCHANGECOUNT });
       resetForm();
     }
   };
@@ -191,7 +191,7 @@ function ToDoList(props) {
         }
       }
       setTodo(newListTodo);
-      dispatch({ type: SAVETODO });
+      dispatch({ type: TODOCHANGECOUNT });
     }
   };
 
@@ -218,7 +218,7 @@ function ToDoList(props) {
     if (confirm) {
       const filterData = todo.filter((value) => value.id !== id);
       setTodo(filterData);
-      dispatch({ type: SAVETODO });
+      dispatch({ type: TODOCHANGECOUNT });
     }
   };
 
@@ -269,7 +269,7 @@ function ToDoList(props) {
           setPercentProgress(0);
           setActionState((prev) => prev + 1);
           setLoading(false);
-          dispatch({ type: CHANGEDATA });
+          dispatch({ type: SAVETODO });
         })
         .catch((error) => {
           console.log(error);
@@ -285,7 +285,7 @@ function ToDoList(props) {
         .delete(deleteFileByIdApi(id))
         .then((response) => {
           setActionState(actionState + 1);
-          dispatch({ type: CHANGEDATA });
+          dispatch({ type: TODOCHANGECOUNT });
         })
         .catch((error) => console.log(error));
     }
