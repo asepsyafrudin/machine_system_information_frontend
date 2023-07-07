@@ -5,7 +5,7 @@ function Footer() {
   return (
     <div className="footer">
       <p style={{ lineHeight: "50px" }}>
-        © 2023 DENSO INDONESIA. All Rights Reserved.
+        © 2023 Production Engineering Denso Indonesia.
       </p>
     </div>
   );
