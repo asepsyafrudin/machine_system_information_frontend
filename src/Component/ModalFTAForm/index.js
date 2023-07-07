@@ -67,13 +67,16 @@ function ModalFTAForm(props) {
   };
 
   const handleDeleteFile = () => {
-    setSetupMode(false);
-    setAttachment([]);
+    let confirm = window.confirm("Do you want to delete this?");
+    if (confirm) {
+      setSetupMode(false);
+      setAttachment([]);
+    }
   };
 
   const handleDeleteFileDataBase = (e) => {
     const id = e.target.id;
-    const confirm = window.confirm("Apakah file Akan di Hapus?");
+    const confirm = window.confirm("Do you want to delete this?");
     if (confirm) {
       axios
         .delete(deleteFileByIdApi(id))

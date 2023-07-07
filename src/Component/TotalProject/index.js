@@ -10,13 +10,15 @@ import {
   searchProjectApi,
 } from "../../Config/API";
 import axios from "axios";
-import { FaMoneyBillWaveAlt } from "react-icons/fa";
+import { FaMoneyBillWaveAlt, FaSmile } from "react-icons/fa";
 import { BiWallet } from "react-icons/bi";
-import { BsListTask } from "react-icons/bs";
+import { BsFlag, BsListTask } from "react-icons/bs";
 import PaginationTable from "../Pagination";
 import { RiStarLine } from "react-icons/ri";
 import moment from "moment/moment";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
+import { IoMdRainy } from "react-icons/io";
+import { TfiShine } from "react-icons/tfi";
 
 function TotalProject(props) {
   const { actionStateValue } = props;
@@ -397,36 +399,37 @@ function TotalProject(props) {
 
             <Row className="progressSummary">
               <Col sm={3} style={{ textAlign: "center" }}>
-                <div
-                  className="box yellow"
+                <BsFlag
                   title="Not Yet Started"
                   onClick={() => handleButtonFilter("Not Yet Started")}
+                  style={{ color: "orange", fontSize: 25, cursor: "pointer" }}
                 />
                 <br />
                 {totalNotYetStartedBaseOnStatusProject(tableProject)}
               </Col>
               <Col sm={3}>
-                <div
-                  className="box green"
+                <FaSmile
                   title="Project On Progress"
                   onClick={() => handleButtonFilter("On Progress")}
-                />{" "}
+                  style={{ color: "green", fontSize: 25, cursor: "pointer" }}
+                />
                 <br /> {totalOnProgressBaseOnStatusProject(tableProject)}
               </Col>
               <Col sm={3}>
-                <div
-                  className="box blue"
+                <TfiShine
                   title="Project Finish"
                   onClick={() => handleButtonFilter("Finish")}
-                />{" "}
-                <br /> {totalFinishBaseOnStatusProject(tableProject)}
+                  style={{ color: "blue", fontSize: 25, cursor: "pointer" }}
+                />
+                <br />
+                {totalFinishBaseOnStatusProject(tableProject)}
               </Col>
               <Col sm={3}>
-                <div
-                  className="box red"
+                <IoMdRainy
                   title="Project Delay"
                   onClick={() => handleButtonFilter("Delay")}
-                />{" "}
+                  style={{ color: "red", fontSize: 25, cursor: "pointer" }}
+                />
                 <br /> {totalDelayBaseOnStatusProject(tableProject)}
               </Col>
             </Row>

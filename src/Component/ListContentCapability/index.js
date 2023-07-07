@@ -8,6 +8,7 @@ import PaginationTable from "../Pagination";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
+import { BsBack } from "react-icons/bs";
 
 function ListContentCapability() {
   const [tableCapability, setTableCapability] = useState([]);
@@ -15,6 +16,7 @@ function ListContentCapability() {
   const [page, setPage] = useState(1);
   const [totalPageData, setTotalPageData] = useState(1);
   const [numberStart, setNumberStart] = useState(1);
+  const [position, setPosition] = useState("");
 
   useEffect(() => {
     if (search === "") {
@@ -36,6 +38,9 @@ function ListContentCapability() {
         }
       });
     }
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    setPosition(user.position);
   }, [page, search]);
 
   const maxPagesShow = 3;
@@ -47,6 +52,16 @@ function ListContentCapability() {
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
+        <div style={{ textAlign: "left", marginBottom: 5 }}>
+          <Link
+            to={position === "Administrator" ? "/adminmenu" : "/dashboardUsers"}
+          >
+            <Button>
+              <BsBack style={{ pointerEvents: "none", marginRight: 5 }} />
+              Back to Dashboard User
+            </Button>
+          </Link>
+        </div>
         <TitleSection
           title="Capability List"
           icon={<AiOutlineDotChart style={{ marginRight: 5 }} />}

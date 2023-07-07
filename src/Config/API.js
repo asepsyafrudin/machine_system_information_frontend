@@ -282,3 +282,8 @@ export const createAndUpdateTodoApi = `${port}/api/todo/create`;
 export const getTodoByProjectIdApi = (id) => {
   return `${port}/api/todo/getTodoByProjectId/${id}`;
 };
+
+//tokek
+
+export const createTokenApi = `${port}/api/token/createToken`;
+export const validateTokenApi = `${port}/api/token/getValidationFromToken`;

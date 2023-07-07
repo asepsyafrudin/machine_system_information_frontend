@@ -49,7 +49,7 @@ function Home() {
               <h4>Dashboard User & Engineering Tools</h4>
               <p>
                 To Make Sharing Document, Video Upload (Setting parameter
-                Machine), E-Capabality, FTA Creation.
+                Machine), E-Capability, FTA Creation.
               </p>
             </div>
           </div>

@@ -19,11 +19,11 @@ import {
 } from "../../Config/API";
 import axios from "axios";
 import "./FTAForm.css";
-import { BsFillPlayFill } from "react-icons/bs";
+import { BsBack, BsFillPlayFill } from "react-icons/bs";
 import { FIRSTANALYSIS, SECONDANALYSIS } from "../../Config/const";
 import { getExtFileName } from "../../Config/fileType";
 import { v4 as uuid } from "uuid";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 function FTAForm() {
   const { id } = useParams();
@@ -42,6 +42,7 @@ function FTAForm() {
   const [dataEdit, setDataEdit] = useState("");
   const [userId, setUserId] = useState("");
   const [showAfterSave, setShowAfterSave] = useState(false);
+  const [position, setPosition] = useState("");
 
   useEffect(() => {
     axios
@@ -64,6 +65,7 @@ function FTAForm() {
 
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
+    setPosition(user.position);
 
     if (id) {
       axios.get(getProblemByIdApi(id)).then((response) => {
@@ -190,14 +192,20 @@ function FTAForm() {
 
   const handleDeleteAnalysis1 = (e) => {
     const id = e.target.id;
-    const newData = analysis1.filter((value) => value.id !== id);
-    setAnalysis1(newData);
+    let confirm = window.confirm("Do you want to delete this?");
+    if (confirm) {
+      const newData = analysis1.filter((value) => value.id !== id);
+      setAnalysis1(newData);
+    }
   };
 
   const handleDeleteAnalysis2 = (e) => {
     const id = e.target.id;
-    const newData = analysis2.filter((value) => value.idAnalysis2 !== id);
-    setAnalysis2(newData);
+    let confirm = window.confirm("Do you want to delete this?");
+    if (confirm) {
+      const newData = analysis2.filter((value) => value.idAnalysis2 !== id);
+      setAnalysis2(newData);
+    }
   };
 
   const handleEditAnalysis1 = (e) => {
@@ -240,19 +248,20 @@ function FTAForm() {
                   <BsFillPlayFill />
                   Solution
                 </td>
-                <td>{solution[index].name} </td>
+                <td width={500}>{solution[index].name} </td>
                 <td>
                   <Button
                     type="button"
                     variant="primary"
                     id={solution[index].idAnalysis2}
                     onClick={handleEditAnalysis2}
+                    style={{ marginRight: 30 }}
                   >
                     Edit
                   </Button>{" "}
                   <Button
                     type="button"
-                    variant="secondary"
+                    variant="danger"
                     id={solution[index].idAnalysis2}
                     onClick={handleDeleteAnalysis2}
                   >
@@ -407,6 +416,16 @@ function FTAForm() {
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
+        <div style={{ textAlign: "left", marginBottom: 5 }}>
+          <Link
+            to={position === "Administrator" ? "/adminmenu" : "/dashboardUsers"}
+          >
+            <Button>
+              <BsBack style={{ pointerEvents: "none", marginRight: 5 }} />
+              Back to Dashboard User
+            </Button>
+          </Link>
+        </div>
         <TitleSection
           title="Create FTA"
           icon={<ImTree style={{ marginRight: 5 }} />}
@@ -499,7 +518,7 @@ function FTAForm() {
                       <b>{index + 1}.</b>
                     </td>
                     <td width={200}>{value.type}</td>
-                    <td>{value.name}</td>
+                    <td width={500}>{value.name}</td>
                     <td>
                       <Button
                         type="button"
@@ -509,24 +528,25 @@ function FTAForm() {
                       >
                         Edit
                       </Button>{" "}
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        id={value.id}
-                        onClick={handleDeleteAnalysis1}
-                      >
-                        Delete
-                      </Button>{" "}
                       {value.type === "Causative Factor" && (
                         <Button
                           type="button"
                           variant="success"
                           id={value.id}
                           onClick={handleSecondAnalysis}
+                          style={{ marginRight: 30 }}
                         >
                           Add Solution
                         </Button>
                       )}
+                      <Button
+                        type="button"
+                        variant="danger"
+                        id={value.id}
+                        onClick={handleDeleteAnalysis1}
+                      >
+                        Delete
+                      </Button>
                     </td>
                   </tr>
 

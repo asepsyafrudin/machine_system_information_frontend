@@ -13,6 +13,7 @@ import {
   searchProblemByMachineIdApi,
 } from "../../Config/API";
 import PaginationTable from "../Pagination";
+import { BsBack } from "react-icons/bs";
 
 function FTAListComponent() {
   const [tableFTA, setTableFTA] = useState([]);
@@ -24,6 +25,7 @@ function FTAListComponent() {
   const [userId, setUserId] = useState("");
   const [showNotif, setShowNotif] = useState(false);
   const [message, setMessage] = useState("");
+  const [position, setPosition] = useState("");
 
   useEffect(() => {
     axios.get(getAllMachineApi).then((response) => {
@@ -51,6 +53,7 @@ function FTAListComponent() {
 
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
+    setPosition(user.position);
   }, [page, searchByMachine, showNotif]);
 
   const machineOption = () => {
@@ -84,6 +87,16 @@ function FTAListComponent() {
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
+        <div style={{ textAlign: "left", marginBottom: 5 }}>
+          <Link
+            to={position === "Administrator" ? "/adminmenu" : "/dashboardUsers"}
+          >
+            <Button>
+              <BsBack style={{ pointerEvents: "none", marginRight: 5 }} />
+              Back to Dashboard User
+            </Button>
+          </Link>
+        </div>
         <TitleSection
           title="FTA List"
           icon={<ImTree style={{ marginRight: 5 }} />}

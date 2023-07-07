@@ -146,7 +146,7 @@ function CapabilityComparisonForm() {
   };
   const productOption = () => {
     let option = [];
-    if (tableProduct.length>0) {
+    if (tableProduct.length > 0) {
       for (let index = 0; index < tableProduct.length; index++) {
         option.push(
           <option key={index} value={tableProduct[index].id}>
@@ -160,7 +160,7 @@ function CapabilityComparisonForm() {
 
   const lineOption = () => {
     let option = [];
-    if (product && tableLine.length>0) {
+    if (product && tableLine.length > 0) {
       const lineFilter = tableLine.filter(
         (value) =>
           value.product_id === parseInt(product) && value.status === "Active"
@@ -181,7 +181,7 @@ function CapabilityComparisonForm() {
 
   const machineOption = () => {
     let option = [];
-    if (line && tableMachine.length>0) {
+    if (line && tableMachine.length > 0) {
       const machineFilter = tableMachine.filter(
         (value) => value.line_id === parseInt(line) && value.status === "Active"
       );
@@ -793,9 +793,12 @@ function CapabilityComparisonForm() {
                   <option value={""} disabled>
                     Open This
                   </option>
-                  <option value={SINGLE_STANDARD_MAX}> 1 Batasan Max</option>
-                  <option value={SINGLE_STANDARD_MIN}> 1 Batasan Min</option>
-                  <option value={DOUBLE_STANDARD}> 2 Batasan</option>
+                  <option value={SINGLE_STANDARD_MAX}> 1 Limit Maximum</option>
+                  <option value={SINGLE_STANDARD_MIN}>
+                    {" "}
+                    1 Limit Mininimum
+                  </option>
+                  <option value={DOUBLE_STANDARD}> 2 Limit</option>
                 </Form.Select>
               </Form.Group>
               <Form.Group as={Col}>

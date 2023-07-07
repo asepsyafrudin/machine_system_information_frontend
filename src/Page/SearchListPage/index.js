@@ -7,8 +7,9 @@ import { AiOutlineScan } from "react-icons/ai";
 import "./searchListPage.css";
 import ModalBarcodeScanner from "../../Component/ModalBarcodeScanner";
 import NavigationTab from "../../Component/NavigationTab";
-import { useNavigate, useParams } from "react-router-dom";
-import { Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { Button, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { BsBack } from "react-icons/bs";
 
 function SearchListPage() {
   let { searchValue } = useParams();
@@ -101,6 +102,12 @@ function SearchListPage() {
             </form>
           </Col>
           <Col sm={4}>
+            <Link to={"/home"}>
+              <Button>
+                <BsBack style={{ pointerEvents: "none", marginRight: 5 }} />
+                Back to Main Menu
+              </Button>
+            </Link>
             {/* <Link to="/openai">
               <Button type="button" variant="dark" style={{ marginLeft: 5 }}>
                 <SiOpenai size={22} /> Need Assitance?
