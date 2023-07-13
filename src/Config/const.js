@@ -23,4 +23,4 @@ export const SECONDANALYSIS = "second_analysis";
 //status project
 
 export const STATUSOPEN = "open";
-export const STATUSFINISH = "finish";
+export const STATUSFINISH = "Finish";

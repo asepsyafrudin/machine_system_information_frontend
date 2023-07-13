@@ -11,7 +11,7 @@ import {
 } from "../../Config/API";
 import axios from "axios";
 import { FaMoneyBillWaveAlt, FaSmile } from "react-icons/fa";
-import { BiWallet } from "react-icons/bi";
+import { BiLoader, BiWallet } from "react-icons/bi";
 import { BsFlag, BsListTask } from "react-icons/bs";
 import PaginationTable from "../Pagination";
 import { RiStarLine } from "react-icons/ri";
@@ -215,8 +215,14 @@ function TotalProject(props) {
       return <Badge bg="warning">{status}</Badge>;
     } else if (status === "Delay") {
       return <Badge bg="danger">{status}</Badge>;
-    } else {
+    } else if (status === "On Progress") {
       return <Badge bg="success">{status}</Badge>;
+    } else {
+      return (
+        <Badge bg="light" text="dark">
+          Waiting Detail Activity
+        </Badge>
+      );
     }
   };
 
@@ -274,6 +280,18 @@ function TotalProject(props) {
     if (data.length > 0) {
       for (let index = 0; index < data.length; index++) {
         if (data[index].status === "Finish") {
+          count += 1;
+        }
+      }
+    }
+    return count;
+  };
+
+  const totalWaitingDetailActivity = (data) => {
+    let count = 0;
+    if (data.length > 0) {
+      for (let index = 0; index < data.length; index++) {
+        if (data[index].status === "Waiting Detail Activity") {
           count += 1;
         }
       }
@@ -398,6 +416,15 @@ function TotalProject(props) {
             <span className="valueTotalProject">{totalItem} Items</span>
 
             <Row className="progressSummary">
+              <Col sm={3} style={{ textAlign: "center" }}>
+                <BiLoader
+                  title="Waiting Detail Activity"
+                  onClick={() => handleButtonFilter("Waiting Detail Activity")}
+                  style={{ color: "orange", fontSize: 25, cursor: "pointer" }}
+                />
+                <br />
+                {totalWaitingDetailActivity(tableProject)}
+              </Col>
               <Col sm={3} style={{ textAlign: "center" }}>
                 <BsFlag
                   title="Not Yet Started"

@@ -18,20 +18,18 @@ import {
   getAllUsersApi,
   getProjectByPageAndUser,
   updateProjectApi,
-  updateStatusProjectApi,
 } from "../../Config/API";
 import { useState } from "react";
 import axios from "axios";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { v4 as uuid } from "uuid";
-import { STATUSFINISH, STATUSOPEN } from "../../Config/const";
+import { STATUSOPEN } from "../../Config/const";
 import { BsListNested } from "react-icons/bs";
 import { RiCreativeCommonsNdFill } from "react-icons/ri";
 import moment from "moment";
 import PaginationTable from "../Pagination";
 import { MdDeleteForever, MdEmail, MdVideoLibrary } from "react-icons/md";
 import { GrEdit } from "react-icons/gr";
-import { GoGitCompare } from "react-icons/go";
 import { Link } from "react-router-dom";
 
 function Project(props) {
@@ -197,7 +195,7 @@ function Project(props) {
     if (projectIdEdit) {
       let newData = { ...data, id: projectIdEdit };
       axios.put(updateProjectApi, newData);
-      setMessage("Project already created");
+      setMessage("Project already Update");
       setShow(true);
       handleReset();
       actionState(1);
@@ -239,8 +237,14 @@ function Project(props) {
       return <Badge bg="warning">{status}</Badge>;
     } else if (status === "Delay") {
       return <Badge bg="danger">{status}</Badge>;
-    } else {
+    } else if (status === "On Progress") {
       return <Badge bg="success">{status}</Badge>;
+    } else {
+      return (
+        <Badge bg="light" text="dark">
+          Waiting Detail Activity
+        </Badge>
+      );
     }
   };
 
@@ -270,25 +274,31 @@ function Project(props) {
     }
   };
 
-  const changeStatusProject = (e) => {
-    const id = e.target.id;
-    const findData = tableProject.find((value) => value.id === id);
-    let status = "";
-    if (findData) {
-      if (findData.status !== STATUSFINISH) {
-        status = STATUSFINISH;
-      } else {
-        status = STATUSOPEN;
-      }
-      const data = { id: id, status: status };
-      axios.put(updateStatusProjectApi, data).then((response) => {
-        setMessage("Status Project Already Changed");
-        setShow(true);
-        handleReset();
-        actionState(1);
-      });
-    }
-  };
+  // const changeStatusProject = (e) => {
+  //   const id = e.target.id;
+  //   const findData = tableProject.find((value) => value.id === id);
+  //   let status = "";
+  //   console.log(findData.status);
+  //   if (findData) {
+  //     if (findData.status !== STATUSFINISH) {
+  //       status = "finish";
+  //     } else {
+  //       status = STATUSOPEN;
+  //     }
+  //     let confirm = window.confirm(
+  //       `Do You Want to Change Status to ${status}?`
+  //     );
+  //     if (confirm) {
+  //       const data = { id: id, status: status };
+  //       axios.put(updateStatusProjectApi, data).then((response) => {
+  //         setMessage("Status Project Already Changed");
+  //         setShow(true);
+  //         handleReset();
+  //         actionState(1);
+  //       });
+  //     }
+  //   }
+  // };
 
   const handleDelete = (e) => {
     const id = e.target.id;
@@ -514,7 +524,7 @@ function Project(props) {
                       >
                         <GrEdit style={{ pointerEvents: "none" }} />
                       </Button>
-                      <Button
+                      {/* <Button
                         title="Change Status"
                         size="sm"
                         style={{ marginRight: 2 }}
@@ -523,7 +533,7 @@ function Project(props) {
                         onClick={changeStatusProject}
                       >
                         <GoGitCompare style={{ pointerEvents: "none" }} />
-                      </Button>
+                      </Button> */}
                       <Link to={`/projectActivity/${value.id}`} target="_blank">
                         <Button
                           title="View"
@@ -540,7 +550,7 @@ function Project(props) {
                         size="sm"
                         style={{ marginRight: 2 }}
                         id={value.id}
-                        variant="dark"
+                        variant="warning"
                       >
                         <MdEmail style={{ pointerEvents: "none" }} />
                       </Button>
