@@ -1,0 +1,37 @@
+
+
+.box-plan{
+    width: 50px;
+    height: 20px;
+    display: inline-block;
+    background-color: #B8C2CC;
+    margin-left: 20px;
+    border-radius: 5px;
+}
+.box-actual{
+    width: 50px;
+    height: 20px;
+    display: inline-block;
+    background-color: #A3A3FF;
+    margin-left: 20px;
+    border-radius: 5px;
+}
+
+.box-delay{
+    width: 50px;
+    height: 20px;
+    display: inline-block;
+    background-color: red;
+    margin-left: 20px;
+    border-radius: 5px;
+}
+
+.box-milestone{
+    width: 20px;
+    height: 20px;
+    transform: rotate(45deg);
+    display: inline-block;
+    background-color: #F1C453;
+    margin-left: 20px;
+    border-radius: 5px;
+}

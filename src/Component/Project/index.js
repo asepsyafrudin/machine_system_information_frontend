@@ -230,21 +230,21 @@ function Project(props) {
     return "";
   };
 
-  const statusFunction = (status) => {
+  const statusFunction = (status, id) => {
     if (status === "Finish") {
       return <Badge bg="primary">{status}</Badge>;
     } else if (status === "Not Yet Started") {
       return <Badge bg="warning">{status}</Badge>;
-    } else if (status === "Delay") {
-      return <Badge bg="danger">{status}</Badge>;
-    } else if (status === "On Progress") {
-      return <Badge bg="success">{status}</Badge>;
-    } else {
+    } else if (status === "Waiting Detail Activity") {
       return (
         <Badge bg="light" text="dark">
           Waiting Detail Activity
         </Badge>
       );
+    } else if (status === "On Progress") {
+      return <Badge bg="success">{status}</Badge>;
+    } else {
+      return <Badge bg="danger">{status}</Badge>;
     }
   };
 
@@ -480,7 +480,7 @@ function Project(props) {
               <th>Saving</th>
               <th>Start Date</th>
               <th>SOP Date</th>
-              <th>Last Update</th>
+              {/* <th>Last Update</th> */}
               <th>Status</th>
               <th>Action</th>
             </tr>
@@ -498,10 +498,8 @@ function Project(props) {
                     <td>{parseFloat(value.saving_cost).toLocaleString()}</td>
                     <td>{moment(value.start).format("LL")}</td>
                     <td>{moment(value.finish).format("LL")}</td>
-                    <td>{moment(value.create_date).format("LL")}</td>
-                    <td>
-                      {statusFunction(value.status, value.start, value.finish)}
-                    </td>
+                    {/* <td>{moment(value.create_date).format("LL")}</td> */}
+                    <td>{statusFunction(value.status, value.id)}</td>
                     <td>
                       {value.user_id === userId && (
                         <Button

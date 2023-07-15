@@ -20,6 +20,7 @@ import {
   getAllLineApi,
   getAllMachineApi,
   getAllProductApi,
+  getAllProjectApi,
   getCapabilityByIdApi,
   updateCapabilityApi,
 } from "../../Config/API";
@@ -77,6 +78,8 @@ function CapabilityComparisonForm() {
   const [showModalConfirm, setShowModalConfirm] = useState(false);
   const fileRef = useRef(null);
   const [inputData2, setInputData2] = useState("");
+  const [tableProject, setTableProject] = useState([]);
+  const [project, setProject] = useState("");
   const [listData2, setListData2] = useState([]);
 
   useEffect(() => {
@@ -97,6 +100,13 @@ function CapabilityComparisonForm() {
     axios.get(getAllMachineApi).then((response) => {
       setTableMachine(response.data.data);
     });
+
+    axios
+      .get(getAllProjectApi)
+      .then((response) => {
+        setTableProject(response.data.data);
+      })
+      .catch((error) => console.log(error));
 
     axios.get(getCapabilityByIdApi(id)).then((response) => {
       const result = response.data.data;
@@ -144,6 +154,23 @@ function CapabilityComparisonForm() {
     setLine(e.target.value);
     setMachine("");
   };
+
+  const projectOption = () => {
+    let option = [];
+
+    if (tableProject.length > 0) {
+      for (let index = 0; index < tableProject.length; index++) {
+        option.push(
+          <option key={index} value={tableProject[index].id}>
+            {tableProject[index].project_name}
+          </option>
+        );
+      }
+    }
+
+    return <>{option}</>;
+  };
+
   const productOption = () => {
     let option = [];
     if (tableProduct.length > 0) {
@@ -270,6 +297,32 @@ function CapabilityComparisonForm() {
     array.splice(index, 1);
     setListData2(array);
     setActionValue(actionValue + 1);
+  };
+
+  const maximumData = (listData) => {
+    let maxData = 0;
+    let data = [];
+    if (listData.length > 0) {
+      for (let index = 0; index < listData.length; index++) {
+        data.push(parseFloat(listData[index].data));
+      }
+      maxData = Math.max(...data);
+    }
+
+    return maxData;
+  };
+
+  const minimumData = (listData) => {
+    let minData = 0;
+    let data = [];
+    if (listData.length > 0) {
+      for (let index = 0; index < listData.length; index++) {
+        data.push(parseFloat(listData[index].data));
+      }
+      minData = Math.min(...data);
+    }
+
+    return minData;
   };
 
   const averageData = (data) => {
@@ -861,6 +914,26 @@ function CapabilityComparisonForm() {
                 />
               </Form.Group>
               <Form.Group as={Col}>
+                <Form.Label>Link To Project (Optional)</Form.Label>
+                <Form.Select
+                  value={project}
+                  onChange={(e) => setProject(e.target.value)}
+                  required
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
+                >
+                  <option value={""}>Open This</option>
+                  {projectOption()}
+                </Form.Select>
+              </Form.Group>
+            </Row>
+            <Row className="mb-3" style={{ textAlign: "left" }}>
+              <Form.Group as={Col}>
                 <Form.Label>Purpose</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -1244,6 +1317,8 @@ function CapabilityComparisonForm() {
                   Data Before
                 </div>
                 <Row className="mb-3">
+                  <Col>Maximum : {maximumData(listData)} </Col>
+                  <Col>Minumum : {minimumData(listData)} </Col>
                   <Col>Average : {averageData(listData)} </Col>
                   <Col>Sigma : {sigmaData(listData)}</Col>
                   <Col>Cp : {cpData(listData)}</Col>

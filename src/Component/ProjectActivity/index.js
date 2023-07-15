@@ -5,6 +5,7 @@ import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
+import "./projectActivity.css";
 import {
   createActivityApi,
   getActivityByProjectIdApi,
@@ -20,23 +21,12 @@ import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { CHANGEDATA, SAVECHANGEDATA } from "../../Context/const";
 import { FaBackward } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-const currentDate = new Date();
 
-let tasks = [
-  {
-    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
-    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
-    name: "Some Project",
-    id: "ProjectSample",
-    progress: 25,
-    type: "project",
-  },
-];
 function ProjectActivity(props) {
   const { id, dataChangeCount, dispatch, todoChangeCount } = props;
   const [project, setProject] = useState([]);
   const [tableUser, setTableUser] = useState([]);
-  const [activity, setActivity] = useState(tasks);
+  const [activity, setActivity] = useState([]);
   const [titleProject, setTitleProject] = useState("");
   const [viewMode, setViewMode] = useState(ViewMode.Month);
   const [show, setShow] = useState(false);
@@ -50,6 +40,18 @@ function ProjectActivity(props) {
   const [colWidth, setColWidth] = useState(120);
   const [showNotif, setShowNotif] = useState(false);
   const [message, setMessage] = useState(false);
+  const [rowHeight, setRowHeight] = useState(50);
+  const [listCellWidth, setListCellWidth] = useState(200);
+
+  const backgroundColorDelay = (endProject, progressBar) => {
+    let currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() - 1);
+    if (parseInt(progressBar) === 100) {
+      return { backgroundColor: "#A3A3FF", backgroundSelectedColor: "#A3A3FF" };
+    } else if (currentDate - endProject > 0) {
+      return { backgroundColor: "red", backgroundSelectedColor: "red" };
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -58,7 +60,7 @@ function ProjectActivity(props) {
         setTitleProject(dataProject.project_name);
         setProject(dataProject);
         const data = {
-          name: dataProject.project_name,
+          name: "PE Schedule",
           id: dataProject.id,
           progress: dataProject.progress,
           type: "project",
@@ -68,6 +70,7 @@ function ProjectActivity(props) {
         };
         let activityData = [];
         activityData.push(data);
+
         axios
           .get(getActivityByProjectIdApi(dataProject.id))
           .then((response) => {
@@ -83,6 +86,10 @@ function ProjectActivity(props) {
                   dependencies: dataActivity[index].dependencies,
                   type: dataActivity[index].type,
                   project: dataActivity[index].project,
+                  styles: backgroundColorDelay(
+                    new Date(moment(dataActivity[index].end)),
+                    dataActivity[index].progress
+                  ),
                 };
                 activityData.push(pushData);
               }
@@ -110,7 +117,7 @@ function ProjectActivity(props) {
     e.preventDefault();
     let data = {
       start: new Date(startDate),
-      end: new Date(type === "task" ? finishDate : startDate),
+      end: new Date(type === "milestone" ? startDate : finishDate),
       name: activityName,
       progress: progress,
       dependencies: dependencies === "" ? [] : [dependencies],
@@ -205,6 +212,11 @@ function ProjectActivity(props) {
       }
     }
   };
+
+  const handleExpanderClick = (task) => {
+    setActivity(activity.map((t) => (t.id === task.id ? task : t)));
+  };
+
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -234,28 +246,27 @@ function ProjectActivity(props) {
           <Row className="mb-3" style={{ textAlign: "left" }}>
             <Col sm={1}>PIC</Col>
             <Col sm={4}>: {userNameFunction(project.manager_id)}</Col>
+            <Col sm={7} style={{ textAlign: "right" }}>
+              <div className="box-plan" /> Plan
+              <div className="box-actual" /> Progress
+              <div className="box-delay" /> Delay
+              <div className="box-milestone" /> Milestone
+            </Col>
           </Row>
         </div>
-        <GanttChart
-          tasks={activity}
-          viewMode={viewMode}
-          columnWidth={colWidth}
-          onDoubleClick={(task) => handleDoubleClick(task)}
-          onDelete={(task) => handleDeleteTask(task)}
-        />
+        {activity.length > 0 && (
+          <GanttChart
+            tasks={activity}
+            viewMode={viewMode}
+            listCellWidth={listCellWidth}
+            columnWidth={colWidth}
+            rowHeight={rowHeight}
+            onExpanderClick={(task) => handleExpanderClick(task)}
+            onDoubleClick={(task) => handleDoubleClick(task)}
+            onDelete={(task) => handleDeleteTask(task)}
+          />
+        )}
         <div style={{ textAlign: "left" }}>
-          <Button
-            style={{ marginRight: 5 }}
-            onClick={() => setViewMode(ViewMode.QuarterDay)}
-          >
-            Quarter of Day
-          </Button>
-          <Button
-            style={{ marginRight: 5 }}
-            onClick={() => setViewMode(ViewMode.HalfDay)}
-          >
-            Half of Day
-          </Button>
           <Button
             style={{ marginRight: 5 }}
             onClick={() => setViewMode(ViewMode.Day)}
@@ -280,6 +291,20 @@ function ProjectActivity(props) {
             type="number"
             value={colWidth}
             onChange={(e) => setColWidth(e.target.value)}
+          />
+          {"    "}Row Height :
+          <input
+            width={50}
+            type="number"
+            value={rowHeight}
+            onChange={(e) => setRowHeight(parseInt(e.target.value))}
+          />
+          {"    "}List Cell Width :
+          <input
+            width={50}
+            type="number"
+            value={listCellWidth}
+            onChange={(e) => setListCellWidth(parseInt(e.target.value))}
           />
         </div>
         <Modal show={show} centered>
@@ -323,7 +348,7 @@ function ProjectActivity(props) {
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     type="date"
-                    placeholder="Enter Aactivity Name"
+                    placeholder="Enter Activity Name"
                     required
                   />
                 </Form.Group>
@@ -336,7 +361,7 @@ function ProjectActivity(props) {
                       type="date"
                       value={finishDate}
                       onChange={(e) => setFinishDate(e.target.value)}
-                      placeholder="Enter Aactivity Name"
+                      placeholder="Enter Activity Name"
                       required
                     />
                   </Form.Group>
@@ -349,9 +374,7 @@ function ProjectActivity(props) {
                     value={dependencies}
                     onChange={(e) => setDepedencies(e.target.value)}
                   >
-                    <option value="" disabled>
-                      Open This
-                    </option>
+                    <option value="">Open This</option>
                     {activity.length > 1 &&
                       activity.map((value, index) => {
                         return (

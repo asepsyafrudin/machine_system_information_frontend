@@ -1,7 +1,7 @@
 import React from "react";
 import TitleSection from "../TitleSection";
 import { ImTree } from "react-icons/im";
-import { Button, Col, Form, Modal, Row, Table } from "react-bootstrap";
+import { Button, Col, Form, Modal, Row, Spinner, Table } from "react-bootstrap";
 import { useState } from "react";
 import ModalFTAForm from "../ModalFTAForm";
 import { useEffect } from "react";
@@ -43,6 +43,7 @@ function FTAForm() {
   const [userId, setUserId] = useState("");
   const [showAfterSave, setShowAfterSave] = useState(false);
   const [position, setPosition] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     axios
@@ -306,10 +307,28 @@ function FTAForm() {
     setMode("");
   };
 
+  const loadingPostData = (loadingData) => {
+    let loading = [];
+    if (loadingData) {
+      loading.push(
+        <Spinner
+          as="span"
+          animation="grow"
+          size="sm"
+          role="status"
+          aria-hidden="true"
+          key={new Date()}
+        />
+      );
+    }
+    return loading;
+  };
+
   const navigate = useNavigate();
 
   const handleSaveFTA = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const problemId = uuid();
     const dataProblem = {
       id: problemId,
@@ -395,16 +414,18 @@ function FTAForm() {
         await saveProblem();
         await saveAnalysis1();
         await saveAnalysis2();
+        setLoading(false);
       });
     } else {
       await saveProblem();
       await saveAnalysis1();
       await saveAnalysis2();
+      setLoading(false);
     }
     setShowAfterSave(true);
-    setTimeout(() => {
-      navigate("/ftaList");
-    }, [1000]);
+    // setTimeout(() => {
+    //   navigate("/ftaList");
+    // }, [1000]);
   };
 
   const handleHideModal = (e) => {
@@ -412,6 +433,10 @@ function FTAForm() {
     setIdAnalysis("");
     setDataEdit("");
     setMode("");
+  };
+
+  const closeModalAfterSave = () => {
+    navigate("/ftaList");
   };
   return (
     <div className="capabilityFormContainer">
@@ -438,6 +463,7 @@ function FTAForm() {
                 variant="primary"
                 style={{ marginRight: 5 }}
               >
+                {loadingPostData(loading)}
                 Save
               </Button>
               <Button type="button" variant="secondary" onClick={handleReset}>
@@ -591,7 +617,7 @@ function FTAForm() {
           </Modal.Header>
           <Modal.Body>Data Tersimpan</Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowAfterSave(false)}>
+            <Button variant="secondary" onClick={closeModalAfterSave}>
               Close
             </Button>
           </Modal.Footer>

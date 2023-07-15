@@ -222,6 +222,10 @@ export const searchCapabilityApi = (searchValue, page) => {
   return `${port}/api/capability/search/${searchValue}/${page}`;
 };
 
+export const getCapabilityByProjectId = (projectId) => {
+  return `${port}/api/capability/getCapabilityByProjectId/${projectId}`;
+};
+
 //problem
 export const createProblemApi = `${port}/api/problem/create`;
 export const createFtaLv1Api = `${port}/api/ftaLv1/create`;
@@ -275,6 +279,7 @@ export const updateActivityApi = `${port}/api/activity/update`;
 export const getActivityByProjectIdApi = (projectId) => {
   return `${port}/api/activity/getActivityByProjectId/${projectId}`;
 };
+export const getAllActivityApi = `${port}/api/activity/getAll`;
 
 //todo
 

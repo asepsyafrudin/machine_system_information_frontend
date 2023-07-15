@@ -20,6 +20,7 @@ import {
   getAllLineApi,
   getAllMachineApi,
   getAllProductApi,
+  getAllProjectApi,
   getCapabilityByIdApi,
   updateCapabilityApi,
 } from "../../Config/API";
@@ -75,6 +76,8 @@ function CapabilityForm() {
   const [actionValue, setActionValue] = useState(0);
   const [showModalAlert, setShowModalAlert] = useState(false);
   const [message, setMessage] = useState("");
+  const [tableProject, setTableProject] = useState([]);
+  const [project, setProject] = useState("");
   const [showModalConfirm, setShowModalConfirm] = useState(false);
   const fileRef = useRef(null);
 
@@ -97,6 +100,13 @@ function CapabilityForm() {
       setTableMachine(response.data.data);
     });
 
+    axios
+      .get(getAllProjectApi)
+      .then((response) => {
+        setTableProject(response.data.data);
+      })
+      .catch((error) => console.log(error));
+
     axios.get(getCapabilityByIdApi(id)).then((response) => {
       const result = response.data.data;
       if (result.length > 0) {
@@ -109,6 +119,7 @@ function CapabilityForm() {
         setType(result[0].type);
         setItemCheck(result[0].item_check);
         setSigma(result[0].sigma);
+        setProject(result[0].project_id);
         if (result[0].type === DOUBLE_STANDARD) {
           setStandardMax(result[0].standard_max);
           setStandardMin(result[0].standard_min);
@@ -155,12 +166,12 @@ function CapabilityForm() {
 
   const lineOption = () => {
     let option = [];
-    if (product && tableLine) {
+    if (product && tableLine.length > 0) {
       const lineFilter = tableLine.filter(
         (value) =>
           value.product_id === parseInt(product) && value.status === "Active"
       );
-      if (lineFilter) {
+      if (lineFilter.length > 0) {
         for (let index = 0; index < lineFilter.length; index++) {
           option.push(
             <option key={index} value={lineFilter[index].id}>
@@ -176,12 +187,12 @@ function CapabilityForm() {
 
   const machineOption = () => {
     let option = [];
-    if (line && tableMachine) {
+    if (line && tableMachine.length > 0) {
       const machineFilter = tableMachine.filter(
         (value) => value.line_id === parseInt(line) && value.status === "Active"
       );
 
-      if (machineFilter) {
+      if (machineFilter.length > 0) {
         for (let index = 0; index < machineFilter.length; index++) {
           option.push(
             <option key={index} value={machineFilter[index].id}>
@@ -189,6 +200,22 @@ function CapabilityForm() {
             </option>
           );
         }
+      }
+    }
+
+    return <>{option}</>;
+  };
+
+  const projectOption = () => {
+    let option = [];
+
+    if (tableProject.length > 0) {
+      for (let index = 0; index < tableProject.length; index++) {
+        option.push(
+          <option key={index} value={tableProject[index].id}>
+            {tableProject[index].project_name}
+          </option>
+        );
       }
     }
 
@@ -240,6 +267,32 @@ function CapabilityForm() {
     array.splice(index, 1);
     setListData(array);
     setActionValue(actionValue + 1);
+  };
+
+  const maximumData = (listData) => {
+    let maxData = 0;
+    let data = [];
+    if (listData.length > 0) {
+      for (let index = 0; index < listData.length; index++) {
+        data.push(parseFloat(listData[index].data));
+      }
+      maxData = Math.max(...data);
+    }
+
+    return maxData;
+  };
+
+  const minimumData = (listData) => {
+    let minData = 0;
+    let data = [];
+    if (listData.length > 0) {
+      for (let index = 0; index < listData.length; index++) {
+        data.push(parseFloat(listData[index].data));
+      }
+      minData = Math.min(...data);
+    }
+
+    return minData;
   };
 
   const averageData = (listData) => {
@@ -493,6 +546,7 @@ function CapabilityForm() {
       standard: standard,
       standard_max: standardMax,
       standard_min: standardMin,
+      project_id: project,
       description: remark,
       status: "single",
       data: listData,
@@ -822,6 +876,26 @@ function CapabilityForm() {
                 />
               </Form.Group>
               <Form.Group as={Col}>
+                <Form.Label>Link To Project (Optional)</Form.Label>
+                <Form.Select
+                  value={project}
+                  onChange={(e) => setProject(e.target.value)}
+                  required
+                  disabled={
+                    updateMode
+                      ? userId === userIdDataView
+                        ? false
+                        : true
+                      : false
+                  }
+                >
+                  <option value={""}>Open This</option>
+                  {projectOption()}
+                </Form.Select>
+              </Form.Group>
+            </Row>
+            <Row className="mb-3" style={{ textAlign: "left" }}>
+              <Form.Group as={Col}>
                 <Form.Label>Purpose</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -1066,6 +1140,8 @@ function CapabilityForm() {
               />
               <div>
                 <Row className="mb-3">
+                  <Col>Maximum : {maximumData(listData)} </Col>
+                  <Col>Minumum : {minimumData(listData)} </Col>
                   <Col>Average : {averageData(listData)} </Col>
                   <Col>Sigma : {sigmaData(listData)}</Col>
                   <Col>Cp : {cpData(listData)}</Col>

@@ -6,6 +6,7 @@ import axios from "axios";
 import {
   changePasswordUserApi,
   createRequestApi,
+  createTokenApi,
   deleteRequestApi,
   getRequestApi,
   getUserByEmailApi,
@@ -54,21 +55,31 @@ function LoginForm(props) {
         const { id, username, npk, email, section, product, photo, position } =
           user;
         if (user) {
-          localStorage.setItem("user", JSON.stringify(user));
-          navigate("/home");
-          dispatch({
-            type: SAVEUSERLOGIN,
-            payload: {
-              user_id: id,
-              username: username,
-              npk: npk,
-              email: email,
-              section: section,
-              product: product,
-              photo: photo,
-              position: position,
-            },
-          });
+          axios
+            .post(createTokenApi, user)
+            .then((response) => {
+              const token = response.data.data;
+
+              localStorage.setItem("user", JSON.stringify(user));
+              localStorage.setItem("token", JSON.stringify(token));
+              navigate("/home");
+              dispatch({
+                type: SAVEUSERLOGIN,
+                payload: {
+                  user_id: id,
+                  username: username,
+                  npk: npk,
+                  email: email,
+                  section: section,
+                  product: product,
+                  photo: photo,
+                  position: position,
+                },
+              });
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         } else {
           setAlert(true);
         }

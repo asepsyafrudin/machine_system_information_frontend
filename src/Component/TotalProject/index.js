@@ -208,21 +208,21 @@ function TotalProject(props) {
     return "";
   };
 
-  const statusFunction = (status) => {
+  const statusFunction = (status, id) => {
     if (status === "Finish") {
       return <Badge bg="primary">{status}</Badge>;
     } else if (status === "Not Yet Started") {
       return <Badge bg="warning">{status}</Badge>;
-    } else if (status === "Delay") {
-      return <Badge bg="danger">{status}</Badge>;
-    } else if (status === "On Progress") {
-      return <Badge bg="success">{status}</Badge>;
-    } else {
+    } else if (status === "Waiting Detail Activity") {
       return (
         <Badge bg="light" text="dark">
           Waiting Detail Activity
         </Badge>
       );
+    } else if (status === "On Progress") {
+      return <Badge bg="success">{status}</Badge>;
+    } else {
+      return <Badge bg="danger">{status}</Badge>;
     }
   };
 
@@ -265,9 +265,18 @@ function TotalProject(props) {
 
   const totalDelayBaseOnStatusProject = (data) => {
     let count = 0;
+    let notCryteria = [
+      "Not Yet Started",
+      "On Progress",
+      "Finish",
+      "Waiting Detail Activity",
+    ];
     if (data.length > 0) {
       for (let index = 0; index < data.length; index++) {
-        if (data[index].status === "Delay") {
+        let checkData = notCryteria.find(
+          (value) => value === data[index].status
+        );
+        if (!checkData) {
           count += 1;
         }
       }
@@ -337,7 +346,28 @@ function TotalProject(props) {
   const tableFilter = (filter) => {
     let dataList = [];
     if (filter) {
-      let dataFilter = tableProject.filter((value) => value.status === filter);
+      let dataFilter = [];
+      let notCryteria = [
+        "Not Yet Started",
+        "On Progress",
+        "Finish",
+        "Waiting Detail Activity",
+      ];
+      let checkData = notCryteria.find((value) => value === filter);
+
+      if (checkData) {
+        dataFilter = tableProject.filter((value) => value.status === filter);
+      } else {
+        for (let index = 0; index < tableProject.length; index++) {
+          let checkData = notCryteria.find(
+            (value) => value === tableProject[index].status
+          );
+          if (!checkData) {
+            dataFilter.push(tableProject[index]);
+          }
+        }
+      }
+
       if (dataFilter.length > 0) {
         for (let index = 0; index < dataFilter.length; index++) {
           dataList.push(

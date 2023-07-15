@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import ProjectActivity from "../../Component/ProjectActivity";
 import ToDoList from "../../Component/TodoList";
 import { GlobalConsumer } from "../../Context/store";
+import TrialDataOnActivity from "../../Component/TrialDataOnActivity";
 
 function ProjectActivityPage(props) {
   const { dataChangeCount, dispatch, todoChangeCount } = props;
@@ -26,6 +27,7 @@ function ProjectActivityPage(props) {
           dispatch={dispatch}
           todoChangeCount={todoChangeCount}
         />
+        <TrialDataOnActivity id={id} />
       </div>
       <Footer />
     </div>
