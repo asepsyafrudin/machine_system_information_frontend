@@ -106,20 +106,20 @@ function UserList(props) {
 
   const handleRegisterUser = async (e) => {
     e.preventDefault();
-    const checkUser = await axios.get(getUserByNPKApi(npk));
-    const getUser = checkUser.data.data;
-    if (getUser.length === 0) {
-      if (password === rePassword) {
-        let formData = new FormData();
-        formData.append("username", userName);
-        formData.append("npk", npk);
-        formData.append("email", email);
-        formData.append("password", password);
-        formData.append("section", section);
-        formData.append("product", product);
-        formData.append("position", position);
-        formData.append("photo", photo);
-        if (!updateMode) {
+    if (password === rePassword) {
+      let formData = new FormData();
+      formData.append("username", userName);
+      formData.append("npk", npk);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("section", section);
+      formData.append("product", product);
+      formData.append("position", position);
+      formData.append("photo", photo);
+      if (!updateMode) {
+        const checkUser = await axios.get(getUserByNPKApi(npk));
+        const getUser = checkUser.data.data;
+        if (getUser.length === 0) {
           axios
             .post(registerUserApi, formData)
             .then((response) => {
@@ -130,30 +130,30 @@ function UserList(props) {
             })
             .catch((err) => console.log(err));
         } else {
-          axios
-            .patch(updateUserApi, formData)
-            .then((response) => {
-              resetForm();
-              setMessage("Update Success !!!");
-              setNotifSuccess(true);
-              setAlert(false);
-              setUpdateMode(false);
-            })
-            .catch((error) => {
-              setMessage(`Function Error`);
-              setAlert(true);
-              console.log(error);
-            })
-            .finally(() => {
-              resetForm();
-            });
+          setMessage(`NPK Telah Terdaftar!!`);
+          setAlert(true);
         }
       } else {
-        setMessage(`Password & Re Passoword doesnt Match!!`);
-        setAlert(true);
+        axios
+          .patch(updateUserApi, formData)
+          .then((response) => {
+            resetForm();
+            setMessage("Update Success !!!");
+            setNotifSuccess(true);
+            setAlert(false);
+            setUpdateMode(false);
+          })
+          .catch((error) => {
+            setMessage(`Function Error`);
+            setAlert(true);
+            console.log(error);
+          })
+          .finally(() => {
+            resetForm();
+          });
       }
     } else {
-      setMessage(`NPK Telah Terdaftar!!`);
+      setMessage(`Password & Re Passoword doesnt Match!!`);
       setAlert(true);
     }
   };
