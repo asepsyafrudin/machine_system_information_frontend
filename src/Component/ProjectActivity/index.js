@@ -113,7 +113,6 @@ function ProjectActivity(props) {
     setStartDate("");
     setProgress("");
     setType("");
-    setDescription("");
     setDepedencies("");
     setShow(false);
   };

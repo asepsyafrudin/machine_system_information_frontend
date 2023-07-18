@@ -178,6 +178,7 @@ function Project(props) {
   const handleReset = () => {
     setProduct("");
     setProjectName("");
+    setDescription("");
     setManager("");
     setBudget("");
     setSavingCost("");
