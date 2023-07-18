@@ -151,6 +151,7 @@ function CapabilityComparisonForm() {
             setListData2(result[0].data2);
           }
           setUpdateMode(true);
+          setProject(result[0].project_id);
         }
       });
 
@@ -557,6 +558,7 @@ function CapabilityComparisonForm() {
     setStandardMax("");
     setStandardMin("");
     setInputData("");
+    setProject("");
     setListData([]);
     setListData2([]);
   };
@@ -583,6 +585,7 @@ function CapabilityComparisonForm() {
       data1: listData,
       data2: listData2,
       status: "compare",
+      project_id: project,
     };
     if (!updateMode) {
       axios

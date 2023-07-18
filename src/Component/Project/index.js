@@ -62,6 +62,7 @@ function Project(props) {
   const [subjectEmail, setSubjectEmail] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [description, setDescription] = useState("");
 
   const maxPagesShow = 3;
 
@@ -200,6 +201,7 @@ function Project(props) {
       member: projectIdEdit ? [...member] : [...member, userId],
       user_id: userId,
       status: STATUSOPEN,
+      description: description,
     };
 
     if (projectIdEdit) {
@@ -275,6 +277,7 @@ function Project(props) {
         setSavingCost(data.saving_cost);
         setStartDate(dateParse(data.start));
         setSopDate(dateParse(data.finish));
+        setDescription(data.description);
         let memberIddata = [];
         for (let index = 0; index < data.member.length; index++) {
           memberIddata.push(data.member[index].user_id);
@@ -505,6 +508,7 @@ function Project(props) {
           <Row className="mb-3" style={{ textAlign: "left" }}>
             <Col>Our Members</Col>
           </Row>
+
           <Row className="mb-3" style={{ textAlign: "left" }}>
             <Col>
               {member.length > 0
@@ -529,6 +533,17 @@ function Project(props) {
                   })
                 : "Data Is Not Available"}
             </Col>
+          </Row>
+          <Row className="mb-3" style={{ textAlign: "left" }}>
+            <Form.Group as={Col}>
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                style={{ height: 100 }}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              ></Form.Control>
+            </Form.Group>
           </Row>
           <Row className="mb-3" style={{ textAlign: "right" }}>
             <Col>

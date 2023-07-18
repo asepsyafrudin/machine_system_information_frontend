@@ -25,6 +25,7 @@ import { useNavigate } from "react-router-dom";
 function ProjectActivity(props) {
   const { id, dataChangeCount, dispatch, todoChangeCount } = props;
   const [project, setProject] = useState([]);
+  const [description, setDescription] = useState("");
   const [tableUser, setTableUser] = useState([]);
   const [activity, setActivity] = useState([]);
   const [titleProject, setTitleProject] = useState("");
@@ -59,6 +60,8 @@ function ProjectActivity(props) {
         const dataProject = response.data.data[0];
         setTitleProject(dataProject.project_name);
         setProject(dataProject);
+        setDescription(dataProject.description);
+
         const data = {
           name: "PE Schedule",
           id: dataProject.id,
@@ -110,6 +113,7 @@ function ProjectActivity(props) {
     setStartDate("");
     setProgress("");
     setType("");
+    setDescription("");
     setDepedencies("");
     setShow(false);
   };
@@ -244,14 +248,18 @@ function ProjectActivity(props) {
         />
         <div>
           <Row className="mb-3" style={{ textAlign: "left" }}>
-            <Col sm={1}>PIC</Col>
+            <Col sm={2}>PIC</Col>
             <Col sm={4}>: {userNameFunction(project.manager_id)}</Col>
-            <Col sm={7} style={{ textAlign: "right" }}>
+            <Col sm={6} style={{ textAlign: "right" }}>
               <div className="box-plan" /> Plan
               <div className="box-actual" /> Progress
               <div className="box-delay" /> Delay
               <div className="box-milestone" /> Milestone
             </Col>
+          </Row>
+          <Row className="mb-3" style={{ textAlign: "left" }}>
+            <Col sm={2}>Description</Col>
+            <Col sm={10}>: {description}</Col>
           </Row>
         </div>
         {activity.length > 0 && (
