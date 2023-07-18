@@ -22,6 +22,7 @@ import {
   getAllLineApi,
   getAllMachineApi,
   getAllProductApi,
+  getAllProjectApi,
   getDocumentByUserIdAndPageApi,
   registerDocumentApi,
   searchDocumentForDashboardApi,
@@ -67,6 +68,8 @@ function DocumentRegister(props) {
   const [numberStart, setNumberStart] = useState(1);
   const [id, setId] = useState("");
   const [showModalAlert, setShowModalAlert] = useState(false);
+  const [tableProject, setTableProject] = useState([]);
+  const [project, setProject] = useState("");
 
   useEffect(() => {
     axios
@@ -86,6 +89,14 @@ function DocumentRegister(props) {
     axios.get(getAllMachineApi).then((response) => {
       setTableMachine(response.data.data);
     });
+
+    axios
+      .get(getAllProjectApi)
+      .then((response) => {
+        setTableProject(response.data.data);
+      })
+      .catch((error) => console.log(error));
+
     if (userId) {
       if (search) {
         axios
@@ -191,6 +202,21 @@ function DocumentRegister(props) {
     return <>{option}</>;
   };
 
+  const projectOption = () => {
+    let option = [];
+
+    if (tableProject.length > 0) {
+      for (let index = 0; index < tableProject.length; index++) {
+        option.push(
+          <option key={index} value={tableProject[index].id}>
+            {tableProject[index].project_name}
+          </option>
+        );
+      }
+    }
+
+    return <>{option}</>;
+  };
   const handleSearch = (e) => {
     setSearch(e.target.value);
     setPage(1);
@@ -207,6 +233,7 @@ function DocumentRegister(props) {
     setDocument([]);
     actionState(1);
     setFileType("");
+    setProject("");
     setId("");
     setFileCurrent([]);
     setLoading(false);
@@ -218,7 +245,7 @@ function DocumentRegister(props) {
     setFile(e.target.files);
   };
 
-  const handleRegisterVideo = (e) => {
+  const handleRegisterDocument = (e) => {
     e.preventDefault();
     if (file.length <= 10) {
       let formData = new FormData();
@@ -227,6 +254,7 @@ function DocumentRegister(props) {
       formData.append("user_id", userId);
       formData.append("file_type", fileType);
       formData.append("description", description);
+      formData.append("project_id", project);
       for (let i = 0; i < file.length; i++) {
         formData.append("file", file[i]);
       }
@@ -381,6 +409,7 @@ function DocumentRegister(props) {
       setDescription(documentEdit.description);
       setFileCurrent(documentEdit.file);
       setFileType(documentEdit.file_type);
+      setProject(documentEdit.project_id);
       setId(id);
     }
   };
@@ -412,7 +441,7 @@ function DocumentRegister(props) {
         icon={<IoMdDocument style={{ marginRight: 5 }} />}
       />
       <div className="registerProductFormContainer">
-        <Form onSubmit={handleRegisterVideo}>
+        <Form onSubmit={handleRegisterDocument}>
           <Row className="mb-3">
             <Form.Group as={Col}>
               <Form.Label>Select Product</Form.Label>
@@ -552,14 +581,28 @@ function DocumentRegister(props) {
             </Col>
           </Row>
           <Row className="mb-3">
-            <Col>
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                style={{ height: 100 }}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              ></Form.Control>
+            <Col sm={4}>
+              <Form.Group as={Col}>
+                <Form.Label>Link To Project (Optional)</Form.Label>
+                <Form.Select
+                  value={project}
+                  onChange={(e) => setProject(e.target.value)}
+                >
+                  <option value={""}>Open This</option>
+                  {projectOption()}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col sm={8}>
+              <Form.Group as={Col}>
+                <Form.Label>Description</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  style={{ height: 100 }}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                ></Form.Control>
+              </Form.Group>
             </Col>
           </Row>
           <Row>
@@ -641,7 +684,7 @@ function DocumentRegister(props) {
             </tr>
           </thead>
           <tbody>
-            {tableDocument &&
+            {tableDocument.length > 0 &&
               tableDocument.map((value, index) => {
                 return (
                   <tr key={index}>

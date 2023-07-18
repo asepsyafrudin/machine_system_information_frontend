@@ -6,6 +6,8 @@ import ProjectActivity from "../../Component/ProjectActivity";
 import ToDoList from "../../Component/TodoList";
 import { GlobalConsumer } from "../../Context/store";
 import TrialDataOnActivity from "../../Component/TrialDataOnActivity";
+import DocumentProject from "../../Component/DocumentProject";
+import VideoProject from "../../Component/VideoProject";
 
 function ProjectActivityPage(props) {
   const { dataChangeCount, dispatch, todoChangeCount } = props;
@@ -28,6 +30,8 @@ function ProjectActivityPage(props) {
           todoChangeCount={todoChangeCount}
         />
         <TrialDataOnActivity id={id} />
+        <DocumentProject id={id} />
+        <VideoProject id={id} />
       </div>
       <Footer />
     </div>

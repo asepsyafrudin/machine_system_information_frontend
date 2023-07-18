@@ -82,62 +82,80 @@ function CapabilityForm() {
   const fileRef = useRef(null);
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     axios
-      .get(getAllProductApi)
+      .get(getAllProductApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableProduct(response.data.data);
+        isMounted && setTableProduct(response.data.data);
       })
       .catch((error) => console.log(error));
 
     axios
-      .get(getAllLineApi)
+      .get(getAllLineApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableLine(response.data.data);
+        isMounted && setTableLine(response.data.data);
       })
       .catch((error) => console.log(error));
 
     axios.get(getAllMachineApi).then((response) => {
-      setTableMachine(response.data.data);
+      isMounted && setTableMachine(response.data.data);
     });
 
     axios
-      .get(getAllProjectApi)
+      .get(getAllProjectApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableProject(response.data.data);
+        isMounted && setTableProject(response.data.data);
       })
       .catch((error) => console.log(error));
 
-    axios.get(getCapabilityByIdApi(id)).then((response) => {
-      const result = response.data.data;
-      if (result.length > 0) {
-        setMachine(result[0].machine_id);
-        setUserIdDataView(result[0].user_id);
-        setProduct(result[0].product_id);
-        setLine(result[0].line_id);
-        setPartName(result[0].part_name);
-        setPartNumber(result[0].part_number);
-        setType(result[0].type);
-        setItemCheck(result[0].item_check);
-        setSigma(result[0].sigma);
-        setProject(result[0].project_id);
-        if (result[0].type === DOUBLE_STANDARD) {
-          setStandardMax(result[0].standard_max);
-          setStandardMin(result[0].standard_min);
-        } else {
-          setStandard(result[0].standard);
+    axios
+      .get(getCapabilityByIdApi(id), {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        const result = isMounted ? response.data.data : [];
+        if (result.length > 0) {
+          setMachine(result[0].machine_id);
+          setUserIdDataView(result[0].user_id);
+          setProduct(result[0].product_id);
+          setLine(result[0].line_id);
+          setPartName(result[0].part_name);
+          setPartNumber(result[0].part_number);
+          setType(result[0].type);
+          setItemCheck(result[0].item_check);
+          setSigma(result[0].sigma);
+          setProject(result[0].project_id);
+          if (result[0].type === DOUBLE_STANDARD) {
+            setStandardMax(result[0].standard_max);
+            setStandardMin(result[0].standard_min);
+          } else {
+            setStandard(result[0].standard);
+          }
+          setRemark(result[0].description);
+          if (result[0].data1.length > 0) {
+            setListData(result[0].data1);
+          }
+          setUpdateMode(true);
         }
-        setRemark(result[0].description);
-        if (result[0].data1.length > 0) {
-          setListData(result[0].data1);
-        }
-        setUpdateMode(true);
-      }
-    });
+      });
 
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
       setUserId(user.id);
     }
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [id, updateMode]);
 
   const handleSetProduct = (e) => {
@@ -880,7 +898,6 @@ function CapabilityForm() {
                 <Form.Select
                   value={project}
                   onChange={(e) => setProject(e.target.value)}
-                  required
                   disabled={
                     updateMode
                       ? userId === userIdDataView
@@ -933,6 +950,13 @@ function CapabilityForm() {
                     className="inputfile"
                     onChange={handleChangeFile}
                     ref={fileRef}
+                    disabled={
+                      updateMode
+                        ? userId === userIdDataView
+                          ? false
+                          : true
+                        : false
+                    }
                   />
                 </Col>
                 <Col sm={6}>
@@ -949,6 +973,13 @@ function CapabilityForm() {
                     style={{ marginRight: 5 }}
                     title="Reset"
                     onClick={handleResetInputData}
+                    disabled={
+                      updateMode
+                        ? userId === userIdDataView
+                          ? false
+                          : true
+                        : false
+                    }
                   >
                     <BiReset style={{ pointerEvents: "none" }} />
                   </Button>
@@ -970,10 +1001,28 @@ function CapabilityForm() {
                           lang="en"
                           step={".001"}
                           required
+                          disabled={
+                            updateMode
+                              ? userId === userIdDataView
+                                ? false
+                                : true
+                              : false
+                          }
                         />
                       </Col>
                       <Col sm={3} style={{ textAlign: "right" }}>
-                        <Button type="submit">ADD</Button>
+                        <Button
+                          type="submit"
+                          disabled={
+                            updateMode
+                              ? userId === userIdDataView
+                                ? false
+                                : true
+                              : false
+                          }
+                        >
+                          ADD
+                        </Button>
                       </Col>
                     </Row>
                   </Form>

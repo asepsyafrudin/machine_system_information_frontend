@@ -579,20 +579,22 @@ function TotalProject(props) {
           <Modal.Title>Project List "{buttonFilter}"</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>NO</th>
-                <th>Project Name</th>
-                <th>Product</th>
-                <th>PIC</th>
-                <th>Start Date</th>
-                <th>SOP Date</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>{tableFilter(buttonFilter)}</tbody>
-          </Table>
+          <div className="filterModal">
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>NO</th>
+                  <th>Project Name</th>
+                  <th>Product</th>
+                  <th>PIC</th>
+                  <th>Start Date</th>
+                  <th>SOP Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>{tableFilter(buttonFilter)}</tbody>
+            </Table>
+          </div>
         </Modal.Body>
         <Modal.Footer>
           <Button

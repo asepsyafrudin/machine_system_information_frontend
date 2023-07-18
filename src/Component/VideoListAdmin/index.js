@@ -20,6 +20,7 @@ import {
   getAllLineApi,
   getAllMachineApi,
   getAllProductApi,
+  getAllProjectApi,
   getVideoByPageAdminApi,
   getVideoByUserIdApi,
   registerVideoApi,
@@ -64,6 +65,8 @@ function VideoListAdmin(props) {
   const [percentProgress, setPercentProgress] = useState(0);
   const [message, setMessage] = useState("");
   const [showModalAlert, setShowModalAlert] = useState(false);
+  const [project, setProject] = useState("");
+  const [tableProject, setTableProject] = useState([]);
 
   useEffect(() => {
     axios
@@ -80,9 +83,19 @@ function VideoListAdmin(props) {
       })
       .catch((error) => console.log(error));
 
-    axios.get(getAllMachineApi).then((response) => {
-      setTableMachine(response.data.data);
-    });
+    axios
+      .get(getAllMachineApi)
+      .then((response) => {
+        setTableMachine(response.data.data);
+      })
+      .catch((error) => console.log(error));
+
+    axios
+      .get(getAllProjectApi)
+      .then((response) => {
+        setTableProject(response.data.data);
+      })
+      .catch((error) => console.log(error));
 
     if (userId) {
       if (search) {
@@ -189,6 +202,22 @@ function VideoListAdmin(props) {
     return <>{option}</>;
   };
 
+  const projectOption = () => {
+    let option = [];
+
+    if (tableProject.length > 0) {
+      for (let index = 0; index < tableProject.length; index++) {
+        option.push(
+          <option key={index} value={tableProject[index].id}>
+            {tableProject[index].project_name}
+          </option>
+        );
+      }
+    }
+
+    return <>{option}</>;
+  };
+
   const handleSearch = (e) => {
     setSearch(e.target.value);
     setPage(1);
@@ -203,6 +232,7 @@ function VideoListAdmin(props) {
     setLine("");
     setMachine("");
     setId("");
+    setProject("");
     setUpdateMode(false);
   };
 
@@ -215,6 +245,7 @@ function VideoListAdmin(props) {
     formData.append("machine_id", machine);
     formData.append("description", description);
     formData.append("status", "Active");
+    formData.append("project_id", project);
     setLoading(true);
 
     const onUploadProgress = (progressEvent) => {
@@ -290,6 +321,7 @@ function VideoListAdmin(props) {
       setVideoName(dataEdit.video_name);
       setCurrentVideo(dataEdit.video_url);
       setDescription(dataEdit.description);
+      setProject(dataEdit.project_id);
       setUpdateMode(true);
     }
   };
@@ -449,6 +481,16 @@ function VideoListAdmin(props) {
                 required={updateMode ? false : true}
               />
             </Form.Group>
+            <Form.Group as={Col}>
+              <Form.Label>Link To Project (Optional)</Form.Label>
+              <Form.Select
+                value={project}
+                onChange={(e) => setProject(e.target.value)}
+              >
+                <option value={""}>Open This</option>
+                {projectOption()}
+              </Form.Select>
+            </Form.Group>
           </Row>
           <Row className="mb-3">
             <Col>
@@ -548,7 +590,7 @@ function VideoListAdmin(props) {
             </tr>
           </thead>
           <tbody>
-            {tableVideo ? (
+            {tableVideo.length > 0 ? (
               tableVideo.map((value, index) => {
                 return (
                   <tr key={index}>

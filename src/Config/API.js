@@ -1,4 +1,4 @@
-const port = "http://172.31.71.2:8080";
+const port = "http://172.31.71.10:8080";
 
 //users Api
 export const registerUserApi = `${port}/api/users/create_users`;
@@ -109,6 +109,9 @@ export const getVideoByPageAdminApi = (page) => {
 export const searchVideoForDashboardMenuApi = (searchValue, page, userId) => {
   return `${port}/api/video/searchVideoDashboard/${searchValue}/${page}/${userId}`;
 };
+export const getVideoByProjectIdApi = (projectId) => {
+  return `${port}/api/video/getVideoByProjectId/${projectId}`;
+};
 
 //comment
 export const postCommentApi = `${port}/api/comment/create`;
@@ -156,6 +159,10 @@ export const getDocumentByIdApi = (id) => {
 
 export const getDocumentGeneralBypageApi = (page) => {
   return `${port}/api/document/getDocumentForGeneralByPage/${page}`;
+};
+
+export const getDocumentByProjectIdApi = (projectId) => {
+  return `${port}/api/document/getDocumentByProjectId/${projectId}`;
 };
 
 //file

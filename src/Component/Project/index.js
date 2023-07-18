@@ -1,6 +1,7 @@
 import React from "react";
 import TitleSection from "../TitleSection";
 import {
+  Alert,
   Badge,
   Button,
   CloseButton,
@@ -53,6 +54,15 @@ function Project(props) {
   const [page, setPage] = useState(1);
   const [numberStart, setNumberStart] = useState("");
   const [totalPageData, setStotalPageData] = useState(1);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [memberToEmail, setMemberToEmail] = useState("");
+  const [memberListOfProject, setMemberListOfProject] = useState([]);
+  const [totalMemberToEmail, setTotalMemberToEmail] = useState([]);
+  const [bodyEmail, setBodyEmail] = useState("");
+  const [subjectEmail, setSubjectEmail] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const maxPagesShow = 3;
 
   useEffect(() => {
@@ -300,6 +310,37 @@ function Project(props) {
   //   }
   // };
 
+  const handleSendEmail = (e) => {
+    const id = e.target.id;
+    let confirm = window.confirm("Do You Want to Send Email?");
+    if (confirm) {
+      const checkProject = tableProject.find((value) => value.id === id);
+      if (checkProject) {
+        let memberIddata = [];
+        for (let index = 0; index < checkProject.member.length; index++) {
+          memberIddata.push(checkProject.member[index].user_id);
+        }
+        setMemberListOfProject(memberIddata);
+        setSubjectEmail(checkProject.project_name);
+        setShowEmailModal(true);
+      }
+    }
+  };
+
+  const optionMemberToEmailFunction = () => {
+    let option = [];
+    if (memberListOfProject.length > 0) {
+      for (let index = 0; index < memberListOfProject.length; index++) {
+        option.push(
+          <option key={index} value={memberListOfProject[index]}>
+            {userNameFunction(memberListOfProject[index])}
+          </option>
+        );
+      }
+    }
+    return option;
+  };
+
   const handleDelete = (e) => {
     const id = e.target.id;
     let confirm = window.confirm("Do you want to delete this item?");
@@ -310,6 +351,43 @@ function Project(props) {
         handleReset();
         actionState(1);
       });
+    }
+  };
+
+  const handleAddToEmail = () => {
+    if (memberToEmail) {
+      const check = totalMemberToEmail.find(
+        (value) => parseInt(value) === parseInt(memberToEmail)
+      );
+      if (!check) {
+        setTotalMemberToEmail((prev) => [...prev, memberToEmail]);
+      }
+    }
+  };
+
+  const handleDeleteToEmail = (e) => {
+    const id = e.target.id;
+    let filter = totalMemberToEmail.filter(
+      (value) => parseInt(value) !== parseInt(id)
+    );
+    setTotalMemberToEmail(filter);
+  };
+
+  const handleCloseModalEmail = () => {
+    setShowEmailModal(false);
+    setTotalMemberToEmail([]);
+    setMemberToEmail("");
+    setBodyEmail("");
+    setShowAlert(false);
+    setShowSuccess(false);
+  };
+
+  const handleSendEmailToUser = (e) => {
+    e.preventDefault();
+    if (totalMemberToEmail.length > 0) {
+      setShowSuccess(true);
+    } else {
+      setShowAlert(true);
     }
   };
   return (
@@ -549,6 +627,7 @@ function Project(props) {
                         style={{ marginRight: 2 }}
                         id={value.id}
                         variant="warning"
+                        onClick={handleSendEmail}
                       >
                         <MdEmail style={{ pointerEvents: "none" }} />
                       </Button>
@@ -589,6 +668,121 @@ function Project(props) {
               setShow(false);
             }}
           >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showEmailModal} onHide={handleCloseModalEmail}>
+        <Modal.Header closeButton>
+          <Modal.Title>Send Email To Member</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {!showSuccess ? (
+            <>
+              <Form onSubmit={handleSendEmailToUser}>
+                <Row className="mb-3" style={{ textAlign: "left" }}>
+                  <Form.Group as={Col}>
+                    <Form.Label>To</Form.Label>
+                    <Form.Select
+                      value={memberToEmail}
+                      onChange={(e) => setMemberToEmail(e.target.value)}
+                    >
+                      <option value="" disabled>
+                        Open This
+                      </option>
+                      {optionMemberToEmailFunction()}
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group as={Col}>
+                    <Form.Label></Form.Label> <br />
+                    <Button type="button" onClick={handleAddToEmail}>
+                      Add
+                    </Button>
+                  </Form.Group>
+                </Row>
+                <Row className="mb-3" style={{ textAlign: "left" }}>
+                  <Col>
+                    {totalMemberToEmail.length > 0
+                      ? totalMemberToEmail.map((value, index) => {
+                          return (
+                            <Badge
+                              key={index}
+                              style={{ marginRight: 2 }}
+                              bg={colorBgBadge(index + 1)}
+                            >
+                              <h6>
+                                {CapitalCaseFirstWord(
+                                  tableUser.length > 0 &&
+                                    tableUser.find(
+                                      (value2) => value2.id === parseInt(value)
+                                    ).username
+                                )}{" "}
+                                <CloseButton
+                                  id={value}
+                                  onClick={handleDeleteToEmail}
+                                />
+                              </h6>
+                            </Badge>
+                          );
+                        })
+                      : "Data Is Not Available"}
+                  </Col>
+                </Row>
+                <Row className="mb-3" style={{ textAlign: "left" }}>
+                  <Form.Group as={Col}>
+                    <Form.Label>Subject</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter Subject"
+                      onChange={(e) => setSubjectEmail(e.target.value)}
+                      value={subjectEmail}
+                      required
+                    />
+                  </Form.Group>
+                </Row>
+                <Row className="mb-3" style={{ textAlign: "left" }}>
+                  <Form.Group as={Col}>
+                    <Form.Label>Body</Form.Label>
+                    <Form.Control
+                      as={"textarea"}
+                      style={{ height: 100 }}
+                      placeholder="Enter Body"
+                      onChange={(e) => setBodyEmail(e.target.value)}
+                      value={bodyEmail}
+                      required
+                    />
+                  </Form.Group>
+                </Row>
+                <Row>
+                  <Col style={{ textAlign: "left" }}>
+                    <Button variant="primary" type="submit">
+                      Send Email
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+              <Alert
+                show={showAlert}
+                variant="warning"
+                onClose={() => setShowAlert(false)}
+                dismissible
+              >
+                Please Add Users to Email
+              </Alert>
+            </>
+          ) : (
+            <Alert
+              show={showSuccess}
+              variant="success"
+              onClose={() => setShowSuccess(false)}
+              dismissible
+            >
+              Email Already Send to Users
+            </Alert>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModalEmail}>
             Close
           </Button>
         </Modal.Footer>

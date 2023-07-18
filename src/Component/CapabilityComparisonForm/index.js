@@ -83,65 +83,86 @@ function CapabilityComparisonForm() {
   const [listData2, setListData2] = useState([]);
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
     axios
-      .get(getAllProductApi)
+      .get(getAllProductApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableProduct(response.data.data);
+        isMounted && setTableProduct(response.data.data);
       })
       .catch((error) => console.log(error));
 
     axios
-      .get(getAllLineApi)
+      .get(getAllLineApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableLine(response.data.data);
+        isMounted && setTableLine(response.data.data);
       })
       .catch((error) => console.log(error));
-
-    axios.get(getAllMachineApi).then((response) => {
-      setTableMachine(response.data.data);
-    });
 
     axios
-      .get(getAllProjectApi)
+      .get(getAllMachineApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableProject(response.data.data);
+        isMounted && setTableMachine(response.data.data);
+      });
+
+    axios
+      .get(getAllProjectApi, {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        isMounted && setTableProject(response.data.data);
       })
       .catch((error) => console.log(error));
 
-    axios.get(getCapabilityByIdApi(id)).then((response) => {
-      const result = response.data.data;
-      if (result.length > 0) {
-        setMachine(result[0].machine_id);
-        setUserIdDataView(result[0].user_id);
-        setProduct(result[0].product_id);
-        setLine(result[0].line_id);
-        setPartName(result[0].part_name);
-        setPartNumber(result[0].part_number);
-        setType(result[0].type);
-        setItemCheck(result[0].item_check);
-        setSigma(result[0].sigma);
-        if (result[0].type === DOUBLE_STANDARD) {
-          setStandardMax(result[0].standard_max);
-          setStandardMin(result[0].standard_min);
-        } else {
-          setStandard(result[0].standard);
-        }
-        setRemark(result[0].description);
+    axios
+      .get(getCapabilityByIdApi(id), {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        const result = isMounted ? response.data.data : [];
+        if (result.length > 0) {
+          setMachine(result[0].machine_id);
+          setUserIdDataView(result[0].user_id);
+          setProduct(result[0].product_id);
+          setLine(result[0].line_id);
+          setPartName(result[0].part_name);
+          setPartNumber(result[0].part_number);
+          setType(result[0].type);
+          setItemCheck(result[0].item_check);
+          setSigma(result[0].sigma);
+          if (result[0].type === DOUBLE_STANDARD) {
+            setStandardMax(result[0].standard_max);
+            setStandardMin(result[0].standard_min);
+          } else {
+            setStandard(result[0].standard);
+          }
+          setRemark(result[0].description);
 
-        if (result[0].data1.length > 0) {
-          setListData(result[0].data1);
+          if (result[0].data1.length > 0) {
+            setListData(result[0].data1);
+          }
+          if (result[0].data2.length > 0) {
+            setListData2(result[0].data2);
+          }
+          setUpdateMode(true);
         }
-        if (result[0].data2.length > 0) {
-          setListData2(result[0].data2);
-        }
-        setUpdateMode(true);
-      }
-    });
+      });
 
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
       setUserId(user.id);
     }
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [id, updateMode]);
 
   const handleSetProduct = (e) => {
@@ -918,7 +939,6 @@ function CapabilityComparisonForm() {
                 <Form.Select
                   value={project}
                   onChange={(e) => setProject(e.target.value)}
-                  required
                   disabled={
                     updateMode
                       ? userId === userIdDataView
@@ -971,6 +991,13 @@ function CapabilityComparisonForm() {
                     className="inputfile"
                     onChange={handleChangeFile}
                     ref={fileRef}
+                    disabled={
+                      updateMode
+                        ? userId === userIdDataView
+                          ? false
+                          : true
+                        : false
+                    }
                   />
                 </Col>
                 <Col sm={6}>
@@ -987,6 +1014,13 @@ function CapabilityComparisonForm() {
                     title="Reset"
                     onClick={handleResetInputData}
                     style={{ marginRight: 5 }}
+                    disabled={
+                      updateMode
+                        ? userId === userIdDataView
+                          ? false
+                          : true
+                        : false
+                    }
                   >
                     <BiReset style={{ pointerEvents: "none" }} />
                   </Button>
@@ -1015,6 +1049,13 @@ function CapabilityComparisonForm() {
                                 step={".001"}
                                 required
                                 size="sm"
+                                disabled={
+                                  updateMode
+                                    ? userId === userIdDataView
+                                      ? false
+                                      : true
+                                    : false
+                                }
                               />
                             </FloatingLabel>
                           </Col>
@@ -1024,7 +1065,18 @@ function CapabilityComparisonForm() {
                             </Row>
                             <Row>
                               <Col>
-                                <Button type="submit">ADD</Button>
+                                <Button
+                                  type="submit"
+                                  disabled={
+                                    updateMode
+                                      ? userId === userIdDataView
+                                        ? false
+                                        : true
+                                      : false
+                                  }
+                                >
+                                  ADD
+                                </Button>
                               </Col>
                             </Row>
                           </Col>
