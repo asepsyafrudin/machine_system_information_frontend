@@ -1,4 +1,4 @@
-const port = "http://172.31.71.2:8080";
+const port = "http://172.31.71.10:8080";
 
 //users Api
 export const registerUserApi = `${port}/api/users/create_users`;
@@ -295,7 +295,16 @@ export const getTodoByProjectIdApi = (id) => {
   return `${port}/api/todo/getTodoByProjectId/${id}`;
 };
 
-//tokek
+//token
 
 export const createTokenApi = `${port}/api/token/createToken`;
 export const validateTokenApi = `${port}/api/token/getValidationFromToken`;
+
+//section
+
+export const createSectionApi = `${port}/api/section/create`;
+export const deleteSectionApi = (id) => {
+  return `${port}/api/section/delete/${id}`;
+};
+
+export const getAllSectionApi = `${port}/api/section/getAll`;

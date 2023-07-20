@@ -39,7 +39,7 @@ import { GrEdit } from "react-icons/gr";
 import ModalAlert from "../ModalAlert";
 
 function DocumentRegister(props) {
-  const { actionState, actionStateValue } = props;
+  const { actionState, actionStateValue, title } = props;
   const refVidoe = useRef();
   const [documentTitle, setDocumentTitle] = useState("");
   const [document, setDocument] = useState([]); //file will be transfered show
@@ -437,7 +437,7 @@ function DocumentRegister(props) {
   return (
     <div className="userListContainer">
       <TitleSection
-        title="Document Upload Form"
+        title={title}
         icon={<IoMdDocument style={{ marginRight: 5 }} />}
       />
       <div className="registerProductFormContainer">

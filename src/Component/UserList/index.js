@@ -24,7 +24,7 @@ import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import ModalAlert from "../ModalAlert";
 
 function UserList(props) {
-  const { actionState, actionStateValue } = props;
+  const { actionState, actionStateValue, title } = props;
   const [updateMode, setUpdateMode] = useState(false);
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
@@ -307,7 +307,7 @@ function UserList(props) {
   return (
     <div className="userListContainer">
       <TitleSection
-        title="User Registration"
+        title={title}
         icon={<FaUserAlt style={{ marginRight: 5 }} />}
       />
       <div className="userFormContainer">

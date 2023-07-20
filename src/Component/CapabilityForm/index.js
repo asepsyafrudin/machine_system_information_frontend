@@ -35,7 +35,7 @@ import GraphCapabilityLine from "../GraphCapabilityLine";
 import GraphCapabilityDistribution from "../GraphCapabilityDistribution";
 import GraphNormalDistribution from "../GraphNormalDistribution";
 import { SlEmotsmile } from "react-icons/sl";
-import { FaRegSadCry } from "react-icons/fa";
+import { FaBackward, FaRegSadCry } from "react-icons/fa";
 import RECOMENDATION from "../../Config/recomendationOfCapability";
 import { BsDiamondFill } from "react-icons/bs";
 import { RiStopMiniLine } from "react-icons/ri";
@@ -80,6 +80,7 @@ function CapabilityForm() {
   const [project, setProject] = useState("");
   const [showModalConfirm, setShowModalConfirm] = useState(false);
   const fileRef = useRef(null);
+  const [position, setPosition] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -150,6 +151,7 @@ function CapabilityForm() {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
       setUserId(user.id);
+      setPosition(user.position);
     }
 
     return () => {
@@ -634,10 +636,30 @@ function CapabilityForm() {
     setListData([]);
     fileRef.current.value = "";
   };
+
+  const handleBackPage = () => {
+    if (position === "Administrator") {
+      navigate("/adminMenu");
+    } else {
+      navigate("/dashboardUsers");
+    }
+  };
   return (
     <>
       <div className="capabilityFormContainer">
         <div className="capabilityForm">
+          <div>
+            <Row>
+              <Col sm={6} style={{ textAlign: "left" }}>
+                <Button
+                  style={{ marginRight: 5, marginBottom: 5 }}
+                  onClick={handleBackPage}
+                >
+                  <FaBackward pointerEvents={"none"} /> Back to Dashboard User
+                </Button>
+              </Col>
+            </Row>
+          </div>
           <Form onSubmit={handleSave}>
             {updateMode
               ? userId === userIdDataView

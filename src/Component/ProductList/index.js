@@ -20,6 +20,7 @@ import axios from "axios";
 import {
   deleteProductApi,
   getAllProductApi,
+  getAllSectionApi,
   registerProductApi,
   searchProductApi,
   updateProductNameApi,
@@ -29,30 +30,50 @@ import PaginationTable from "../Pagination";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 
 function ProductList(props) {
-  const { actionState, actionStateValue } = props;
+  const { actionState, actionStateValue, title } = props;
   const [productName, setProductName] = useState("");
+  const [sectionName, setSectionName] = useState("");
   const [search, setSearch] = useState("");
   const [alert, setAlert] = useState(false);
   const [notifSuccess, setNotifSuccess] = useState(false);
+  const [tableSection, setTableSection] = useState([]);
   const [tableProduct, setTableProduct] = useState("");
   const [page, setPage] = useState(1);
   const [updateMode, setUpdateMode] = useState(false);
   const [id, setId] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     if (search === "") {
       axios
-        .get(getAllProductApi)
+        .get(getAllProductApi, {
+          signal: controller.signal,
+        })
         .then((response) => {
-          setTableProduct(response.data.data);
+          isMounted && setTableProduct(response.data.data);
         })
         .catch((error) => console.log(error));
     } else {
-      axios.get(searchProductApi(search)).then((response) => {
-        setTableProduct(response.data.data);
-        setPage(1);
-      });
+      axios
+        .get(searchProductApi(search), {
+          signal: controller.signal,
+        })
+        .then((response) => {
+          isMounted && setTableProduct(response.data.data);
+          setPage(1);
+        });
     }
+
+    axios
+      .get(getAllSectionApi, {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        isMounted && setTableSection(response.data.data);
+      })
+      .catch((error) => console.log(error));
   }, [search, actionStateValue]);
 
   const handleRegisterProduct = (e) => {
@@ -60,11 +81,13 @@ function ProductList(props) {
     if (!updateMode) {
       const data = {
         product_name: productName,
+        section_id: sectionName,
         status: "Active",
       };
 
       axios.post(registerProductApi, data).then((response) => {
         setProductName("");
+        setSectionName("");
         setNotifSuccess(true);
         setAlert(false);
         actionState(1);
@@ -73,11 +96,13 @@ function ProductList(props) {
       const data = {
         id: id,
         product_name: productName,
+        section_id: sectionName,
       };
       axios.patch(updateProductNameApi, data).then((response) => {
         setId("");
         setUpdateMode(false);
         setProductName("");
+        setSectionName("");
         setNotifSuccess(true);
         actionState(1);
       });
@@ -86,6 +111,7 @@ function ProductList(props) {
 
   const handleClear = () => {
     setProductName("");
+    setSectionName("");
     setUpdateMode(false);
     actionState(1);
   };
@@ -98,6 +124,7 @@ function ProductList(props) {
     });
 
     setProductName(product.product_name);
+    setSectionName(product.section_id);
     setUpdateMode(true);
     actionState(1);
   };
@@ -168,6 +195,7 @@ function ProductList(props) {
         listData.push(
           <tr key={index}>
             <td>{index + 1}</td>
+            <td>{sectionNameFunction(tableProduct[index].section_id)}</td>
             <td>{CapitalCaseFirstWord(tableProduct[index].product_name)}</td>
             <td>{tableProduct[index].status}</td>
             <td>
@@ -213,22 +241,52 @@ function ProductList(props) {
     setSearch(e.target.value);
     setPage(1);
   };
+
+  const sectionNameFunction = (id) => {
+    const data = tableSection.find((value) => value.id === id);
+    if (data) {
+      return CapitalCaseFirstWord(data.section_name);
+    }
+    return "";
+  };
+
+  const sectionOption = () => {
+    let option = [];
+    if (tableSection.length > 0) {
+      for (let index = 0; index < tableSection.length; index++) {
+        option.push(
+          <option key={index} value={tableSection[index].id}>
+            {tableSection[index].section_name}
+          </option>
+        );
+      }
+    }
+    return <>{option}</>;
+  };
   return (
     <div className="userListContainer">
       <TitleSection
-        title="Product Registration"
+        title={title}
         icon={<FaCashRegister style={{ marginRight: 5 }} />}
       />
       <div className="registerProductFormContainer">
         <Form onSubmit={handleRegisterProduct}>
-          <Row>
-            <Col sm={8}>
+          <Row className="mb-3" style={{ textAlign: "left" }}>
+            <Form.Group as={Col}>
+              <Form.Label>Section Name</Form.Label>
+              <Form.Select
+                value={sectionName}
+                onChange={(e) => setSectionName(e.target.value)}
+                required
+              >
+                <option value="" disabled>
+                  OpenThis
+                </option>
+                {sectionOption()}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group as={Col}>
               <Form.Label>Product Name</Form.Label>
-            </Col>
-            <Col sm={4} />
-          </Row>
-          <Row>
-            <Col sm={8}>
               <Form.Control
                 type="text"
                 placeholder="Enter product name"
@@ -236,8 +294,10 @@ function ProductList(props) {
                 onChange={(e) => setProductName(e.target.value)}
                 required
               />
-            </Col>
-            <Col sm={4}>
+            </Form.Group>
+          </Row>
+          <Row className="mb-3" style={{ textAlign: "right" }}>
+            <Col>
               <Button type="submit" style={{ marginRight: 5 }}>
                 {updateMode ? "Update" : "Register"}
               </Button>
@@ -285,6 +345,7 @@ function ProductList(props) {
           <thead>
             <tr>
               <th>No</th>
+              <th>Section Name</th>
               <th>Product Name</th>
               <th>Status</th>
               <th>Action</th>

@@ -29,7 +29,7 @@ import { GoGitCompare } from "react-icons/go";
 import PaginationTable from "../Pagination";
 
 function LineList(props) {
-  const { actionState, actionStateValue } = props;
+  const { actionState, actionStateValue, title } = props;
   const [alert, setAlert] = useState(false);
   const [notifSuccess, setNotifSuccess] = useState(false);
   const [search, setSearch] = useState("");
@@ -257,7 +257,7 @@ function LineList(props) {
   return (
     <div className="userListContainer">
       <TitleSection
-        title="Register Line"
+        title={title}
         icon={<AiOutlineWindows tyle={{ marginRight: 5 }} />}
       />
       <div className="lineRegisterFormContainer">

@@ -5,6 +5,8 @@ import {
   SAVECHANGEDATA,
   SAVETODO,
   SAVEUSERLOGIN,
+  SETPROJECTEVENT,
+  SETUSEREVENT,
   TODOCHANGECOUNT,
 } from "../const";
 
@@ -24,6 +26,8 @@ export const GlobalProvider = (Children) => {
       position: "",
       dataChangeCount: 0,
       todoChangeCount: 0,
+      projectEvent: "totalProject",
+      userEvent: "userDashboard",
     };
 
     dipatch = (action) => {
@@ -64,6 +68,14 @@ export const GlobalProvider = (Children) => {
       if (action.type === SAVETODO) {
         this.setState({ todoChangeCount: 0 });
       }
+
+      if (action.type === SETPROJECTEVENT) {
+        this.setState({ projectEvent: action.payload });
+      }
+
+      if (action.type === SETUSEREVENT) {
+        this.setState({ userEvent: action.payload });
+      }
     };
 
     render() {
@@ -80,6 +92,8 @@ export const GlobalProvider = (Children) => {
             position: this.state.position,
             dataChangeCount: this.state.dataChangeCount,
             todoChangeCount: this.state.todoChangeCount,
+            projectEvent: this.state.projectEvent,
+            userEvent: this.state.userEvent,
             dispatch: this.dipatch,
           }}
         >

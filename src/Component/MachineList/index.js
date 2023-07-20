@@ -34,7 +34,7 @@ import QRCode from "react-qr-code";
 import ModalAlert from "../ModalAlert";
 
 function MachineList(props) {
-  const { actionState, actionStateValue } = props;
+  const { actionState, actionStateValue, title } = props;
   const [product, setProduct] = useState("");
   const [line, setLine] = useState("");
   const [machine, setMachine] = useState("");
@@ -334,7 +334,7 @@ function MachineList(props) {
   return (
     <div className="userListContainer">
       <TitleSection
-        title="Machine Register"
+        title={title}
         icon={<HiOutlineDesktopComputer style={{ marginRight: 5 }} />}
       />
       <div className="registerMachineFormContainer">
@@ -373,7 +373,7 @@ function MachineList(props) {
               />
             </Form.Group>
             <Form.Group as={Col}>
-              <Form.Label>Asset No</Form.Label>
+              <Form.Label>Asset No (*optional)</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Enter Asset No"
@@ -419,7 +419,7 @@ function MachineList(props) {
           </Row>
           <Row className="mb-3">
             <Col>
-              <Form.Label>Machine Description</Form.Label>
+              <Form.Label>Machine Description (*optional)</Form.Label>
               <Form.Control
                 as="textarea"
                 style={{ height: 100 }}

@@ -18,7 +18,7 @@ import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import moment from "moment/moment";
 
 function UserDashboard(props) {
-  const { actionState, actionStateValue } = props;
+  const { actionState, actionStateValue, title } = props;
   const [id, setId] = useState("");
   const [updateMode, setUpdateMode] = useState(false);
   const [email, setEmail] = useState("");
@@ -259,7 +259,7 @@ function UserDashboard(props) {
     <div>
       <div className="userListContainer">
         <TitleSection
-          title="User Profile"
+          title={title}
           icon={<FaUserAlt style={{ marginRight: 5 }} />}
         />
         <div className="userFormContainer">

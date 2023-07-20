@@ -626,7 +626,7 @@ function Project(props) {
                       >
                         <GoGitCompare style={{ pointerEvents: "none" }} />
                       </Button> */}
-                      <Link to={`/projectActivity/${value.id}`} target="_blank">
+                      <Link to={`/projectActivity/${value.id}`}>
                         <Button
                           title="View"
                           size="sm"

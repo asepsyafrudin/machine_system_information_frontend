@@ -38,7 +38,7 @@ import { Link } from "react-router-dom";
 import ModalAlert from "../ModalAlert";
 
 function VideoListAdmin(props) {
-  const { actionState, actionStateValue } = props;
+  const { actionState, actionStateValue, title } = props;
   const refVidoe = useRef();
   const [videoName, setVideoName] = useState("");
   const [video, setVideo] = useState("");
@@ -420,7 +420,7 @@ function VideoListAdmin(props) {
   return (
     <div className="userListContainer">
       <TitleSection
-        title="Video Upload Form"
+        title={title}
         icon={<TfiVideoClapper style={{ marginRight: 5 }} />}
       />
       <div className="registerProductFormContainer">

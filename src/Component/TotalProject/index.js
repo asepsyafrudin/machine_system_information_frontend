@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import {
   getAllProductApi,
-  getAllProjectApi,
+  getAllSectionApi,
   getAllUsersApi,
   searchProjectApi,
 } from "../../Config/API";
@@ -35,12 +35,17 @@ function TotalProject(props) {
   const [tableProject, setTableProject] = useState([]);
   const [projectLaunch, setProjectLaunch] = useState("");
   const [show, setShow] = useState(false);
+  const [tableSection, setTableSection] = useState([]);
+  const [sectionFilter, setSectionFilter] = useState("");
   const [buttonFilter, setButtonFilter] = useState("");
 
   const maxPagesShow = 3;
   const dataPerPage = 5;
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     const projectWillBeLaunch = (data) => {
       let currentDate = new Date().getTime();
       if (data.length > 0) {
@@ -57,133 +62,99 @@ function TotalProject(props) {
     };
 
     axios
-      .get(getAllProductApi)
+      .get(getAllProductApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
         setTableProduct(response.data.data);
       })
       .catch((error) => console.log(error));
 
-    if (productFilter === "") {
-      if (startFilter !== "" && endFilter !== "") {
-        let data = {
-          page: page,
-          product_id: productFilter,
-          from_date: startFilter,
-          to_date: endFilter,
-        };
-
-        axios.post(searchProjectApi, data).then((response) => {
-          const data = response.data.data;
-          setTableProject(data);
-          const totalPageData = Math.ceil(data.length / dataPerPage);
-          setStotalPageData(totalPageData);
-          projectWillBeLaunch(data);
-          setTotalItem(data.length);
-          let budget = 0;
-          let saving = 0;
-          if (data.length > 0) {
-            for (let index = 0; index < data.length; index++) {
-              budget += parseFloat(data[index].budget);
-              saving += parseFloat(data[index].saving_cost);
-            }
-          }
-          setTotalBudget(budget);
-          setTotalSavingCost(saving);
-        });
-      } else {
-        axios
-          .get(getAllProjectApi)
-          .then((response) => {
-            const data = response.data.data;
-            setTableProject(data);
-            const totalPageData = Math.ceil(data.length / dataPerPage);
-            setStotalPageData(totalPageData);
-            projectWillBeLaunch(data);
-            setTotalItem(data.length);
-            let budget = 0;
-            let saving = 0;
-            if (data.length > 0) {
-              for (let index = 0; index < data.length; index++) {
-                budget += parseFloat(data[index].budget);
-                saving += parseFloat(data[index].saving_cost);
-              }
-            }
-            setTotalBudget(budget);
-            setTotalSavingCost(saving);
-          })
-          .catch((error) => console.log(error));
-      }
-    } else {
-      if (startFilter !== "" && endFilter !== "") {
-        let data = {
-          page: page,
-          product_id: productFilter,
-          from_date: startFilter,
-          to_date: endFilter,
-        };
-
-        axios.post(searchProjectApi, data).then((response) => {
-          const data = response.data.data;
-          setTableProject(data);
-          const totalPageData = Math.ceil(data.length / dataPerPage);
-          setStotalPageData(totalPageData);
-          projectWillBeLaunch(data);
-          setTotalItem(data.length);
-          let budget = 0;
-          let saving = 0;
-          if (data.length > 0) {
-            for (let index = 0; index < data.length; index++) {
-              budget += parseFloat(data[index].budget);
-              saving += parseFloat(data[index].saving_cost);
-            }
-          }
-          setTotalBudget(budget);
-          setTotalSavingCost(saving);
-        });
-      } else {
-        let sendData = {
-          page: page,
-          product_id: parseInt(productFilter),
-          from_date: startFilter,
-          to_date: endFilter,
-        };
-
-        axios.post(searchProjectApi, sendData).then((response) => {
-          const data = response.data.data;
-          setTableProject(data);
-          const totalPageData = Math.ceil(data.length / dataPerPage);
-          setStotalPageData(totalPageData);
-          projectWillBeLaunch(data);
-          setTotalItem(data.length);
-          let budget = 0;
-          let saving = 0;
-          if (data.length > 0) {
-            for (let index = 0; index < data.length; index++) {
-              budget += parseFloat(data[index].budget);
-              saving += parseFloat(data[index].saving_cost);
-            }
-          }
-          setTotalBudget(budget);
-          setTotalSavingCost(saving);
-        });
-      }
-    }
-
     axios
-      .get(getAllUsersApi)
+      .get(getAllSectionApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableUser(response.data.data);
+        isMounted && setTableSection(response.data.data);
       })
       .catch((error) => console.log(error));
-  }, [productFilter, page, actionStateValue, startFilter, endFilter]);
+
+    let data = {
+      page: page,
+      section_id: sectionFilter,
+      product_id: productFilter,
+      from_date: startFilter,
+      to_date: endFilter,
+    };
+
+    axios.post(searchProjectApi, data).then((response) => {
+      const data = response.data.data;
+      setTableProject(data);
+      const totalPageData = Math.ceil(data.length / dataPerPage);
+      setStotalPageData(totalPageData);
+      projectWillBeLaunch(data);
+      setTotalItem(data.length);
+      let budget = 0;
+      let saving = 0;
+      if (data.length > 0) {
+        for (let index = 0; index < data.length; index++) {
+          budget += parseFloat(data[index].budget);
+          saving += parseFloat(data[index].saving_cost);
+        }
+      }
+      setTotalBudget(budget);
+      setTotalSavingCost(saving);
+    });
+
+    axios
+      .get(getAllUsersApi, {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        isMounted && setTableUser(response.data.data);
+      })
+      .catch((error) => console.log(error));
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [
+    sectionFilter,
+    productFilter,
+    page,
+    actionStateValue,
+    startFilter,
+    endFilter,
+  ]);
 
   const productOption = () => {
     let option = [];
-    if (tableProduct) {
-      for (let index = 0; index < tableProduct.length; index++) {
+    if (sectionFilter) {
+      const productFilter = tableProduct.filter(
+        (value) => value.section_id === parseInt(sectionFilter)
+      );
+      console.log(productFilter);
+      if (productFilter.length > 0) {
+        for (let index = 0; index < productFilter.length; index++) {
+          option.push(
+            <option key={index} value={productFilter[index].id}>
+              {productFilter[index].product_name}
+            </option>
+          );
+        }
+      }
+    }
+    return <>{option}</>;
+  };
+
+  const sectionOption = () => {
+    let option = [];
+    if (tableSection.length > 0) {
+      for (let index = 0; index < tableSection.length; index++) {
         option.push(
-          <option key={index} value={tableProduct[index].id}>
-            {tableProduct[index].product_name}
+          <option key={index} value={tableSection[index].id}>
+            {tableSection[index].section_name}
           </option>
         );
       }
@@ -398,6 +369,12 @@ function TotalProject(props) {
     setButtonFilter(filter);
     setShow(true);
   };
+
+  const handleChangeSectionFilter = (e) => {
+    const filter = e.target.value;
+    setSectionFilter(filter);
+    setProductFilter("");
+  };
   return (
     <div>
       <Row>
@@ -405,6 +382,18 @@ function TotalProject(props) {
           <div className="filterTotalProject">
             <Form>
               <Row style={{ textAlign: "left" }}>
+                <Form.Group as={Col}>
+                  <Form.Label>Select Section</Form.Label>
+                  <Form.Select
+                    value={sectionFilter}
+                    onChange={handleChangeSectionFilter}
+                  >
+                    <option value={""} disabled>
+                      open this to product filter
+                    </option>
+                    {sectionOption()}
+                  </Form.Select>
+                </Form.Group>
                 <Form.Group as={Col}>
                   <Form.Label>Select Product</Form.Label>
                   <Form.Select

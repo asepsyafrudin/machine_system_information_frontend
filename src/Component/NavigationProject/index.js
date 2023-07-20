@@ -6,13 +6,23 @@ import { AiOutlineFundProjectionScreen } from "react-icons/ai";
 import { VscProject } from "react-icons/vsc";
 import { BsBack } from "react-icons/bs";
 import { Link } from "react-router-dom";
+import { GlobalConsumer } from "../../Context/store";
+import { SETPROJECTEVENT } from "../../Context/const";
 
-function NavigationProject() {
+function NavigationProject(props) {
+  const { projectEvent, dispatch } = props;
   const [actionState, setActionState] = useState(1);
+
+  const handleEvent = (eventName) => {
+    dispatch({
+      type: SETPROJECTEVENT,
+      payload: eventName,
+    });
+  };
   return (
     <Tab.Container
       id="left-tabs-admin"
-      defaultActiveKey={"totalProject"}
+      defaultActiveKey={projectEvent}
       className="containerNavigation"
     >
       <Row>
@@ -20,13 +30,21 @@ function NavigationProject() {
           <div className="menuListAdmin tabTitle">Project Dashboard</div>
           <Nav variant="pills" className="flex-column">
             <Nav.Item>
-              <Nav.Link eventKey={"totalProject"} className="tabTitle">
+              <Nav.Link
+                eventKey={"totalProject"}
+                onClick={() => handleEvent("totalProject")}
+                className="tabTitle"
+              >
                 <AiOutlineFundProjectionScreen style={{ marginRight: 5 }} />{" "}
                 Total Project
               </Nav.Link>
             </Nav.Item>
             <Nav.Item>
-              <Nav.Link eventKey={"project"} className="tabTitle">
+              <Nav.Link
+                eventKey={"project"}
+                onClick={() => handleEvent("project")}
+                className="tabTitle"
+              >
                 <VscProject style={{ marginRight: 5 }} />
                 Project
               </Nav.Link>
@@ -60,4 +78,4 @@ function NavigationProject() {
   );
 }
 
-export default NavigationProject;
+export default GlobalConsumer(NavigationProject);
