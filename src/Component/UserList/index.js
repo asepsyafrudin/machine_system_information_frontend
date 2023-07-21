@@ -142,8 +142,7 @@ function UserList(props) {
       formData.append("npk", npk);
       formData.append("email", email);
       formData.append("password", password);
-      formData.append("section", section);
-      formData.append("product", product);
+      formData.append("product_id", product);
       formData.append("position", position);
       formData.append("photo", photo);
       if (!updateMode) {
@@ -218,8 +217,8 @@ function UserList(props) {
       }
       setPhoto(dataForEdit.photo);
       setPosition(dataForEdit.position);
-      setSection(dataForEdit.section);
-      setProduct(dataForEdit.product);
+      setSection(dataForEdit.section_id);
+      setProduct(dataForEdit.product_id);
       setUpdateMode(true);
     }
   };
@@ -491,8 +490,8 @@ function UserList(props) {
                     <td>{CapitalCaseFirstWord(value.username)}</td>
                     <td>{value.npk}</td>
                     <td>{value.email}</td>
-                    <td>{value.section}</td>
-                    <td>{value.product}</td>
+                    <td>{value.section_name}</td>
+                    <td>{value.product_name}</td>
                     <td>{value.position}</td>
                     <td>
                       <Button
