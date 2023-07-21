@@ -65,8 +65,8 @@ function UserDashboard(props) {
       }
       setPhoto(dataForEdit[0].photo);
       setPosition(dataForEdit[0].position);
-      setSection(dataForEdit[0].section);
-      setProduct(dataForEdit[0].product);
+      setSection(dataForEdit[0].section_id);
+      setProduct(dataForEdit[0].product_id);
     });
 
     axios
