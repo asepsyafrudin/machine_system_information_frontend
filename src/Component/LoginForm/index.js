@@ -15,11 +15,9 @@ import {
 import { CHANGE_PASSWORD } from "../../Config/const";
 import ModalAlert from "../ModalAlert";
 import { GrValidate } from "react-icons/gr";
-import { SAVEUSERLOGIN } from "../../Context/const";
 import { GlobalConsumer } from "../../Context/store";
 
 function LoginForm(props) {
-  const { dispatch } = props;
   const { token } = useParams();
   const [npk, setNpk] = useState("");
   const [password, setPassword] = useState("");
@@ -52,30 +50,14 @@ function LoginForm(props) {
       .post(loginApi, data)
       .then((response) => {
         const user = response.data.data[0];
-        const { id, username, npk, email, section, product, photo, position } =
-          user;
         if (user) {
           axios
             .post(createTokenApi, user)
             .then((response) => {
               const token = response.data.data;
-
               localStorage.setItem("user", JSON.stringify(user));
               localStorage.setItem("token", JSON.stringify(token));
               navigate("/home");
-              dispatch({
-                type: SAVEUSERLOGIN,
-                payload: {
-                  user_id: id,
-                  username: username,
-                  npk: npk,
-                  email: email,
-                  section: section,
-                  product: product,
-                  photo: photo,
-                  position: position,
-                },
-              });
             })
             .catch((error) => {
               console.log(error);

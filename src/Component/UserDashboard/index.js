@@ -8,6 +8,8 @@ import { FaUserAlt } from "react-icons/fa";
 import {
   changeStatusNotification,
   checkUserPassword,
+  getAllProductApi,
+  getAllSectionApi,
   getNotificationByUserId,
   getUserByUserIdApi,
   resetPhotoProfileApi,
@@ -37,14 +39,21 @@ function UserDashboard(props) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [message, setMessage] = useState("");
   const [tableNotification, setTableNotification] = useState([]);
+  const [tableSection, setTableSection] = useState([]);
+  const [tableProduct, setTableProduct] = useState([]);
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     const user = JSON.parse(localStorage.getItem("user"));
     setOldPassword(user.password);
     const id = parseInt(user.id);
     setId(id);
-    axios(getUserByUserIdApi(id)).then((response) => {
-      const dataForEdit = response.data.data;
+    axios(getUserByUserIdApi(id), {
+      signal: controller.signal,
+    }).then((response) => {
+      const dataForEdit = isMounted && response.data.data;
       setEmail(dataForEdit[0].email);
       setUserName(dataForEdit[0].username);
       setNpk(dataForEdit[0].npk);
@@ -59,9 +68,35 @@ function UserDashboard(props) {
       setSection(dataForEdit[0].section);
       setProduct(dataForEdit[0].product);
     });
-    axios.get(getNotificationByUserId(id)).then((response) => {
-      setTableNotification(response.data.data);
-    });
+
+    axios
+      .get(getNotificationByUserId(id), {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        isMounted && setTableNotification(response.data.data);
+      });
+
+    axios
+      .get(getAllSectionApi, {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        isMounted && setTableSection(response.data.data);
+      });
+
+    axios
+      .get(getAllProductApi, {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        isMounted && setTableProduct(response.data.data);
+      });
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [actionStateValue]);
 
   const resetForm = () => {
@@ -143,103 +178,38 @@ function UserDashboard(props) {
     });
   };
 
-  const optionProduct = () => {
+  const sectionOption = () => {
     let option = [];
-    if (section === "Power Train") {
-      option.push(
-        <Fragment key={"power train"}>
-          <option key="Common" value={"Common"}>
-            Common
+    if (tableSection.length > 0) {
+      for (let index = 0; index < tableSection.length; index++) {
+        option.push(
+          <option key={index} value={tableSection[index].id}>
+            {tableSection[index].section_name}
           </option>
-          <option key="Alternator" value={"Alternator"}>
-            Alternator
-          </option>
-          <option key="Stater" value={"Stater"}>
-            Stater
-          </option>
-          <option key="Sparkplug" value={"Sparkplug"}>
-            Sparkplug
-          </option>
-          <option key="VCT" value={"VCT"}>
-            VCT
-          </option>
-          <option key="SIFS" value={"SIFS"}>
-            SIFS
-          </option>
-          <option key="ACGS" value={"ACGS"}>
-            ACGS
-          </option>
-          <option key="O2 Sensor 2WV" value={"O2 Sensor 2WV"}>
-            O2 Sensor 2WV
-          </option>
-          <option key="O2 Sensor 4WV" value={"O2 Sensor 4WV"}>
-            O2 Sensor 4WV
-          </option>
-        </Fragment>
-      );
-    } else if (section === "Electronics") {
-      option.push(
-        <Fragment key={"Electronics"}>
-          <option key="Common" value={"Common"}>
-            Common
-          </option>
-          <option key="ECU 2WV" value={"ECU 2WV"}>
-            ECU 2WV
-          </option>
-          <option key="ECU 4WV" value={"ECU 4WV"}>
-            ECU 4WV
-          </option>
-          <option key="Sonar ECU" value={"Sonar ECU"}>
-            Sonar ECU
-          </option>
-          <option key="Meter Cluster" value={"Meter Cluster"}>
-            Meter Cluster
-          </option>
-          <option key="WSS" value={"WSS"}>
-            WSS
-          </option>
-          <option key="AISS" value={"AISS"}>
-            AISS
-          </option>
-          <option key="EFI ECU" value={"EFI ECU"}>
-            EFI ECU
-          </option>
-        </Fragment>
-      );
-    } else if (section === "Thermal") {
-      option.push(
-        <Fragment key={"Thermal"}>
-          <option key="Car AC" value={"Car AC"}>
-            Car AC
-          </option>
-          <option key="Bus AC" value={"Bus AC"}>
-            Bus AC
-          </option>
-          <option key="Al Radiator" value={"Al Radiator"}>
-            Al Radiator
-          </option>
-          <option key="N2R Radiator" value={"N2R Radiator"}>
-            N2R Radiator
-          </option>
-          <option key="Condensor" value={"Condensor"}>
-            Condensor
-          </option>
-          <option key="Hose & Tube" value={"Hose & Tube"}>
-            Hose & Tube
-          </option>
-          <option key="Molding" value={"Molding"}>
-            Molding
-          </option>
-          <option key="Stamping" value={"Stamping"}>
-            Stamping
-          </option>
-          <option value={"Common"}>Common</option>
-        </Fragment>
-      );
-    } else {
-      <option value={"Common"}>Common</option>;
+        );
+      }
     }
-    return option;
+    return <>{option}</>;
+  };
+
+  const productOption = () => {
+    let option = [];
+    if (section) {
+      const productFilter = tableProduct.filter(
+        (value) => value.section_id === parseInt(section)
+      );
+      console.log(productFilter);
+      if (productFilter.length > 0) {
+        for (let index = 0; index < productFilter.length; index++) {
+          option.push(
+            <option key={index} value={productFilter[index].id}>
+              {productFilter[index].product_name}
+            </option>
+          );
+        }
+      }
+    }
+    return <>{option}</>;
   };
 
   const handleCloseNotif = (e) => {
@@ -303,32 +273,29 @@ function UserDashboard(props) {
                 </Row>
                 <Row className="mb-3">
                   <Form.Group as={Col}>
-                    <Form.Label>Section</Form.Label>
+                    <Form.Label>Select Section</Form.Label>
                     <Form.Select
-                      disabled={!updateMode}
                       value={section}
                       onChange={handleSetSection}
+                      disabled={!updateMode}
                     >
                       <option value={""} disabled>
-                        open this
+                        open this to product filter
                       </option>
-                      <option value={"Power Train"}>Power Train</option>
-                      <option value={"Electronics"}>Electronics</option>
-                      <option value={"Planning Center"}>Planning Center</option>
-                      <option value={"Thermal"}>Thermal</option>
+                      {sectionOption()}
                     </Form.Select>
                   </Form.Group>
                   <Form.Group as={Col}>
-                    <Form.Label>Product</Form.Label>
+                    <Form.Label>Select Product</Form.Label>
                     <Form.Select
-                      disabled={section && updateMode ? false : true}
                       value={product}
                       onChange={(e) => setProduct(e.target.value)}
+                      disabled={!updateMode}
                     >
                       <option value={""} disabled>
-                        open this
+                        open this to product filter
                       </option>
-                      {optionProduct()}
+                      {productOption()}
                     </Form.Select>
                   </Form.Group>
                   <Form.Group as={Col}>

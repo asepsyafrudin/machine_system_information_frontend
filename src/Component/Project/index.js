@@ -63,6 +63,7 @@ function Project(props) {
   const [showAlert, setShowAlert] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
 
   const maxPagesShow = 3;
 
@@ -184,6 +185,7 @@ function Project(props) {
     setSavingCost("");
     setStartDate("");
     setSopDate("");
+    setCategory("");
     setMemberId("");
     setMember([]);
     setProjectIdEdit("");
@@ -199,6 +201,7 @@ function Project(props) {
       saving_cost: savingCost,
       start: startDate,
       finish: sopDate,
+      category: category,
       member: projectIdEdit ? [...member] : [...member, userId],
       user_id: userId,
       status: STATUSOPEN,
@@ -223,15 +226,6 @@ function Project(props) {
           actionState(1);
         });
       }
-    }
-  };
-
-  const productNameFunction = (id) => {
-    const findProduct = tableProduct.find((value) => value.id === parseInt(id));
-    if (findProduct) {
-      return findProduct.product_name;
-    } else {
-      return "";
     }
   };
 
@@ -277,6 +271,7 @@ function Project(props) {
         setBudget(data.budget);
         setSavingCost(data.saving_cost);
         setStartDate(dateParse(data.start));
+        setCategory(data.category);
         setSopDate(dateParse(data.finish));
         setDescription(data.description);
         let memberIddata = [];
@@ -287,32 +282,6 @@ function Project(props) {
       }
     }
   };
-
-  // const changeStatusProject = (e) => {
-  //   const id = e.target.id;
-  //   const findData = tableProject.find((value) => value.id === id);
-  //   let status = "";
-  //   console.log(findData.status);
-  //   if (findData) {
-  //     if (findData.status !== STATUSFINISH) {
-  //       status = "finish";
-  //     } else {
-  //       status = STATUSOPEN;
-  //     }
-  //     let confirm = window.confirm(
-  //       `Do You Want to Change Status to ${status}?`
-  //     );
-  //     if (confirm) {
-  //       const data = { id: id, status: status };
-  //       axios.put(updateStatusProjectApi, data).then((response) => {
-  //         setMessage("Status Project Already Changed");
-  //         setShow(true);
-  //         handleReset();
-  //         actionState(1);
-  //       });
-  //     }
-  //   }
-  // };
 
   const handleSendEmail = (e) => {
     const id = e.target.id;
@@ -536,7 +505,24 @@ function Project(props) {
             </Col>
           </Row>
           <Row className="mb-3" style={{ textAlign: "left" }}>
-            <Form.Group as={Col}>
+            <Col sm={4}>
+              <Form.Label>Category</Form.Label>
+              <Form.Select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+              >
+                <option value="" disabled>
+                  Open This
+                </option>
+                <option value="New Model">New Model</option>
+                <option value="Quality">Quality</option>
+                <option value="Integrated Factory">Integrated Factory</option>
+                <option value="Productivity">Productivity</option>
+                <option value="Profit Improvement">Profit Improvement</option>
+              </Form.Select>
+            </Col>
+            <Col sm={8}>
               <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
@@ -544,7 +530,7 @@ function Project(props) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               ></Form.Control>
-            </Form.Group>
+            </Col>
           </Row>
           <Row className="mb-3" style={{ textAlign: "right" }}>
             <Col>
@@ -568,7 +554,7 @@ function Project(props) {
             <tr>
               <th>NO</th>
               <th>Project Name</th>
-              <th>Product</th>
+              <th>Category</th>
               <th>PIC</th>
               <th>Budget</th>
               <th>Saving</th>
@@ -586,7 +572,7 @@ function Project(props) {
                   <tr key={index}>
                     <td>{numberStart + index}</td>
                     <td>{value.project_name}</td>
-                    <td>{productNameFunction(value.product_id)}</td>
+                    <td>{value.category}</td>
                     <td>{userNameFunction(value.manager_id)}</td>
                     <td>{parseFloat(value.budget).toLocaleString()}</td>
                     <td>{parseFloat(value.saving_cost).toLocaleString()}</td>

@@ -69,7 +69,7 @@ function LineList(props) {
 
   const optionProduct = () => {
     let option = [];
-    if (productList) {
+    if (productList.length > 0) {
       for (let index = 0; index < productList.length; index++) {
         option.push(
           <option key={index} value={productList[index].id}>

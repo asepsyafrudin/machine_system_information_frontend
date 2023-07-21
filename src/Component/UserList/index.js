@@ -17,6 +17,8 @@ import {
   searchUserApi,
   getUsersByPageApi,
   getUserByNPKApi,
+  getAllSectionApi,
+  getAllProductApi,
 } from "../../Config/API";
 import { GoSmiley } from "react-icons/go";
 import Pagination from "../Pagination";
@@ -39,6 +41,8 @@ function UserList(props) {
   const [alert, setAlert] = useState(false);
   const [notifSuccess, setNotifSuccess] = useState(false);
   const [tableUser, setTableUser] = useState([]);
+  const [tableSection, setTableSection] = useState([]);
+  const [tableProduct, setTableProduct] = useState([]);
   const [totalPageData, setTotalPageData] = useState(0);
   const [page, setPage] = useState(1);
   const [numberStartData, setNumberStartData] = useState(1);
@@ -46,25 +50,51 @@ function UserList(props) {
   const [message, setMessage] = useState("");
   const [showModalAlert, setShowModalAlert] = useState(false);
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     if (searchUser === "") {
       axios
-        .get(getUsersByPageApi(page))
+        .get(getUsersByPageApi(page), {
+          signal: controller.signal,
+        })
         .then((response) => {
-          setTableUser(response.data.data);
-          setTotalPageData(response.data.totalPageData);
-          setNumberStartData(response.data.numberStart);
+          isMounted && setTableUser(response.data.data);
+          isMounted && setTotalPageData(response.data.totalPageData);
+          isMounted && setNumberStartData(response.data.numberStart);
         })
         .catch((error) => console.log(error));
     } else {
       axios
         .get(searchUserApi(searchUser, page))
         .then((response) => {
-          setTableUser(response.data.data);
-          setTotalPageData(response.data.totalPageData);
-          setNumberStartData(response.data.numberStart);
+          isMounted && setTableUser(response.data.data);
+          isMounted && setTotalPageData(response.data.totalPageData);
+          isMounted && setNumberStartData(response.data.numberStart);
         })
         .catch((error) => console.log(error));
     }
+
+    axios
+      .get(getAllSectionApi, {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        isMounted && setTableSection(response.data.data);
+      });
+
+    axios
+      .get(getAllProductApi, {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        isMounted && setTableProduct(response.data.data);
+      });
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [searchUser, actionStateValue, page]);
 
   const validatePassword = () => {
@@ -201,103 +231,38 @@ function UserList(props) {
     setSection(e.target.value);
   };
 
-  const optionProduct = () => {
+  const sectionOption = () => {
     let option = [];
-    if (section === "Power Train") {
-      option.push(
-        <Fragment key={"power train"}>
-          <option key="Common" value={"Common"}>
-            Common
+    if (tableSection.length > 0) {
+      for (let index = 0; index < tableSection.length; index++) {
+        option.push(
+          <option key={index} value={tableSection[index].id}>
+            {tableSection[index].section_name}
           </option>
-          <option key="Alternator" value={"Alternator"}>
-            Alternator
-          </option>
-          <option key="Stater" value={"Stater"}>
-            Stater
-          </option>
-          <option key="Sparkplug" value={"Sparkplug"}>
-            Sparkplug
-          </option>
-          <option key="VCT" value={"VCT"}>
-            VCT
-          </option>
-          <option key="SIFS" value={"SIFS"}>
-            SIFS
-          </option>
-          <option key="ACGS" value={"ACGS"}>
-            ACGS
-          </option>
-          <option key="O2 Sensor 2WV" value={"O2 Sensor 2WV"}>
-            O2 Sensor 2WV
-          </option>
-          <option key="O2 Sensor 4WV" value={"O2 Sensor 4WV"}>
-            O2 Sensor 4WV
-          </option>
-        </Fragment>
-      );
-    } else if (section === "Electronics") {
-      option.push(
-        <Fragment key={"Electronics"}>
-          <option key="Common" value={"Common"}>
-            Common
-          </option>
-          <option key="ECU 2WV" value={"ECU 2WV"}>
-            ECU 2WV
-          </option>
-          <option key="ECU 4WV" value={"ECU 4WV"}>
-            ECU 4WV
-          </option>
-          <option key="Sonar ECU" value={"Sonar ECU"}>
-            Sonar ECU
-          </option>
-          <option key="Meter Cluster" value={"Meter Cluster"}>
-            Meter Cluster
-          </option>
-          <option key="WSS" value={"WSS"}>
-            WSS
-          </option>
-          <option key="AISS" value={"AISS"}>
-            AISS
-          </option>
-          <option key="EFI ECU" value={"EFI ECU"}>
-            EFI ECU
-          </option>
-        </Fragment>
-      );
-    } else if (section === "Thermal") {
-      option.push(
-        <Fragment key={"Thermal"}>
-          <option key="Car AC" value={"Car AC"}>
-            Car AC
-          </option>
-          <option key="Bus AC" value={"Bus AC"}>
-            Bus AC
-          </option>
-          <option key="Al Radiator" value={"Al Radiator"}>
-            Al Radiator
-          </option>
-          <option key="N2R Radiator" value={"N2R Radiator"}>
-            N2R Radiator
-          </option>
-          <option key="Condensor" value={"Condensor"}>
-            Condensor
-          </option>
-          <option key="Hose & Tube" value={"Hose & Tube"}>
-            Hose & Tube
-          </option>
-          <option key="Molding" value={"Molding"}>
-            Molding
-          </option>
-          <option key="Stamping" value={"Stamping"}>
-            Stamping
-          </option>
-          <option value={"Common"}>Common</option>
-        </Fragment>
-      );
-    } else {
-      <option value={"Common"}>Common</option>;
+        );
+      }
     }
-    return option;
+    return <>{option}</>;
+  };
+
+  const productOption = () => {
+    let option = [];
+    if (section) {
+      const productFilter = tableProduct.filter(
+        (value) => value.section_id === parseInt(section)
+      );
+      console.log(productFilter);
+      if (productFilter.length > 0) {
+        for (let index = 0; index < productFilter.length; index++) {
+          option.push(
+            <option key={index} value={productFilter[index].id}>
+              {productFilter[index].product_name}
+            </option>
+          );
+        }
+      }
+    }
+    return <>{option}</>;
   };
 
   const handleSearchUser = (e) => {
@@ -349,28 +314,24 @@ function UserList(props) {
               </Row>
               <Row className="mb-3">
                 <Form.Group as={Col}>
-                  <Form.Label>Section</Form.Label>
+                  <Form.Label>Select Section</Form.Label>
                   <Form.Select value={section} onChange={handleSetSection}>
                     <option value={""} disabled>
-                      open this
+                      open this to product filter
                     </option>
-                    <option value={"Power Train"}>Power Train</option>
-                    <option value={"Electronics"}>Electronics</option>
-                    <option value={"Planning Center"}>Planning Center</option>
-                    <option value={"Thermal"}>Thermal</option>
+                    {sectionOption()}
                   </Form.Select>
                 </Form.Group>
                 <Form.Group as={Col}>
-                  <Form.Label>Product</Form.Label>
+                  <Form.Label>Select Product</Form.Label>
                   <Form.Select
-                    disabled={section !== "" ? false : true}
                     value={product}
                     onChange={(e) => setProduct(e.target.value)}
                   >
                     <option value={""} disabled>
-                      open this
+                      open this to product filter
                     </option>
-                    {optionProduct()}
+                    {productOption()}
                   </Form.Select>
                 </Form.Group>
                 <Form.Group as={Col}>
