@@ -1,4 +1,7 @@
-
+@font-face {
+    font-family: roboto;
+    src: url(../../Asset/Font/Roboto-Medium.ttf);
+}
 
 .box-plan{
     width: 50px;
@@ -34,4 +37,13 @@
     background-color: #F1C453;
     margin-left: 20px;
     border-radius: 5px;
+}
+
+.titleModalAddActivity{
+    padding: 15px;
+    font-size: 20px;
+}
+
+.modalAddActivity{
+    font-family: roboto;
 }

@@ -20,7 +20,7 @@ import {
   getAllLineApi,
   getAllMachineApi,
   getAllProductApi,
-  getAllProjectApi,
+  getProjectByUserApi,
   getVideoByPageAdminApi,
   getVideoByUserIdApi,
   registerVideoApi,
@@ -69,61 +69,78 @@ function VideoListAdmin(props) {
   const [tableProject, setTableProject] = useState([]);
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     axios
-      .get(getAllProductApi)
+      .get(getAllProductApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableProduct(response.data.data);
+        isMounted && setTableProduct(response.data.data);
       })
       .catch((error) => console.log(error));
 
     axios
-      .get(getAllLineApi)
+      .get(getAllLineApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableLine(response.data.data);
+        isMounted && setTableLine(response.data.data);
       })
       .catch((error) => console.log(error));
 
     axios
-      .get(getAllMachineApi)
+      .get(getAllMachineApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableMachine(response.data.data);
+        isMounted && setTableMachine(response.data.data);
       })
       .catch((error) => console.log(error));
 
     axios
-      .get(getAllProjectApi)
+      .get(getProjectByUserApi(userId), {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableProject(response.data.data);
+        isMounted && setTableProject(response.data.data);
       })
       .catch((error) => console.log(error));
 
     if (userId) {
       if (search) {
         axios
-          .get(searchVideoForDashboardMenuApi(search, page, userId))
+          .get(searchVideoForDashboardMenuApi(search, page, userId), {
+            signal: controller.signal,
+          })
           .then((response) => {
-            setTableVideo(response.data.data);
-            setTotalPageData(response.data.totalPageData);
-            setNumberStartData(response.data.numberStart);
+            isMounted && setTableVideo(response.data.data);
+            isMounted && setTotalPageData(response.data.totalPageData);
+            isMounted && setNumberStartData(response.data.numberStart);
           })
           .catch((error) => console.log(error));
       } else {
         if (userPositon === "Administrator") {
           axios
-            .get(getVideoByPageAdminApi(page))
+            .get(getVideoByPageAdminApi(page), {
+              signal: controller.signal,
+            })
             .then((response) => {
-              setTableVideo(response.data.data);
-              setTotalPageData(response.data.totalPageData);
-              setNumberStartData(response.data.numberStart);
+              isMounted && setTableVideo(response.data.data);
+              isMounted && setTotalPageData(response.data.totalPageData);
+              isMounted && setNumberStartData(response.data.numberStart);
             })
             .catch((error) => console.log(error));
         } else {
           axios
-            .get(getVideoByUserIdApi(userId, page))
+            .get(getVideoByUserIdApi(userId, page), {
+              signal: controller.signal,
+            })
             .then((response) => {
-              setTableVideo(response.data.data);
-              setTotalPageData(response.data.totalPageData);
-              setNumberStartData(response.data.numberStart);
+              isMounted && setTableVideo(response.data.data);
+              isMounted && setTotalPageData(response.data.totalPageData);
+              isMounted && setNumberStartData(response.data.numberStart);
             })
             .catch((error) => console.log(error));
         }
@@ -133,6 +150,11 @@ function VideoListAdmin(props) {
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
     setUserPosition(user.position);
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [actionStateValue, search, userId, userPositon, page]);
 
   const handleSetProduct = (e) => {

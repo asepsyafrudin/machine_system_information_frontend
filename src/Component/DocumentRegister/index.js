@@ -22,8 +22,8 @@ import {
   getAllLineApi,
   getAllMachineApi,
   getAllProductApi,
-  getAllProjectApi,
   getDocumentByUserIdAndPageApi,
+  getProjectByUserApi,
   registerDocumentApi,
   searchDocumentForDashboardApi,
   updateDocumentApi,
@@ -72,58 +72,76 @@ function DocumentRegister(props) {
   const [project, setProject] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
     axios
-      .get(getAllProductApi)
+      .get(getAllProductApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableProduct(response.data.data);
+        isMounted && setTableProduct(response.data.data);
       })
       .catch((error) => console.log(error));
 
     axios
-      .get(getAllLineApi)
+      .get(getAllLineApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableLine(response.data.data);
+        isMounted && setTableLine(response.data.data);
       })
       .catch((error) => console.log(error));
 
-    axios.get(getAllMachineApi).then((response) => {
-      setTableMachine(response.data.data);
-    });
+    axios
+      .get(getAllMachineApi, {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        isMounted && setTableMachine(response.data.data);
+      });
 
     axios
-      .get(getAllProjectApi)
+      .get(getProjectByUserApi(userId), {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableProject(response.data.data);
+        isMounted && setTableProject(response.data.data);
       })
       .catch((error) => console.log(error));
 
     if (userId) {
       if (search) {
         axios
-          .get(searchDocumentForDashboardApi(search, page, userId))
+          .get(searchDocumentForDashboardApi(search, page, userId), {
+            signal: controller.signal,
+          })
           .then((response) => {
-            setTableDocument(response.data.data);
-            setNumberStart(response.data.numberStart);
-            setTotalPageData(response.data.totalPageData);
+            isMounted && setTableDocument(response.data.data);
+            isMounted && setNumberStart(response.data.numberStart);
+            isMounted && setTotalPageData(response.data.totalPageData);
           })
           .catch((error) => console.log(error));
       } else {
         if (userPositon === "Administrator") {
           axios
-            .get(getAllDocumentByPage(page))
+            .get(getAllDocumentByPage(page), {
+              signal: controller.signal,
+            })
             .then((response) => {
-              setTableDocument(response.data.data);
-              setNumberStart(response.data.numberStart);
-              setTotalPageData(response.data.totalPageData);
+              isMounted && setTableDocument(response.data.data);
+              isMounted && setNumberStart(response.data.numberStart);
+              isMounted && setTotalPageData(response.data.totalPageData);
             })
             .catch((error) => console.log(error));
         } else {
           axios
-            .get(getDocumentByUserIdAndPageApi(userId, page))
+            .get(getDocumentByUserIdAndPageApi(userId, page), {
+              signal: controller.signal,
+            })
             .then((response) => {
-              setTableDocument(response.data.data);
-              setNumberStart(response.data.numberStart);
-              setTotalPageData(response.data.totalPageData);
+              isMounted && setTableDocument(response.data.data);
+              isMounted && setNumberStart(response.data.numberStart);
+              isMounted && setTotalPageData(response.data.totalPageData);
             })
             .catch((error) => console.log(error));
         }

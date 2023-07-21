@@ -279,7 +279,9 @@ export const getProjectByPageAndUser = (page, user) => {
 };
 
 export const searchProjectApi = `${port}/api/project/search`;
-
+export const getProjectByUserApi = (userId) => {
+  return `${port}/api/project/getProjectByUser/${userId}`;
+};
 //activity api
 export const createActivityApi = `${port}/api/activity/create`;
 export const updateActivityApi = `${port}/api/activity/update`;

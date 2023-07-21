@@ -21,6 +21,7 @@ import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { CHANGEDATA, SAVECHANGEDATA } from "../../Context/const";
 import { FaBackward } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { MdDeleteForever } from "react-icons/md";
 
 function ProjectActivity(props) {
   const { id, dataChangeCount, dispatch, todoChangeCount } = props;
@@ -36,7 +37,7 @@ function ProjectActivity(props) {
   const [finishDate, setFinishDate] = useState("");
   const [type, setType] = useState("");
   const [dependencies, setDepedencies] = useState("");
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState("0");
   const [idUpdate, setIdUpdate] = useState("");
   const [colWidth, setColWidth] = useState(120);
   const [showNotif, setShowNotif] = useState(false);
@@ -111,8 +112,9 @@ function ProjectActivity(props) {
     setActivityName("");
     setFinishDate("");
     setStartDate("");
-    setProgress("");
+    setProgress("0");
     setType("");
+    setIdUpdate("");
     setDepedencies("");
     setShow(false);
   };
@@ -149,7 +151,6 @@ function ProjectActivity(props) {
       }
       setActivity(filterData);
       dispatch({ type: CHANGEDATA });
-      setIdUpdate("");
       resetForm();
     }
   };
@@ -177,6 +178,18 @@ function ProjectActivity(props) {
     if (confirm) {
       const filterData = activity.filter((value) => value.id !== task.id);
       setActivity(filterData);
+      setShow(false);
+      dispatch({ type: CHANGEDATA });
+    }
+  };
+
+  const handleDeleteActivity = (id) => {
+    const confirm = window.confirm("Do you want to delete this activity?");
+    if (confirm) {
+      const filterData = activity.filter((value) => value.id !== id);
+      setActivity(filterData);
+      resetForm("");
+      setShow(false);
       dispatch({ type: CHANGEDATA });
     }
   };
@@ -314,11 +327,21 @@ function ProjectActivity(props) {
             onChange={(e) => setListCellWidth(parseInt(e.target.value))}
           />
         </div>
-        <Modal show={show} centered>
+        <Modal show={show} centered className="modalAddActivity">
           <Form onSubmit={handleAddActivity}>
-            <Modal.Header>
-              <Modal.Title>Add Activity Here</Modal.Title>
-            </Modal.Header>
+            <Row className="titleModalAddActivity">
+              <Col sm={10}>Add Activity Here</Col>
+              {idUpdate && (
+                <Col sm={2}>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteActivity(idUpdate)}
+                  >
+                    <MdDeleteForever style={{ pointerEvents: "none" }} />
+                  </Button>
+                </Col>
+              )}
+            </Row>
             <Modal.Body>
               <Row className="mb-3">
                 <Form.Group as={Col}>

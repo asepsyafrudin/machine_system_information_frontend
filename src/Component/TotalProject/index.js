@@ -19,6 +19,8 @@ import moment from "moment/moment";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { IoMdRainy } from "react-icons/io";
 import { TfiShine } from "react-icons/tfi";
+import { Link } from "react-router-dom";
+import { MdVideoLibrary } from "react-icons/md";
 
 function TotalProject(props) {
   const { actionStateValue } = props;
@@ -38,6 +40,7 @@ function TotalProject(props) {
   const [tableSection, setTableSection] = useState([]);
   const [sectionFilter, setSectionFilter] = useState("");
   const [buttonFilter, setButtonFilter] = useState("");
+  const [userId, setUserId] = useState("");
 
   const maxPagesShow = 3;
   const dataPerPage = 5;
@@ -115,6 +118,8 @@ function TotalProject(props) {
       })
       .catch((error) => console.log(error));
 
+    const user = JSON.parse(localStorage.getItem("user"));
+    setUserId(user.id);
     return () => {
       isMounted = false;
       controller.abort();
@@ -299,7 +304,10 @@ function TotalProject(props) {
             </td>
             <td>{moment(tableProject[index].start).format("LL")}</td>
             <td>{moment(tableProject[index].finish).format("LL")}</td>
-            <td>{statusFunction(tableProject[index].status)}</td>
+            <td>
+              {statusFunction(tableProject[index].status)} <br />
+              {buttonView(tableProject[index].id)}
+            </td>
           </tr>
         );
       }
@@ -314,6 +322,24 @@ function TotalProject(props) {
     return listTable;
   };
 
+  const buttonView = (projectId) => {
+    const dataView = tableProject.find((value) => value.id === projectId);
+    if (dataView) {
+      console.log(dataView);
+      const memberDataView = dataView.member.find(
+        (value) => value.user_id === userId
+      );
+      if (memberDataView) {
+        return (
+          <Link to={`/projectActivity/${projectId}`}>
+            <Button size="sm">
+              <MdVideoLibrary style={{ pointerEvents: "none" }} />
+            </Button>
+          </Link>
+        );
+      }
+    }
+  };
   const tableFilter = (filter) => {
     let dataList = [];
     if (filter) {
@@ -349,7 +375,11 @@ function TotalProject(props) {
               <td>{userNameFunction(dataFilter[index].manager_id)}</td>
               <td>{moment(dataFilter[index].start).format("LL")}</td>
               <td>{moment(dataFilter[index].finish).format("LL")}</td>
-              <td>{statusFunction(dataFilter[index].status)}</td>
+              <td style={{ textAlign: "center" }}>
+                {statusFunction(dataFilter[index].status)}
+                <br />
+                {buttonView(dataFilter[index].id)}
+              </td>
             </tr>
           );
         }

@@ -20,8 +20,8 @@ import {
   getAllLineApi,
   getAllMachineApi,
   getAllProductApi,
-  getAllProjectApi,
   getCapabilityByIdApi,
+  getProjectByUserApi,
   updateCapabilityApi,
 } from "../../Config/API";
 import {
@@ -113,7 +113,7 @@ function CapabilityComparisonForm() {
       });
 
     axios
-      .get(getAllProjectApi, {
+      .get(getProjectByUserApi(userId), {
         signal: controller.signal,
       })
       .then((response) => {
@@ -166,7 +166,7 @@ function CapabilityComparisonForm() {
       isMounted = false;
       controller.abort();
     };
-  }, [id, updateMode]);
+  }, [id, updateMode, userId]);
 
   const handleSetProduct = (e) => {
     setProduct(e.target.value);
@@ -695,7 +695,7 @@ function CapabilityComparisonForm() {
                   style={{ marginRight: 5, marginBottom: 5 }}
                   onClick={handleBackPage}
                 >
-                  <FaBackward pointerEvents={"none"} /> Back to Project Page
+                  <FaBackward pointerEvents={"none"} /> Back to Dashboard User
                 </Button>
               </Col>
             </Row>

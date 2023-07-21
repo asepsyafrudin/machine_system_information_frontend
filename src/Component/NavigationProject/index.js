@@ -46,7 +46,7 @@ function NavigationProject(props) {
                 className="tabTitle"
               >
                 <VscProject style={{ marginRight: 5 }} />
-                Project
+                My Project
               </Nav.Link>
             </Nav.Item>
             <Nav.Item style={{ marginTop: 30 }}>

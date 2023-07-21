@@ -250,7 +250,6 @@ function UserList(props) {
       const productFilter = tableProduct.filter(
         (value) => value.section_id === parseInt(section)
       );
-      console.log(productFilter);
       if (productFilter.length > 0) {
         for (let index = 0; index < productFilter.length; index++) {
           option.push(

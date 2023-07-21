@@ -20,8 +20,8 @@ import {
   getAllLineApi,
   getAllMachineApi,
   getAllProductApi,
-  getAllProjectApi,
   getCapabilityByIdApi,
+  getProjectByUserApi,
   updateCapabilityApi,
 } from "../../Config/API";
 import {
@@ -109,7 +109,7 @@ function CapabilityForm() {
     });
 
     axios
-      .get(getAllProjectApi, {
+      .get(getProjectByUserApi(userId), {
         signal: controller.signal,
       })
       .then((response) => {
@@ -158,7 +158,7 @@ function CapabilityForm() {
       isMounted = false;
       controller.abort();
     };
-  }, [id, updateMode]);
+  }, [id, updateMode, userId]);
 
   const handleSetProduct = (e) => {
     setProduct(e.target.value);
