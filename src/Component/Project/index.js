@@ -346,6 +346,7 @@ function Project(props) {
     setTotalMemberToEmail(filter);
   };
 
+
   const handleCloseModalEmail = () => {
     setShowEmailModal(false);
     setTotalMemberToEmail([]);
