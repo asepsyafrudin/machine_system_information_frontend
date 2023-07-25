@@ -30,6 +30,7 @@ function TotalProject(props) {
   const [tableUser, setTableUser] = useState([]);
   const [totalItem, setTotalItem] = useState("");
   const [totalBudget, setTotalBudget] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [totalSavingCost, setTotalSavingCost] = useState("");
   const [tableProduct, setTableProduct] = useState([]);
   const [page, setPage] = useState(1);
@@ -88,21 +89,23 @@ function TotalProject(props) {
       product_id: productFilter,
       from_date: startFilter,
       to_date: endFilter,
+      category: categoryFilter,
     };
 
     axios.post(searchProjectApi, data).then((response) => {
       const data = response.data.data;
-      setTableProject(data);
-      const totalPageData = Math.ceil(data.length / dataPerPage);
+      const filter = data.filter((value) => value.status !== "cancel");
+      setTableProject(filter);
+      const totalPageData = Math.ceil(filter.length / dataPerPage);
       setStotalPageData(totalPageData);
-      projectWillBeLaunch(data);
-      setTotalItem(data.length);
+      projectWillBeLaunch(filter);
+      setTotalItem(filter.length);
       let budget = 0;
       let saving = 0;
-      if (data.length > 0) {
-        for (let index = 0; index < data.length; index++) {
-          budget += parseFloat(data[index].budget);
-          saving += parseFloat(data[index].saving_cost);
+      if (filter.length > 0) {
+        for (let index = 0; index < filter.length; index++) {
+          budget += parseFloat(filter[index].budget);
+          saving += parseFloat(filter[index].saving_cost);
         }
       }
       setTotalBudget(budget);
@@ -131,6 +134,7 @@ function TotalProject(props) {
     actionStateValue,
     startFilter,
     endFilter,
+    categoryFilter,
   ]);
 
   const productOption = () => {
@@ -139,7 +143,6 @@ function TotalProject(props) {
       const productFilter = tableProduct.filter(
         (value) => value.section_id === parseInt(sectionFilter)
       );
-      console.log(productFilter);
       if (productFilter.length > 0) {
         for (let index = 0; index < productFilter.length; index++) {
           option.push(
@@ -185,20 +188,24 @@ function TotalProject(props) {
   };
 
   const statusFunction = (status, id) => {
-    if (status === "Finish") {
-      return <Badge bg="primary">{status}</Badge>;
-    } else if (status === "Not Yet Started") {
-      return <Badge bg="warning">{status}</Badge>;
-    } else if (status === "Waiting Detail Activity") {
-      return (
-        <Badge bg="light" text="dark">
-          Waiting Detail Activity
-        </Badge>
-      );
-    } else if (status === "On Progress") {
-      return <Badge bg="success">{status}</Badge>;
+    if (status !== "cancel") {
+      if (status === "Finish") {
+        return <Badge bg="primary">{status}</Badge>;
+      } else if (status === "Not Yet Started") {
+        return <Badge bg="warning">{status}</Badge>;
+      } else if (status === "Waiting Detail Activity") {
+        return (
+          <Badge bg="light" text="dark">
+            Waiting Detail Activity
+          </Badge>
+        );
+      } else if (status === "On Progress") {
+        return <Badge bg="success">{status}</Badge>;
+      } else {
+        return <Badge bg="danger">{status}</Badge>;
+      }
     } else {
-      return <Badge bg="danger">{status}</Badge>;
+      return <Badge bg="secondary">Cancel</Badge>;
     }
   };
 
@@ -284,6 +291,14 @@ function TotalProject(props) {
     return count;
   };
 
+  const subCategoryLabel = (value) => {
+    if (value) {
+      return (
+        <div className="label-subcategory">{CapitalCaseFirstWord(value)}</div>
+      );
+    }
+  };
+
   const tableListProject = (page) => {
     const listTable = [];
     if (tableProject.length > 0) {
@@ -296,7 +311,12 @@ function TotalProject(props) {
           <tr key={index + 1}>
             <td>{index + 1}</td>
             <td>{tableProject[index].project_name}</td>
+
             <td>{productNameFunction(tableProject[index].product_id)}</td>
+            <td>
+              {tableProject[index].category} <br />
+              {subCategoryLabel(tableProject[index].sub_category)}
+            </td>
             <td>{userNameFunction(tableProject[index].manager_id)}</td>
             <td>{parseFloat(tableProject[index].budget).toLocaleString()}</td>
             <td>
@@ -325,7 +345,6 @@ function TotalProject(props) {
   const buttonView = (projectId) => {
     const dataView = tableProject.find((value) => value.id === projectId);
     if (dataView) {
-      console.log(dataView);
       const memberDataView = dataView.member.find(
         (value) => value.user_id === userId
       );
@@ -405,6 +424,21 @@ function TotalProject(props) {
     setSectionFilter(filter);
     setProductFilter("");
   };
+
+  const categoryOption = () => {
+    if (productFilter && sectionFilter) {
+      return (
+        <>
+          <option value={"New Model"}>New Model</option>
+          <option value={"Quality"}>Quality</option>
+          <option value={"Integrated Factory"}>Integrated Factory</option>
+          <option value={"Productivity"}>Productivity</option>
+          <option value={"Profit Improvement"}>Profit Improvement</option>
+        </>
+      );
+    }
+  };
+
   return (
     <div>
       <Row>
@@ -434,6 +468,18 @@ function TotalProject(props) {
                       open this to product filter
                     </option>
                     {productOption()}
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Label>Select Category</Form.Label>
+                  <Form.Select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                  >
+                    <option value={""} disabled>
+                      open this to product filter
+                    </option>
+                    {categoryOption()}
                   </Form.Select>
                 </Form.Group>
                 <Form.Group as={Col}>
@@ -545,6 +591,7 @@ function TotalProject(props) {
                   <th>NO</th>
                   <th>Project Name</th>
                   <th>Product</th>
+                  <th>Category</th>
                   <th>PIC</th>
                   <th>Budget</th>
                   <th>Saving</th>

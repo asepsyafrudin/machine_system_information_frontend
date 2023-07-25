@@ -1,4 +1,4 @@
-const port = "http://172.31.71.2:8080";
+const port = "http://172.31.71.10:8080";
 
 //users Api
 export const registerUserApi = `${port}/api/users/create_users`;
@@ -310,3 +310,6 @@ export const deleteSectionApi = (id) => {
 };
 
 export const getAllSectionApi = `${port}/api/section/getAll`;
+
+//email
+export const sendEmailApi = `${port}/api/email/send`;

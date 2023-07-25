@@ -14,11 +14,12 @@ import {
 import { useEffect } from "react";
 import {
   createProjectApi,
-  deleteProjectByProjectId,
   getAllProductApi,
   getAllUsersApi,
   getProjectByPageAndUser,
+  sendEmailApi,
   updateProjectApi,
+  updateStatusProjectApi,
 } from "../../Config/API";
 import { useState } from "react";
 import axios from "axios";
@@ -29,9 +30,11 @@ import { BsListNested } from "react-icons/bs";
 import { RiCreativeCommonsNdFill } from "react-icons/ri";
 import moment from "moment";
 import PaginationTable from "../Pagination";
-import { MdDeleteForever, MdEmail, MdVideoLibrary } from "react-icons/md";
+import { GoGitCompare } from "react-icons/go";
+import { MdEmail, MdVideoLibrary } from "react-icons/md";
 import { GrEdit } from "react-icons/gr";
 import { Link } from "react-router-dom";
+import "./project.css";
 
 function Project(props) {
   const { actionState, actionStateValue } = props;
@@ -64,21 +67,29 @@ function Project(props) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("");
 
   const maxPagesShow = 3;
 
   useEffect(() => {
+    let isMount = true;
+    const controller = new AbortController();
+
     axios
-      .get(getAllProductApi)
+      .get(getAllProductApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        setTableProduct(response.data.data);
+        isMount && setTableProduct(response.data.data);
       })
       .catch((error) => console.log(error));
 
     axios
-      .get(getAllUsersApi)
+      .get(getAllUsersApi, {
+        signal: controller.signal,
+      })
       .then((response) => {
-        const tableUserSort = response.data.data;
+        const tableUserSort = isMount && response.data.data;
         setTableUser(
           tableUserSort.sort((nameA, nameB) => {
             let a = nameA.username;
@@ -98,12 +109,21 @@ function Project(props) {
 
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
-    axios.get(getProjectByPageAndUser(page, user.id)).then((response) => {
-      const data = response.data.data;
-      setTableProject(data);
-      setStotalPageData(response.data.totalPageData);
-      setNumberStart(response.data.numberStart);
-    });
+    axios
+      .get(getProjectByPageAndUser(page, user.id), {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        const data = isMount && response.data.data;
+        setTableProject(data);
+        isMount && setStotalPageData(response.data.totalPageData);
+        isMount && setNumberStart(response.data.numberStart);
+      });
+
+    return () => {
+      isMount = false;
+      controller.abort();
+    };
   }, [actionStateValue, page]);
 
   const productOption = () => {
@@ -186,6 +206,7 @@ function Project(props) {
     setStartDate("");
     setSopDate("");
     setCategory("");
+    setSubCategory("");
     setMemberId("");
     setMember([]);
     setProjectIdEdit("");
@@ -202,6 +223,7 @@ function Project(props) {
       start: startDate,
       finish: sopDate,
       category: category,
+      sub_category: subCategory,
       member: projectIdEdit ? [...member] : [...member, userId],
       user_id: userId,
       status: STATUSOPEN,
@@ -238,20 +260,24 @@ function Project(props) {
   };
 
   const statusFunction = (status, id) => {
-    if (status === "Finish") {
-      return <Badge bg="primary">{status}</Badge>;
-    } else if (status === "Not Yet Started") {
-      return <Badge bg="warning">{status}</Badge>;
-    } else if (status === "Waiting Detail Activity") {
-      return (
-        <Badge bg="light" text="dark">
-          Waiting Detail Activity
-        </Badge>
-      );
-    } else if (status === "On Progress") {
-      return <Badge bg="success">{status}</Badge>;
+    if (status !== "cancel") {
+      if (status === "Finish") {
+        return <Badge bg="primary">{status}</Badge>;
+      } else if (status === "Not Yet Started") {
+        return <Badge bg="warning">{status}</Badge>;
+      } else if (status === "Waiting Detail Activity") {
+        return (
+          <Badge bg="light" text="dark">
+            Waiting Detail Activity
+          </Badge>
+        );
+      } else if (status === "On Progress") {
+        return <Badge bg="success">{status}</Badge>;
+      } else {
+        return <Badge bg="danger">{status}</Badge>;
+      }
     } else {
-      return <Badge bg="danger">{status}</Badge>;
+      return <Badge bg="secondary">Cancel</Badge>;
     }
   };
 
@@ -274,6 +300,7 @@ function Project(props) {
         setCategory(data.category);
         setSopDate(dateParse(data.finish));
         setDescription(data.description);
+        setSubCategory(data.sub_category);
         let memberIddata = [];
         for (let index = 0; index < data.member.length; index++) {
           memberIddata.push(data.member[index].user_id);
@@ -314,16 +341,23 @@ function Project(props) {
     return option;
   };
 
-  const handleDelete = (e) => {
+  const handleChangeStatus = (e) => {
     const id = e.target.id;
-    let confirm = window.confirm("Do you want to delete this item?");
-    if (confirm) {
-      axios.delete(deleteProjectByProjectId(id)).then((response) => {
-        setMessage("Project already delete");
-        setShow(true);
-        handleReset();
-        actionState(1);
-      });
+    const data = tableProject.find((value) => value.id === id);
+    if (data) {
+      let body = {
+        id: id,
+        status: data.status === "cancel" ? "open" : "cancel",
+      };
+      let confirm = window.confirm(`Do you want to change status this item?`);
+      if (confirm) {
+        axios.put(updateStatusProjectApi, body).then((response) => {
+          setMessage("Project Stataus Already Change");
+          setShow(true);
+          handleReset();
+          actionState(1);
+        });
+      }
     }
   };
 
@@ -346,7 +380,6 @@ function Project(props) {
     setTotalMemberToEmail(filter);
   };
 
-
   const handleCloseModalEmail = () => {
     setShowEmailModal(false);
     setTotalMemberToEmail([]);
@@ -359,9 +392,28 @@ function Project(props) {
   const handleSendEmailToUser = (e) => {
     e.preventDefault();
     if (totalMemberToEmail.length > 0) {
-      setShowSuccess(true);
+      let data = {
+        sender: userId,
+        toEmail: totalMemberToEmail,
+        subject: subjectEmail,
+        message: bodyEmail,
+      };
+      let confirm = window.confirm("Do you want to send?");
+      if (confirm) {
+        axios.post(sendEmailApi, data).then((response) => {
+          setShowSuccess(true);
+        });
+      }
     } else {
       setShowAlert(true);
+    }
+  };
+
+  const subCategoryLabel = (value) => {
+    if (value) {
+      return (
+        <div className="label-subcategory">{CapitalCaseFirstWord(value)}</div>
+      );
     }
   };
   return (
@@ -505,29 +557,48 @@ function Project(props) {
                 : "Data Is Not Available"}
             </Col>
           </Row>
-          <Row className="mb-3" style={{ textAlign: "left" }}>
+          <Row>
             <Col sm={4}>
-              <Form.Label>Category</Form.Label>
-              <Form.Select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-              >
-                <option value="" disabled>
-                  Open This
-                </option>
-                <option value="New Model">New Model</option>
-                <option value="Quality">Quality</option>
-                <option value="Integrated Factory">Integrated Factory</option>
-                <option value="Productivity">Productivity</option>
-                <option value="Profit Improvement">Profit Improvement</option>
-              </Form.Select>
+              <Row className="mb-3" style={{ textAlign: "left" }}>
+                <Col>
+                  <Form.Label>Category</Form.Label>
+                  <Form.Select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>
+                      Open This
+                    </option>
+                    <option value="New Model">New Model</option>
+                    <option value="Quality">Quality</option>
+                    <option value="Integrated Factory">
+                      Integrated Factory
+                    </option>
+                    <option value="Productivity">Productivity</option>
+                    <option value="Profit Improvement">
+                      Profit Improvement
+                    </option>
+                  </Form.Select>
+                </Col>
+              </Row>
+              <Row className="mb-3" style={{ textAlign: "left" }}>
+                <Col>
+                  <Form.Label>Sub Category (*optional)</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter Sub Category"
+                    value={subCategory}
+                    onChange={(e) => setSubCategory(e.target.value)}
+                  />
+                </Col>
+              </Row>
             </Col>
-            <Col sm={8}>
-              <Form.Label>Description</Form.Label>
+            <Col sm={8} style={{ textAlign: "left" }}>
+              <Form.Label>Description (*optional)</Form.Label>
               <Form.Control
                 as="textarea"
-                style={{ height: 100 }}
+                style={{ height: 120 }}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               ></Form.Control>
@@ -573,7 +644,10 @@ function Project(props) {
                   <tr key={index}>
                     <td>{numberStart + index}</td>
                     <td>{value.project_name}</td>
-                    <td>{value.category}</td>
+                    <td>
+                      {value.category} <br />
+                      {subCategoryLabel(value.sub_category)}
+                    </td>
                     <td>{userNameFunction(value.manager_id)}</td>
                     <td>{parseFloat(value.budget).toLocaleString()}</td>
                     <td>{parseFloat(value.saving_cost).toLocaleString()}</td>
@@ -584,13 +658,14 @@ function Project(props) {
                     <td>
                       {value.user_id === userId && (
                         <Button
-                          title="Delete"
+                          title="Cancel Project"
                           size="sm"
+                          variant="danger"
                           style={{ marginRight: 2 }}
                           id={value.id}
-                          onClick={handleDelete}
+                          onClick={handleChangeStatus}
                         >
-                          <MdDeleteForever style={{ pointerEvents: "none" }} />
+                          <GoGitCompare style={{ pointerEvents: "none" }} />
                         </Button>
                       )}
                       <Button
@@ -603,16 +678,6 @@ function Project(props) {
                       >
                         <GrEdit style={{ pointerEvents: "none" }} />
                       </Button>
-                      {/* <Button
-                        title="Change Status"
-                        size="sm"
-                        style={{ marginRight: 2 }}
-                        variant="warning"
-                        id={value.id}
-                        onClick={changeStatusProject}
-                      >
-                        <GoGitCompare style={{ pointerEvents: "none" }} />
-                      </Button> */}
                       <Link to={`/projectActivity/${value.id}`}>
                         <Button
                           title="View"

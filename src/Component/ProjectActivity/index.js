@@ -27,6 +27,7 @@ function ProjectActivity(props) {
   const { id, dataChangeCount, dispatch, todoChangeCount } = props;
   const [project, setProject] = useState([]);
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
   const [tableUser, setTableUser] = useState([]);
   const [activity, setActivity] = useState([]);
   const [titleProject, setTitleProject] = useState("");
@@ -44,6 +45,7 @@ function ProjectActivity(props) {
   const [message, setMessage] = useState(false);
   const [rowHeight, setRowHeight] = useState(50);
   const [listCellWidth, setListCellWidth] = useState(200);
+  const [remark, setRemark] = useState("");
 
   const backgroundColorDelay = (endProject, progressBar) => {
     let currentDate = new Date();
@@ -56,56 +58,74 @@ function ProjectActivity(props) {
   };
 
   useEffect(() => {
+    let isMount = true;
+    const controller = new AbortController();
+
     if (id) {
-      axios.get(getProjectByIdApi(id)).then((response) => {
-        const dataProject = response.data.data[0];
-        setTitleProject(dataProject.project_name);
-        setProject(dataProject);
-        setDescription(dataProject.description);
+      axios
+        .get(getProjectByIdApi(id), {
+          signal: controller.signal,
+        })
+        .then((response) => {
+          const dataProject = isMount && response.data.data[0];
+          setTitleProject(dataProject.project_name);
+          setProject(dataProject);
+          setDescription(dataProject.description);
+          setCategory(dataProject.category);
 
-        const data = {
-          name: "PE Schedule",
-          id: dataProject.id,
-          progress: dataProject.progress,
-          type: "project",
-          start: new Date(dataProject.start),
-          end: new Date(dataProject.finish),
-          hideChildren: false,
-        };
-        let activityData = [];
-        activityData.push(data);
+          const data = {
+            name: "PE Schedule",
+            id: dataProject.id,
+            progress: dataProject.progress,
+            type: "project",
+            start: new Date(dataProject.start),
+            end: new Date(dataProject.finish),
+            hideChildren: false,
+          };
+          let activityData = [];
+          activityData.push(data);
 
-        axios
-          .get(getActivityByProjectIdApi(dataProject.id))
-          .then((response) => {
-            const dataActivity = response.data.data;
-            if (dataActivity.length > 0) {
-              for (let index = 0; index < dataActivity.length; index++) {
-                let pushData = {
-                  id: dataActivity[index].id,
-                  start: new Date(moment(dataActivity[index].start)),
-                  end: new Date(moment(dataActivity[index].end)),
-                  name: dataActivity[index].name,
-                  progress: dataActivity[index].progress,
-                  dependencies: dataActivity[index].dependencies,
-                  type: dataActivity[index].type,
-                  project: dataActivity[index].project,
-                  styles: backgroundColorDelay(
-                    new Date(moment(dataActivity[index].end)),
-                    dataActivity[index].progress
-                  ),
-                };
-                activityData.push(pushData);
+          axios
+            .get(getActivityByProjectIdApi(dataProject.id))
+            .then((response) => {
+              const dataActivity = isMount && response.data.data;
+              if (dataActivity.length > 0) {
+                for (let index = 0; index < dataActivity.length; index++) {
+                  let pushData = {
+                    id: dataActivity[index].id,
+                    start: new Date(moment(dataActivity[index].start)),
+                    end: new Date(moment(dataActivity[index].end)),
+                    name: dataActivity[index].name,
+                    progress: dataActivity[index].progress,
+                    dependencies: dataActivity[index].dependencies,
+                    type: dataActivity[index].type,
+                    project: dataActivity[index].project,
+                    styles: backgroundColorDelay(
+                      new Date(moment(dataActivity[index].end)),
+                      dataActivity[index].progress
+                    ),
+                    remark: dataActivity[index].remark,
+                  };
+                  activityData.push(pushData);
+                }
               }
-            }
-            setActivity(activityData);
-          });
-      });
+              setActivity(activityData);
+            });
+        });
     }
 
-    axios.get(getAllUsersApi).then((response) => {
-      setTableUser(response.data.data);
-    });
+    axios
+      .get(getAllUsersApi, {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        isMount && setTableUser(response.data.data);
+      });
+
+    return () => {
+      isMount = false;
+      controller.abort();
+    };
   }, [id, viewMode]);
 
   const resetForm = () => {
@@ -116,6 +136,7 @@ function ProjectActivity(props) {
     setType("");
     setIdUpdate("");
     setDepedencies("");
+    setRemark("");
     setShow(false);
   };
   const handleAddActivity = (e) => {
@@ -128,6 +149,7 @@ function ProjectActivity(props) {
       dependencies: dependencies === "" ? [] : [dependencies],
       type: type,
       project: project.id,
+      remark: remark,
     };
 
     if (idUpdate === "") {
@@ -169,6 +191,7 @@ function ProjectActivity(props) {
       setDepedencies(findData.dependencies[0]);
       setProgress(findData.progress);
       setIdUpdate(findData.id);
+      setRemark(findData.remark);
       setShow(true);
     }
   };
@@ -262,16 +285,21 @@ function ProjectActivity(props) {
           <Row className="mb-3" style={{ textAlign: "left" }}>
             <Col sm={2}>PIC</Col>
             <Col sm={4}>: {userNameFunction(project.manager_id)}</Col>
+          </Row>
+          <Row className="mb-3" style={{ textAlign: "left" }}>
+            <Col sm={2}>Category</Col>
+            <Col sm={10}>: {category}</Col>
+          </Row>
+
+          <Row className="mb-3" style={{ textAlign: "left" }}>
+            <Col sm={2}>Description</Col>
+            <Col sm={4}>: {description}</Col>
             <Col sm={6} style={{ textAlign: "right" }}>
               <div className="box-plan" /> Plan
               <div className="box-actual" /> Progress
               <div className="box-delay" /> Delay
               <div className="box-milestone" /> Milestone
             </Col>
-          </Row>
-          <Row className="mb-3" style={{ textAlign: "left" }}>
-            <Col sm={2}>Description</Col>
-            <Col sm={10}>: {description}</Col>
           </Row>
         </div>
         {activity.length > 0 && (
@@ -425,9 +453,19 @@ function ProjectActivity(props) {
                   />
                 </Form.Group>
               </Row>
+              <Row className="mb-3">
+                <Form.Group as={Col}>
+                  <Form.Label>Remark</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    value={remark}
+                    onChange={(e) => setRemark(e.target.value)}
+                  />
+                </Form.Group>
+              </Row>
             </Modal.Body>
             <Modal.Footer>
-              <Button type="submit">ADD</Button>
+              <Button type="submit">Save</Button>
               <Button variant="success" onClick={resetForm}>
                 Close
               </Button>
