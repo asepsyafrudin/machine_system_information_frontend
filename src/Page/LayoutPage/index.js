@@ -19,6 +19,7 @@ import FTAListPage from "../FTAListPage";
 import ProjectPage from "../ProjectPage";
 import ProjectActivityPage from "../ProjectActivitypPage";
 import Home from "../Home";
+import RedirectPage from "../RedirectPage";
 
 function LayoutPage() {
   return (
@@ -26,6 +27,10 @@ function LayoutPage() {
       <Routes>
         <Route index element={<Login />} />
         <Route path="/:token" element={<Login />} />
+        <Route
+          path="/redirectPage/projectActivity/:activityId/:userId"
+          element={<RedirectPage />}
+        />
         <Route element={<ProtectedRoute />}>
           <Route path="/capabilityForm" element={<CapabilityFormPage />} />
           <Route

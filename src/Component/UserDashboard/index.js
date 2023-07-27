@@ -309,10 +309,12 @@ function UserDashboard(props) {
                       </option>
                       <option value={"President"}>President</option>
                       <option value={"Director"}>Director</option>
+                      <option value={"Coordinator"}>Manager</option>
                       <option value={"General Manager"}>General Manager</option>
                       <option value={"Assistant General Manager"}>
                         Assistant General Manager
                       </option>
+                      <option value={"Departement Manager"}>Manager</option>
                       <option value={"Manager"}>Manager</option>
                       <option value={"Assistant Manager"}>
                         Assistant Manager
