@@ -18,6 +18,8 @@ import {
   getAllUsersApi,
   getProjectByPageAndUser,
   sendEmailApi,
+  shareFinishProjectForSMDNewModelApi,
+  shareFinishProjectToUserCommonApi,
   updateProjectApi,
   updateStatusProjectApi,
 } from "../../Config/API";
@@ -32,7 +34,7 @@ import moment from "moment";
 import PaginationTable from "../Pagination";
 import { GoGitCompare } from "react-icons/go";
 import { MdEmail, MdVideoLibrary } from "react-icons/md";
-import { GrEdit } from "react-icons/gr";
+import { GrEdit, GrShareOption } from "react-icons/gr";
 import { Link } from "react-router-dom";
 import "./project.css";
 
@@ -59,6 +61,8 @@ function Project(props) {
   const [totalPageData, setStotalPageData] = useState(1);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [memberToEmail, setMemberToEmail] = useState("");
+  const [ccMail, setCcMail] = useState("");
+  const [ccMailList, setCcMailList] = useState([]);
   const [memberListOfProject, setMemberListOfProject] = useState([]);
   const [totalMemberToEmail, setTotalMemberToEmail] = useState([]);
   const [bodyEmail, setBodyEmail] = useState("");
@@ -68,6 +72,7 @@ function Project(props) {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
+  const [showModalShare, setShowModalShare] = useState(false);
 
   const maxPagesShow = 3;
 
@@ -323,7 +328,22 @@ function Project(props) {
         setMemberListOfProject(memberIddata);
         setSubjectEmail(checkProject.project_name);
         setShowEmailModal(true);
+        setProjectIdEdit(checkProject.id);
       }
+    }
+  };
+
+  const handleShowModalShare = (e) => {
+    const id = e.target.id;
+    const checkProject = tableProject.find((value) => value.id === id);
+    if (checkProject) {
+      let memberIddata = [];
+      for (let index = 0; index < checkProject.member.length; index++) {
+        memberIddata.push(checkProject.member[index].user_id);
+      }
+      setMemberListOfProject(memberIddata);
+      setShowModalShare(true);
+      setProjectIdEdit(checkProject.id);
     }
   };
 
@@ -380,13 +400,34 @@ function Project(props) {
     setTotalMemberToEmail(filter);
   };
 
+  const handleAddCcEmail = () => {
+    if (ccMail) {
+      const check = ccMailList.find(
+        (value) => parseInt(value) === parseInt(ccMail)
+      );
+      if (!check) {
+        setCcMailList((prev) => [...prev, ccMail]);
+      }
+    }
+  };
+
+  const handleDeleteCcEmail = (e) => {
+    const id = e.target.id;
+    let filter = ccMailList.filter((value) => parseInt(value) !== parseInt(id));
+    setCcMailList(filter);
+  };
+
   const handleCloseModalEmail = () => {
     setShowEmailModal(false);
+    setShowModalShare(false);
     setTotalMemberToEmail([]);
     setMemberToEmail("");
     setBodyEmail("");
     setShowAlert(false);
     setShowSuccess(false);
+    setCcMailList([]);
+    setCcMail("");
+    handleReset();
   };
 
   const handleSendEmailToUser = (e) => {
@@ -395,14 +436,50 @@ function Project(props) {
       let data = {
         sender: userId,
         toEmail: totalMemberToEmail,
+        ccEmail: ccMailList,
         subject: subjectEmail,
         message: bodyEmail,
+        project_id: projectIdEdit,
       };
       let confirm = window.confirm("Do you want to send?");
       if (confirm) {
         axios.post(sendEmailApi, data).then((response) => {
           setShowSuccess(true);
         });
+      }
+    } else {
+      setShowAlert(true);
+    }
+  };
+
+  const handleShareProjectFinishToUser = (e) => {
+    e.preventDefault();
+    if (totalMemberToEmail.length > 0) {
+      let data = {
+        user_id: userId,
+        toEmail: totalMemberToEmail,
+        ccEmail: ccMailList,
+        project_id: projectIdEdit,
+      };
+
+      const project = tableProject.find((value) => value.id === projectIdEdit);
+      const user = tableUser.find((value) => value.id === parseInt(userId));
+
+      let confirm = window.confirm("Do you want to send email?");
+      if (confirm) {
+        if (user.product_id === 14 && project.category === "New Model") {
+          axios
+            .post(shareFinishProjectForSMDNewModelApi, data)
+            .then((response) => {
+              setShowSuccess(true);
+            });
+        } else {
+          axios
+            .post(shareFinishProjectToUserCommonApi, data)
+            .then((response) => {
+              setShowSuccess(true);
+            });
+        }
       }
     } else {
       setShowAlert(true);
@@ -654,7 +731,20 @@ function Project(props) {
                     <td>{moment(value.start).format("LL")}</td>
                     <td>{moment(value.finish).format("LL")}</td>
                     {/* <td>{moment(value.create_date).format("LL")}</td> */}
-                    <td>{statusFunction(value.status, value.id)}</td>
+                    <td>
+                      {statusFunction(value.status, value.id)}
+                      <br />
+                      {value.status === "Finish" && (
+                        <Button
+                          id={value.id}
+                          size="sm"
+                          variant="primary"
+                          onClick={handleShowModalShare}
+                        >
+                          <GrShareOption style={{ pointerEvents: "none" }} />
+                        </Button>
+                      )}
+                    </td>
                     <td>
                       {value.user_id === userId && (
                         <Button
@@ -795,6 +885,54 @@ function Project(props) {
                         })
                       : "Data Is Not Available"}
                   </Col>
+                </Row>{" "}
+                <Row className="mb-3" style={{ textAlign: "left" }}>
+                  <Form.Group as={Col}>
+                    <Form.Label>Cc</Form.Label>
+                    <Form.Select
+                      value={ccMail}
+                      onChange={(e) => setCcMail(e.target.value)}
+                    >
+                      <option value="" disabled>
+                        Open This
+                      </option>
+                      {optionMemberToEmailFunction()}
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group as={Col}>
+                    <Form.Label></Form.Label> <br />
+                    <Button type="button" onClick={handleAddCcEmail}>
+                      Add
+                    </Button>
+                  </Form.Group>
+                </Row>
+                <Row className="mb-3" style={{ textAlign: "left" }}>
+                  <Col>
+                    {ccMailList.length > 0
+                      ? ccMailList.map((value, index) => {
+                          return (
+                            <Badge
+                              key={index}
+                              style={{ marginRight: 2 }}
+                              bg={colorBgBadge(index + 1)}
+                            >
+                              <h6>
+                                {CapitalCaseFirstWord(
+                                  tableUser.length > 0 &&
+                                    tableUser.find(
+                                      (value2) => value2.id === parseInt(value)
+                                    ).username
+                                )}{" "}
+                                <CloseButton
+                                  id={value}
+                                  onClick={handleDeleteCcEmail}
+                                />
+                              </h6>
+                            </Badge>
+                          );
+                        })
+                      : "Data Is Not Available"}
+                  </Col>
                 </Row>
                 <Row className="mb-3" style={{ textAlign: "left" }}>
                   <Form.Group as={Col}>
@@ -820,6 +958,144 @@ function Project(props) {
                       required
                     />
                   </Form.Group>
+                </Row>
+                <Row>
+                  <Col style={{ textAlign: "left" }}>
+                    <Button variant="primary" type="submit">
+                      Send Email
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+              <Alert
+                show={showAlert}
+                variant="warning"
+                onClose={() => setShowAlert(false)}
+                dismissible
+              >
+                Please Add Users to Email
+              </Alert>
+            </>
+          ) : (
+            <Alert
+              show={showSuccess}
+              variant="success"
+              onClose={() => setShowSuccess(false)}
+              dismissible
+            >
+              Email Already Send to Users
+            </Alert>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModalEmail}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showModalShare} onHide={handleCloseModalEmail}>
+        <Modal.Header>
+          <Modal.Title>Share Project Finish to Member</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {!showSuccess ? (
+            <>
+              <Form onSubmit={handleShareProjectFinishToUser}>
+                <Row className="mb-3" style={{ textAlign: "left" }}>
+                  <Form.Group as={Col}>
+                    <Form.Label>To</Form.Label>
+                    <Form.Select
+                      value={memberToEmail}
+                      onChange={(e) => setMemberToEmail(e.target.value)}
+                    >
+                      <option value="" disabled>
+                        Open This
+                      </option>
+                      {optionMemberToEmailFunction()}
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group as={Col}>
+                    <Form.Label></Form.Label> <br />
+                    <Button type="button" onClick={handleAddToEmail}>
+                      Add
+                    </Button>
+                  </Form.Group>
+                </Row>
+                <Row className="mb-3" style={{ textAlign: "left" }}>
+                  <Col>
+                    {totalMemberToEmail.length > 0
+                      ? totalMemberToEmail.map((value, index) => {
+                          return (
+                            <Badge
+                              key={index}
+                              style={{ marginRight: 2 }}
+                              bg={colorBgBadge(index + 1)}
+                            >
+                              <h6>
+                                {CapitalCaseFirstWord(
+                                  tableUser.length > 0 &&
+                                    tableUser.find(
+                                      (value2) => value2.id === parseInt(value)
+                                    ).username
+                                )}{" "}
+                                <CloseButton
+                                  id={value}
+                                  onClick={handleDeleteToEmail}
+                                />
+                              </h6>
+                            </Badge>
+                          );
+                        })
+                      : "Data Is Not Available"}
+                  </Col>
+                </Row>{" "}
+                <Row className="mb-3" style={{ textAlign: "left" }}>
+                  <Form.Group as={Col}>
+                    <Form.Label>Cc</Form.Label>
+                    <Form.Select
+                      value={ccMail}
+                      onChange={(e) => setCcMail(e.target.value)}
+                    >
+                      <option value="" disabled>
+                        Open This
+                      </option>
+                      {optionMemberToEmailFunction()}
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group as={Col}>
+                    <Form.Label></Form.Label> <br />
+                    <Button type="button" onClick={handleAddCcEmail}>
+                      Add
+                    </Button>
+                  </Form.Group>
+                </Row>
+                <Row className="mb-3" style={{ textAlign: "left" }}>
+                  <Col>
+                    {ccMailList.length > 0
+                      ? ccMailList.map((value, index) => {
+                          return (
+                            <Badge
+                              key={index}
+                              style={{ marginRight: 2 }}
+                              bg={colorBgBadge(index + 1)}
+                            >
+                              <h6>
+                                {CapitalCaseFirstWord(
+                                  tableUser.length > 0 &&
+                                    tableUser.find(
+                                      (value2) => value2.id === parseInt(value)
+                                    ).username
+                                )}{" "}
+                                <CloseButton
+                                  id={value}
+                                  onClick={handleDeleteCcEmail}
+                                />
+                              </h6>
+                            </Badge>
+                          );
+                        })
+                      : "Data Is Not Available"}
+                  </Col>
                 </Row>
                 <Row>
                   <Col style={{ textAlign: "left" }}>

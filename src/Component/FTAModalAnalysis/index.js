@@ -3,7 +3,11 @@ import { Button, Col, Form, Modal, Row, Table } from "react-bootstrap";
 import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
-import { getProblemByIdApi, getProblemByMachineIdApi } from "../../Config/API";
+import {
+  getProblemByIdApi,
+  getProblemByMachineIdApi,
+  sendFeedbackFtaApi,
+} from "../../Config/API";
 import "./FTAModalAnalysis.css";
 import moment from "moment";
 import { ImAttachment } from "react-icons/im";
@@ -19,6 +23,7 @@ function FTAModalAnalysis(props) {
   const [tableAnalysis2, setTableAnalysis2] = useState([]);
   const [sendFeedback, setSendFeedback] = useState(false);
   const [feedBackValue, setFeedbackValue] = useState("");
+  const [userId, setUserId] = useState("");
 
   const closeModal = () => {
     onHandleHide(false);
@@ -29,21 +34,37 @@ function FTAModalAnalysis(props) {
   };
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     if (search !== "") {
       axios
-        .get(getProblemByMachineIdApi(search))
+        .get(getProblemByMachineIdApi(search), {
+          signal: controller.signal,
+        })
         .then((response) => {
-          const result = response.data.data;
+          const result = isMounted && response.data.data;
           setTableProblem(result);
         })
         .then((error) => console.log(error));
     }
     if (problemId !== "") {
-      axios.get(getProblemByIdApi(problemId)).then((response) => {
-        setTableAnalysis1(response.data.dataFTA1);
-        setTableAnalysis2(response.data.dataFTA2);
-      });
+      axios
+        .get(getProblemByIdApi(problemId), {
+          signal: controller.signal,
+        })
+        .then((response) => {
+          isMounted && setTableAnalysis1(response.data.dataFTA1);
+          isMounted && setTableAnalysis2(response.data.dataFTA2);
+        });
     }
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    setUserId(user.id);
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [search, problemId]);
 
   const content = () => {
@@ -198,7 +219,24 @@ function FTAModalAnalysis(props) {
     setSendFeedback(true);
   };
 
-  const saveFeedback = () => {};
+  const saveFeedback = () => {
+    let data = {
+      problem_id: problemId,
+      user_id: userId,
+      message: feedBackValue,
+    };
+
+    let confirm = window.confirm("Do you want to send ? ");
+    if (confirm) {
+      axios
+        .post(sendFeedbackFtaApi, data)
+        .then((response) => {
+          setFeedbackValue("");
+          window.alert("Feedback already send to creator");
+        })
+        .catch((error) => console.log(error));
+    }
+  };
   return (
     <Modal
       show={showModal}
@@ -221,7 +259,7 @@ function FTAModalAnalysis(props) {
               variant="success"
               onClick={saveFeedback}
             >
-              Save Feedback
+              Send to Creator
             </Button>
           ) : (
             <Button

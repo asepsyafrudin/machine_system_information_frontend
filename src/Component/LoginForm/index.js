@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./loginForm.css";
-import { Alert, Button, Form } from "react-bootstrap";
+import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import {
@@ -26,6 +26,8 @@ function LoginForm(props) {
   const [forgetPassword, setForgetPassword] = useState(false);
   const [showModalAlert, setShowModalAlert] = useState(false);
   const [message, setMessage] = useState("");
+  const [showFinishChangePassword, setShowFinishChangePassword] =
+    useState(false);
   const [user, setUser] = useState([]);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -105,11 +107,9 @@ function LoginForm(props) {
           axios
             .delete(deleteRequestApi(token))
             .then((response) => {
-              navigate("/");
               setUser([]);
               setForgetPassword(false);
-              setMessage("Change Password Berhasil, Silahkan Login Kembali");
-              setShowModalAlert(true);
+              setShowFinishChangePassword(true);
             })
             .catch((error) => console.log(error));
         })
@@ -240,6 +240,21 @@ function LoginForm(props) {
         }}
         message={message}
       />
+      <Modal show={showFinishChangePassword}>
+        <Modal.Header>Notification</Modal.Header>
+        <Modal.Body>Change Password Success</Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowFinishChangePassword(false);
+              navigate("/");
+            }}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

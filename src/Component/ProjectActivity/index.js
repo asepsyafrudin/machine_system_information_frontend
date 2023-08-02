@@ -22,6 +22,7 @@ import { CHANGEDATA, SAVECHANGEDATA } from "../../Context/const";
 import { FaBackward } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { MdDeleteForever } from "react-icons/md";
+import TaskListTable from "../TaskListTable";
 
 function ProjectActivity(props) {
   const { id, dataChangeCount, dispatch, todoChangeCount } = props;
@@ -44,8 +45,11 @@ function ProjectActivity(props) {
   const [showNotif, setShowNotif] = useState(false);
   const [message, setMessage] = useState(false);
   const [rowHeight, setRowHeight] = useState(50);
-  const [listCellWidth, setListCellWidth] = useState(200);
+  const [listCellWidth, setListCellWidth] = useState(300);
   const [remark, setRemark] = useState("");
+  const [updateValue, setUpdateValue] = useState(0);
+  const [monthFormat, setMonthFormat] = useState("en-US");
+  const [hiddenPlan, setHiddenPlan] = useState("Yes");
 
   const backgroundColorDelay = (endProject, progressBar) => {
     let currentDate = new Date();
@@ -74,7 +78,7 @@ function ProjectActivity(props) {
           setCategory(dataProject.category);
 
           const data = {
-            name: "PE Schedule",
+            name: "Total Schedule",
             id: dataProject.id,
             progress: dataProject.progress,
             type: "project",
@@ -126,7 +130,7 @@ function ProjectActivity(props) {
       isMount = false;
       controller.abort();
     };
-  }, [id, viewMode]);
+  }, [id, viewMode, updateValue]);
 
   const resetForm = () => {
     setActivityName("");
@@ -226,6 +230,7 @@ function ProjectActivity(props) {
         setMessage("Data Already SAVE");
         setShowNotif(true);
         dispatch({ type: SAVECHANGEDATA });
+        setUpdateValue((prev) => prev + 1);
       });
     }
   };
@@ -256,6 +261,58 @@ function ProjectActivity(props) {
     setActivity(activity.map((t) => (t.id === task.id ? task : t)));
   };
 
+  const ganttChartFormat = () => {
+    if (activity.length > 0) {
+      if (hiddenPlan === "Yes") {
+        return (
+          <GanttChart
+            tasks={activity}
+            locale={monthFormat}
+            viewMode={viewMode}
+            listCellWidth={listCellWidth}
+            columnWidth={colWidth}
+            rowHeight={rowHeight}
+            onExpanderClick={(task) => handleExpanderClick(task)}
+            onDoubleClick={(task) => handleDoubleClick(task)}
+            onDelete={(task) => handleDeleteTask(task)}
+            TaskListHeader={({ headerHeight }) => (
+              <div
+                style={{
+                  height: headerHeight,
+                  fontFamily: "sans-serif",
+                  fontWeight: "bold",
+                  paddingLeft: 10,
+                  margin: 0,
+                  marginBottom: -1,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                Jobs
+              </div>
+            )}
+            TaskListTable={(props) => <TaskListTable {...props} />}
+          />
+        );
+      } else {
+        return (
+          <GanttChart
+            tasks={activity}
+            locale={monthFormat}
+            viewMode={viewMode}
+            listCellWidth={listCellWidth}
+            columnWidth={colWidth}
+            rowHeight={rowHeight}
+            onExpanderClick={(task) => handleExpanderClick(task)}
+            onDoubleClick={(task) => handleDoubleClick(task)}
+            onDelete={(task) => handleDeleteTask(task)}
+          />
+        );
+      }
+    } else {
+      return "";
+    }
+  };
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -302,9 +359,11 @@ function ProjectActivity(props) {
             </Col>
           </Row>
         </div>
-        {activity.length > 0 && (
+        {ganttChartFormat()}
+        {/* {activity.length > 0 && !hiddenPlan && (
           <GanttChart
             tasks={activity}
+            locale={monthFormat}
             viewMode={viewMode}
             listCellWidth={listCellWidth}
             columnWidth={colWidth}
@@ -313,7 +372,54 @@ function ProjectActivity(props) {
             onDoubleClick={(task) => handleDoubleClick(task)}
             onDelete={(task) => handleDeleteTask(task)}
           />
-        )}
+        )} */}
+
+        {/* {activity.length > 0 ? (
+          hiddenPlan ? (
+            <GanttChart
+              tasks={activity}
+              locale={monthFormat}
+              viewMode={viewMode}
+              listCellWidth={listCellWidth}
+              columnWidth={colWidth}
+              rowHeight={rowHeight}
+              onExpanderClick={(task) => handleExpanderClick(task)}
+              onDoubleClick={(task) => handleDoubleClick(task)}
+              onDelete={(task) => handleDeleteTask(task)}
+              TaskListHeader={({ headerHeight }) => (
+                <div
+                  style={{
+                    height: headerHeight,
+                    fontFamily: "sans-serif",
+                    fontWeight: "bold",
+                    paddingLeft: 10,
+                    margin: 0,
+                    marginBottom: -1,
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  Jobs
+                </div>
+              )}
+              TaskListTable={(props) => <TaskListTable {...props} />}
+            />
+          ) : (
+            <GanttChart
+              tasks={activity}
+              locale={monthFormat}
+              viewMode={viewMode}
+              listCellWidth={listCellWidth}
+              columnWidth={colWidth}
+              rowHeight={rowHeight}
+              onExpanderClick={(task) => handleExpanderClick(task)}
+              onDoubleClick={(task) => handleDoubleClick(task)}
+              onDelete={(task) => handleDeleteTask(task)}
+            />
+          )
+        ) : (
+          ""
+        )} */}
         <div style={{ textAlign: "left" }}>
           <Button
             style={{ marginRight: 5 }}
@@ -335,25 +441,43 @@ function ProjectActivity(props) {
           </Button>
           Column Width :
           <input
-            width={50}
+            style={{ width: 100 }}
             type="number"
             value={colWidth}
             onChange={(e) => setColWidth(e.target.value)}
           />
           {"    "}Row Height :
           <input
-            width={50}
+            style={{ width: 100 }}
             type="number"
             value={rowHeight}
             onChange={(e) => setRowHeight(parseInt(e.target.value))}
           />
           {"    "}List Cell Width :
           <input
-            width={50}
+            style={{ width: 100 }}
             type="number"
             value={listCellWidth}
             onChange={(e) => setListCellWidth(parseInt(e.target.value))}
           />
+          {"    "}Month format :
+          <Form.Select
+            value={monthFormat}
+            style={{ width: 200, display: "inline-block" }}
+            onChange={(e) => setMonthFormat(e.target.value)}
+          >
+            <option value={"ja-JP"}>Japan</option>
+            <option value={"en-US"}>English</option>
+          </Form.Select>
+          {"    "}Hidden Plan :
+          <Form.Select
+            value={hiddenPlan}
+            style={{ width: 200, display: "inline-block" }}
+            onChange={(e) => setHiddenPlan(e.target.value)}
+          >
+            <option value={"Yes"}>Yes</option>
+            <option value={"No"}>No</option>
+          </Form.Select>
         </div>
         <Modal show={show} centered className="modalAddActivity">
           <Form onSubmit={handleAddActivity}>

@@ -51,6 +51,7 @@ function ToDoList(props) {
   const [showModalAttachment, setShowModalAttachment] = useState(false);
   const [percentProgress, setPercentProgress] = useState(0);
   const [actionState, setActionState] = useState(0);
+  const [updateValue, setUpdateValue] = useState(0);
   useEffect(() => {
     if (idTodo) {
       axios
@@ -75,7 +76,7 @@ function ToDoList(props) {
         }
       });
     }
-  }, [id, idTodo, actionState]);
+  }, [id, idTodo, actionState, updateValue]);
 
   const handleSaveData = () => {
     let confirm = window.confirm("Do You Want to Save Todo List?");
@@ -84,6 +85,7 @@ function ToDoList(props) {
         setMessage("Your Data Already Save");
         setShowNotif(true);
         dispatch({ type: SAVETODO });
+        setUpdateValue((prev) => prev + 1);
       });
     }
   };

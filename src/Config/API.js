@@ -313,3 +313,8 @@ export const getAllSectionApi = `${port}/api/section/getAll`;
 
 //email
 export const sendEmailApi = `${port}/api/email/send`;
+export const shareFinishProjectToUserCommonApi = `${port}/api/email/shareFinishProjectCommon`;
+export const shareFinishProjectForSMDNewModelApi = `${port}/api/email/shareFinishProjectForSMD`;
+
+//fedbackFTA
+export const sendFeedbackFtaApi = `${port}/api/email/sendFeedback`;

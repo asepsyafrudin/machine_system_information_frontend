@@ -52,7 +52,7 @@ function TotalProject(props) {
 
     const projectWillBeLaunch = (data) => {
       let currentDate = new Date().getTime();
-      if (data.length > 0) {
+      if (data.length > 1) {
         const sorted = data.sort(
           (a, b) => new Date(a.finish) - new Date(b.finish)
         );
@@ -60,6 +60,8 @@ function TotalProject(props) {
           (o) => new Date(o.finish) - currentDate > 0
         );
         setProjectLaunch(closest);
+      } else if (data.length === 1) {
+        setProjectLaunch(data[0]);
       } else {
         setProjectLaunch("");
       }

@@ -24,7 +24,6 @@ function NavigationUser(props) {
       payload: eventName,
     });
   };
-  console.log(userEvent);
   return (
     <Tab.Container
       id="left-tabs-admin"
