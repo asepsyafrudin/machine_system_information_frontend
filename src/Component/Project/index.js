@@ -463,11 +463,10 @@ function Project(props) {
       };
 
       const project = tableProject.find((value) => value.id === projectIdEdit);
-      const user = tableUser.find((value) => value.id === parseInt(userId));
 
       let confirm = window.confirm("Do you want to send email?");
       if (confirm) {
-        if (user.product_id === 14 && project.category === "New Model") {
+        if (project.product_id === 19 && project.category === "New Model") {
           axios
             .post(shareFinishProjectForSMDNewModelApi, data)
             .then((response) => {

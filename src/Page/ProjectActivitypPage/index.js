@@ -1,18 +1,50 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "../../Component/Header";
 import Footer from "../../Component/Footer";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ProjectActivity from "../../Component/ProjectActivity";
 import ToDoList from "../../Component/TodoList";
 import { GlobalConsumer } from "../../Context/store";
 import TrialDataOnActivity from "../../Component/TrialDataOnActivity";
 import DocumentProject from "../../Component/DocumentProject";
 import VideoProject from "../../Component/VideoProject";
+import axios from "axios";
+import { getProjectByIdApi } from "../../Config/API";
 
 function ProjectActivityPage(props) {
   const { dataChangeCount, dispatch, todoChangeCount } = props;
   const { id } = useParams();
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (id) {
+      axios
+        .get(getProjectByIdApi(id), {
+          signal: controller.signal,
+        })
+        .then((response) => {
+          const project = isMounted && response.data.data[0];
+          const member = project.member;
+          const checkMember = member.find(
+            (value) => value.user_id === parseInt(userId)
+          );
+          if (!checkMember) {
+            navigate("/forbidden");
+          }
+        });
+    }
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [id, navigate]);
   return (
     <div className="adminContainer">
       <Header />

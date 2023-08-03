@@ -20,6 +20,8 @@ import ProjectPage from "../ProjectPage";
 import ProjectActivityPage from "../ProjectActivitypPage";
 import Home from "../Home";
 import RedirectPage from "../RedirectPage";
+import RedirectActivityPage from "../RediectActivityPage";
+import ForbiddenPage from "../ForbiddenPage";
 
 function LayoutPage() {
   return (
@@ -30,6 +32,11 @@ function LayoutPage() {
         <Route
           path="/redirectPage/projectActivity/:activityId/:userId"
           element={<RedirectPage />}
+        />
+        <Route path="/forbidden" element={<ForbiddenPage />} />
+        <Route
+          path="/redirectPage/login/:projectId"
+          element={<RedirectActivityPage />}
         />
         <Route element={<ProtectedRoute />}>
           <Route path="/capabilityForm" element={<CapabilityFormPage />} />

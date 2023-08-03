@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import "./loginForm.css";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -17,8 +16,9 @@ import ModalAlert from "../ModalAlert";
 import { GrValidate } from "react-icons/gr";
 import { GlobalConsumer } from "../../Context/store";
 
-function LoginForm(props) {
+function LoginFormRedirectToActivity(props) {
   const { token } = useParams();
+  const { projectId } = props;
   const [npk, setNpk] = useState("");
   const [password, setPassword] = useState("");
   const [alert, setAlert] = useState(false);
@@ -61,7 +61,7 @@ function LoginForm(props) {
               const token = response.data.data;
               localStorage.setItem("user", JSON.stringify(user));
               localStorage.setItem("token", JSON.stringify(token));
-              navigate("/home");
+              navigate(`/projectActivity/${projectId}`);
             })
             .catch((error) => {
               console.log(error);
@@ -261,4 +261,4 @@ function LoginForm(props) {
   );
 }
 
-export default GlobalConsumer(LoginForm);
+export default GlobalConsumer(LoginFormRedirectToActivity);
