@@ -8,7 +8,7 @@ import VideoListAdmin from "../VideoListAdmin";
 import "./navigationAdmin.css";
 import { CgUserlane } from "react-icons/cg";
 import { SiAbstract, SiAtom } from "react-icons/si";
-import { AiOutlinePicCenter } from "react-icons/ai";
+import { AiFillEdit, AiOutlinePicCenter } from "react-icons/ai";
 import { BiGridAlt } from "react-icons/bi";
 import { MdOutlineVideoSettings } from "react-icons/md";
 import DocumentRegister from "../DocumentRegister";
@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import SectionList from "../SectionList";
 import { GlobalConsumer } from "../../Context/store";
 import { SETUSEREVENT } from "../../Context/const";
+import ApprovalRule from "../ApprovalRule";
 
 function NavigationAdmin(props) {
   const { userEvent, dispatch } = props;
@@ -128,6 +129,16 @@ function NavigationAdmin(props) {
                 Engineering Tools
               </Nav.Link>
             </Nav.Item>
+            <Nav.Item>
+              <Nav.Link
+                eventKey={"approvalRule"}
+                onClick={() => handleEvent("approvalRule")}
+                className="tabTitle"
+              >
+                <AiFillEdit style={{ marginRight: 5 }} />
+                Approval Rule Set Up
+              </Nav.Link>
+            </Nav.Item>
             <Nav.Item style={{ marginTop: 30 }}>
               <Link to={"/home"}>
                 <BsBack style={{ marginRight: 5 }} />
@@ -196,6 +207,12 @@ function NavigationAdmin(props) {
             </Tab.Pane>
             <Tab.Pane eventKey={"capabilityMenu"}>
               <EngineeringTools
+                actionState={(value) => setActionState(actionState + value)}
+                actionStateValue={actionState}
+              />
+            </Tab.Pane>
+            <Tab.Pane eventKey={"approvalRule"}>
+              <ApprovalRule
                 actionState={(value) => setActionState(actionState + value)}
                 actionStateValue={actionState}
               />

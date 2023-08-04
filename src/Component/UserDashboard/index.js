@@ -122,7 +122,7 @@ function UserDashboard(props) {
           formData.append("email", email);
           formData.append("password", password);
           formData.append("section", section);
-          formData.append("product", product);
+          formData.append("product_id", product);
           formData.append("position", position);
           formData.append("photo", photo);
           axios
