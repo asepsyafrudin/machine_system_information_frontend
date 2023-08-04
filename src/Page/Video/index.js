@@ -99,25 +99,13 @@ function Video() {
 
   const handleFeedBackComment = async (e) => {
     e.preventDefault();
-    const commentData = await axios.get(getFeedbackByIdApi(feedbackId));
-    let data;
-    if (commentData.data.data.length > 0) {
-      data = {
-        comment_id: commentData.data.data[0].comment_id,
-        user_id: currentUserId,
-        feedback: feedback,
-        selected_id: id,
-        selected_item: "video",
-      };
-    } else {
-      data = {
-        comment_id: commentId,
-        user_id: currentUserId,
-        feedback: feedback,
-        selected_id: id,
-        selected_item: "video",
-      };
-    }
+    let data = {
+      comment_id: commentId,
+      user_id: currentUserId,
+      feedback: feedback,
+      selected_id: id,
+      selected_item: "video",
+    };
 
     axios
       .post(postFeedbackComment, data)
