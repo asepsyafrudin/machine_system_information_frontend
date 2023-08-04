@@ -314,7 +314,9 @@ function UserDashboard(props) {
                       <option value={"Assistant General Manager"}>
                         Assistant General Manager
                       </option>
-                      <option value={"Departement Manager"}>Manager</option>
+                      <option value={"Departement Manager"}>
+                        Departement Manager
+                      </option>
                       <option value={"Manager"}>Manager</option>
                       <option value={"Assistant Manager"}>
                         Assistant Manager
