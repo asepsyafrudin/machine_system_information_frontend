@@ -46,8 +46,10 @@ function ProjectActivityPage(props) {
           const checkPosition = positionThatCanOpenProject.find(
             (value) => value === position
           );
-          if (!checkMember || !checkPosition) {
-            navigate("/forbidden");
+          if (!checkPosition) {
+            if (!checkMember) {
+              navigate("/forbidden");
+            }
           }
         });
     }
