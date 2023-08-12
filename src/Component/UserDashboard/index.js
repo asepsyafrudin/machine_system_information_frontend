@@ -300,7 +300,7 @@ function UserDashboard(props) {
                   <Form.Group as={Col}>
                     <Form.Label>Position</Form.Label>
                     <Form.Select
-                      disabled={!updateMode}
+                      disabled
                       value={position}
                       onChange={(e) => setPosition(e.target.value)}
                     >

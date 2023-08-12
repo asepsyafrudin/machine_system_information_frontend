@@ -277,6 +277,9 @@ export const deleteProjectByProjectId = (id) => {
 export const getProjectByPageAndUser = (page, user) => {
   return `${port}/api/project/getProjectByPageAndUser/${page}/${user}`;
 };
+export const getProjectBySectionIdAndPage = (page, sectionId) => {
+  return `${port}/api/project/getProjectBySectionIdAndPage/${page}/${sectionId}`;
+};
 
 export const searchProjectApi = `${port}/api/project/search`;
 export const getProjectByUserApi = (userId) => {

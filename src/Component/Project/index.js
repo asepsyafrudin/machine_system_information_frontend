@@ -17,6 +17,7 @@ import {
   getAllProductApi,
   getAllUsersApi,
   getProjectByPageAndUser,
+  getProjectBySectionIdAndPage,
   sendEmailApi,
   shareFinishProjectForSMDNewModelApi,
   shareFinishProjectToUserCommonApi,
@@ -114,16 +115,41 @@ function Project(props) {
 
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
-    axios
-      .get(getProjectByPageAndUser(page, user.id), {
-        signal: controller.signal,
-      })
-      .then((response) => {
-        const data = isMount && response.data.data;
-        setTableProject(data);
-        isMount && setStotalPageData(response.data.totalPageData);
-        isMount && setNumberStart(response.data.numberStart);
-      });
+    const position = user.position;
+    const section_id = user.section_id;
+    const positionThatCanOpenProject = [
+      "Departement Manager",
+      "Assistant General Manager",
+      "General Manager",
+      "Director",
+      "President",
+    ];
+
+    const checkPosition = positionThatCanOpenProject.find(
+      (value) => value === position
+    );
+
+    if (user.position === "Administrator") {
+    } else if (checkPosition) {
+      axios
+        .get(getProjectBySectionIdAndPage(page, section_id))
+        .then((response) => {
+          isMount && setTableProject(response.data.data);
+          isMount && setStotalPageData(response.data.totalPageData);
+          isMount && setNumberStart(response.data.numberStart);
+        });
+    } else {
+      axios
+        .get(getProjectByPageAndUser(page, user.id), {
+          signal: controller.signal,
+        })
+        .then((response) => {
+          const data = isMount && response.data.data;
+          setTableProject(data);
+          isMount && setStotalPageData(response.data.totalPageData);
+          isMount && setNumberStart(response.data.numberStart);
+        });
+    }
 
     return () => {
       isMount = false;
