@@ -44,7 +44,7 @@ function ProjectActivity(props) {
   const [colWidth, setColWidth] = useState(120);
   const [showNotif, setShowNotif] = useState(false);
   const [message, setMessage] = useState(false);
-  const [rowHeight, setRowHeight] = useState(50);
+  const [rowHeight, setRowHeight] = useState(35);
   const [listCellWidth, setListCellWidth] = useState(300);
   const [remark, setRemark] = useState("");
   const [updateValue, setUpdateValue] = useState(0);
