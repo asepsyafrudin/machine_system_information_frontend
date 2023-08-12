@@ -15,6 +15,7 @@ import { useEffect } from "react";
 import {
   createProjectApi,
   getAllProductApi,
+  getAllProjectByPageApi,
   getAllUsersApi,
   getProjectByPageAndUser,
   getProjectBySectionIdAndPage,
@@ -130,6 +131,14 @@ function Project(props) {
     );
 
     if (user.position === "Administrator") {
+      axios
+        .get(getAllProjectByPageApi(page))
+        .then((response) => {
+          isMount && setTableProject(response.data.data);
+          isMount && setStotalPageData(response.data.totalPageData);
+          isMount && setNumberStart(response.data.numberStart);
+        })
+        .then((error) => console.log(error));
     } else if (checkPosition) {
       axios
         .get(getProjectBySectionIdAndPage(page, section_id))
@@ -137,7 +146,8 @@ function Project(props) {
           isMount && setTableProject(response.data.data);
           isMount && setStotalPageData(response.data.totalPageData);
           isMount && setNumberStart(response.data.numberStart);
-        });
+        })
+        .catch((error) => console.log(error));
     } else {
       axios
         .get(getProjectByPageAndUser(page, user.id), {
