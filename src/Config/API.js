@@ -296,7 +296,9 @@ export const createAndUpdateTodoApi = `${port}/api/todo/create`;
 export const getTodoByProjectIdApi = (id, page) => {
   return `${port}/api/todo/getTodoByProjectId/${id}/${page}`;
 };
-
+export const deleteTodoListByIdApi = (id) => {
+  return `${port}/api/todo/delete/${id}`;
+};
 //token
 
 export const createTokenApi = `${port}/api/token/createToken`;

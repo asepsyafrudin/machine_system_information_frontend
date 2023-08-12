@@ -21,6 +21,7 @@ import {
   createAndUpdateTodoApi,
   createFileApi,
   deleteFileByIdApi,
+  deleteTodoListByIdApi,
   getFileByIdApi,
   getTodoByProjectIdApi,
   getUserByUserIdApi,
@@ -235,7 +236,12 @@ function ToDoList(props) {
     const confirm = window.confirm("Do you want to delete this activity?");
     if (confirm) {
       const filterData = todo.filter((value) => value.id !== id);
-      setTodo(filterData);
+      axios
+        .delete(deleteTodoListByIdApi(id))
+        .then((response) => {
+          setTodo(filterData);
+        })
+        .catch((error) => console.log(error));
       dispatch({ type: TODOCHANGECOUNT });
     }
   };
