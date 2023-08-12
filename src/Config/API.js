@@ -293,8 +293,8 @@ export const getAllActivityApi = `${port}/api/activity/getAll`;
 //todo
 
 export const createAndUpdateTodoApi = `${port}/api/todo/create`;
-export const getTodoByProjectIdApi = (id) => {
-  return `${port}/api/todo/getTodoByProjectId/${id}`;
+export const getTodoByProjectIdApi = (id, page) => {
+  return `${port}/api/todo/getTodoByProjectId/${id}/${page}`;
 };
 
 //token

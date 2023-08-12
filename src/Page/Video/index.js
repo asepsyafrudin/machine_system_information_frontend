@@ -7,7 +7,6 @@ import {
   deleteCommentApi,
   deleteFeedbackComment,
   getCommentByVideoIdApi,
-  getFeedbackByIdApi,
   getUserByUserIdApi,
   getVideoByIdApi,
   postCommentApi,

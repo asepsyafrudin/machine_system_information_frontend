@@ -30,6 +30,7 @@ import { fileName } from "../../Config/fileName";
 import { getExtFileName } from "../../Config/fileType";
 import { GoDesktopDownload } from "react-icons/go";
 import { SAVETODO, TODOCHANGECOUNT } from "../../Context/const";
+import PaginationTable from "../Pagination";
 
 function ToDoList(props) {
   const { id, dispatch, todoChangeCount } = props;
@@ -52,19 +53,29 @@ function ToDoList(props) {
   const [percentProgress, setPercentProgress] = useState(0);
   const [actionState, setActionState] = useState(0);
   const [updateValue, setUpdateValue] = useState(0);
+  const [totalPageData, setTotalPageData] = useState(1);
+  const [page, setPage] = useState(1);
+  const [numberStart, setNumberStart] = useState("");
+
+  const maxPagesShow = 3;
+
   useEffect(() => {
+    const controller = new AbortController();
+    let isMounted = true;
     if (idTodo) {
       axios
         .get(getFileByIdApi(idTodo))
         .then((response) => {
-          setTableFile(response.data.data);
+          isMounted && setTableFile(response.data.data);
         })
         .catch((error) => console.log(error));
     }
     axios
-      .get(getTodoByProjectIdApi(id))
+      .get(getTodoByProjectIdApi(id, page))
       .then((response) => {
-        setTodo(response.data.data);
+        isMounted && setTodo(response.data.data);
+        isMounted && setNumberStart(response.data.numberStart);
+        isMounted && setTotalPageData(response.data.totalPageData);
       })
       .catch((error) => console.log(error));
     const user = JSON.parse(localStorage.getItem("user"));
@@ -72,11 +83,16 @@ function ToDoList(props) {
       axios.get(getUserByUserIdApi(user.id)).then((response) => {
         const dataUser = response.data.data;
         if (dataUser.length > 0) {
-          setUserId(dataUser[0].id);
+          isMounted && setUserId(dataUser[0].id);
         }
       });
     }
-  }, [id, idTodo, actionState, updateValue]);
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [id, idTodo, actionState, updateValue, page]);
 
   const handleSaveData = () => {
     let confirm = window.confirm("Do You Want to Save Todo List?");
@@ -343,7 +359,7 @@ function ToDoList(props) {
               todo.map((value, index) => {
                 return (
                   <tr key={index}>
-                    <td>{index + 1}</td>
+                    <td>{index + numberStart}</td>
                     <td>{value.item}</td>
                     <td>{value.due_date}</td>
                     <td>{value.pic}</td>
@@ -393,6 +409,14 @@ function ToDoList(props) {
             )}
           </tbody>
         </Table>
+        <div className="paginationTableProduct">
+          <PaginationTable
+            totalPage={totalPageData}
+            maxPagesShow={maxPagesShow}
+            onChangePage={(e) => setPage(e)}
+            pageActive={page}
+          />
+        </div>
       </div>
       <Modal show={show} centered>
         <Form onSubmit={handleAddActivity}>
