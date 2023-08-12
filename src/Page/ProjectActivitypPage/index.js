@@ -34,7 +34,19 @@ function ProjectActivityPage(props) {
           const checkMember = member.find(
             (value) => value.user_id === parseInt(userId)
           );
-          if (!checkMember) {
+          const position = user.position;
+          const positionThatCanOpenProject = [
+            "Departement Manager",
+            "Assistant General Manager",
+            "General Manager",
+            "Director",
+            "President",
+          ];
+
+          const checkPosition = positionThatCanOpenProject.find(
+            (value) => value === position
+          );
+          if (!checkMember || !checkPosition) {
             navigate("/forbidden");
           }
         });
