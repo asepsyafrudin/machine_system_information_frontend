@@ -50,6 +50,7 @@ function ProjectActivity(props) {
   const [updateValue, setUpdateValue] = useState(0);
   const [monthFormat, setMonthFormat] = useState("en-US");
   const [hiddenPlan, setHiddenPlan] = useState("Yes");
+  const [switchMode, setSwitchMode] = useState(false);
 
   const backgroundColorDelay = (endProject, progressBar) => {
     let currentDate = new Date();
@@ -261,53 +262,110 @@ function ProjectActivity(props) {
     setActivity(activity.map((t) => (t.id === task.id ? task : t)));
   };
 
+  const handleTaskChange = (task) => {
+    dispatch({ type: CHANGEDATA });
+    let newTasks = activity.map((t) => (t.id === task.id ? task : t));
+    setActivity(newTasks);
+  };
+
   const ganttChartFormat = () => {
     if (activity.length > 0) {
       if (hiddenPlan === "Yes") {
-        return (
-          <GanttChart
-            tasks={activity}
-            locale={monthFormat}
-            viewMode={viewMode}
-            listCellWidth={listCellWidth}
-            columnWidth={colWidth}
-            rowHeight={rowHeight}
-            onExpanderClick={(task) => handleExpanderClick(task)}
-            onDoubleClick={(task) => handleDoubleClick(task)}
-            onDelete={(task) => handleDeleteTask(task)}
-            TaskListHeader={({ headerHeight }) => (
-              <div
-                style={{
-                  height: headerHeight,
-                  fontFamily: "sans-serif",
-                  fontWeight: "bold",
-                  paddingLeft: 10,
-                  margin: 0,
-                  marginBottom: -1,
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                Jobs
-              </div>
-            )}
-            TaskListTable={(props) => <TaskListTable {...props} />}
-          />
-        );
+        if (switchMode === true) {
+          return (
+            <GanttChart
+              tasks={activity}
+              locale={monthFormat}
+              viewMode={viewMode}
+              listCellWidth={listCellWidth}
+              columnWidth={colWidth}
+              rowHeight={rowHeight}
+              onExpanderClick={(task) => handleExpanderClick(task)}
+              onDoubleClick={(task) => handleDoubleClick(task)}
+              onDelete={(task) => handleDeleteTask(task)}
+              onDateChange={(task) => handleTaskChange(task)}
+              TaskListHeader={({ headerHeight }) => (
+                <div
+                  style={{
+                    height: headerHeight,
+                    fontFamily: "sans-serif",
+                    fontWeight: "bold",
+                    paddingLeft: 10,
+                    margin: 0,
+                    marginBottom: -1,
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  Jobs
+                </div>
+              )}
+              TaskListTable={(props) => <TaskListTable {...props} />}
+            />
+          );
+        } else {
+          return (
+            <GanttChart
+              tasks={activity}
+              locale={monthFormat}
+              viewMode={viewMode}
+              listCellWidth={listCellWidth}
+              columnWidth={colWidth}
+              rowHeight={rowHeight}
+              onExpanderClick={(task) => handleExpanderClick(task)}
+              onDoubleClick={(task) => handleDoubleClick(task)}
+              onDelete={(task) => handleDeleteTask(task)}
+              TaskListHeader={({ headerHeight }) => (
+                <div
+                  style={{
+                    height: headerHeight,
+                    fontFamily: "sans-serif",
+                    fontWeight: "bold",
+                    paddingLeft: 10,
+                    margin: 0,
+                    marginBottom: -1,
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  Jobs
+                </div>
+              )}
+              TaskListTable={(props) => <TaskListTable {...props} />}
+            />
+          );
+        }
       } else {
-        return (
-          <GanttChart
-            tasks={activity}
-            locale={monthFormat}
-            viewMode={viewMode}
-            listCellWidth={listCellWidth}
-            columnWidth={colWidth}
-            rowHeight={rowHeight}
-            onExpanderClick={(task) => handleExpanderClick(task)}
-            onDoubleClick={(task) => handleDoubleClick(task)}
-            onDelete={(task) => handleDeleteTask(task)}
-          />
-        );
+        if (switchMode === true) {
+          return (
+            <GanttChart
+              tasks={activity}
+              locale={monthFormat}
+              viewMode={viewMode}
+              listCellWidth={listCellWidth}
+              columnWidth={colWidth}
+              rowHeight={rowHeight}
+              onExpanderClick={(task) => handleExpanderClick(task)}
+              onDoubleClick={(task) => handleDoubleClick(task)}
+              onDelete={(task) => handleDeleteTask(task)}
+              onDateChange={(task) => handleTaskChange(task)}
+            />
+          );
+        } else {
+          return (
+            <GanttChart
+              tasks={activity}
+              locale={monthFormat}
+              viewMode={viewMode}
+              listCellWidth={listCellWidth}
+              columnWidth={colWidth}
+              rowHeight={rowHeight}
+              onExpanderClick={(task) => handleExpanderClick(task)}
+              onDoubleClick={(task) => handleDoubleClick(task)}
+              onDelete={(task) => handleDeleteTask(task)}
+            />
+          );
+        }
       }
     } else {
       return "";
@@ -360,66 +418,6 @@ function ProjectActivity(props) {
           </Row>
         </div>
         {ganttChartFormat()}
-        {/* {activity.length > 0 && !hiddenPlan && (
-          <GanttChart
-            tasks={activity}
-            locale={monthFormat}
-            viewMode={viewMode}
-            listCellWidth={listCellWidth}
-            columnWidth={colWidth}
-            rowHeight={rowHeight}
-            onExpanderClick={(task) => handleExpanderClick(task)}
-            onDoubleClick={(task) => handleDoubleClick(task)}
-            onDelete={(task) => handleDeleteTask(task)}
-          />
-        )} */}
-
-        {/* {activity.length > 0 ? (
-          hiddenPlan ? (
-            <GanttChart
-              tasks={activity}
-              locale={monthFormat}
-              viewMode={viewMode}
-              listCellWidth={listCellWidth}
-              columnWidth={colWidth}
-              rowHeight={rowHeight}
-              onExpanderClick={(task) => handleExpanderClick(task)}
-              onDoubleClick={(task) => handleDoubleClick(task)}
-              onDelete={(task) => handleDeleteTask(task)}
-              TaskListHeader={({ headerHeight }) => (
-                <div
-                  style={{
-                    height: headerHeight,
-                    fontFamily: "sans-serif",
-                    fontWeight: "bold",
-                    paddingLeft: 10,
-                    margin: 0,
-                    marginBottom: -1,
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  Jobs
-                </div>
-              )}
-              TaskListTable={(props) => <TaskListTable {...props} />}
-            />
-          ) : (
-            <GanttChart
-              tasks={activity}
-              locale={monthFormat}
-              viewMode={viewMode}
-              listCellWidth={listCellWidth}
-              columnWidth={colWidth}
-              rowHeight={rowHeight}
-              onExpanderClick={(task) => handleExpanderClick(task)}
-              onDoubleClick={(task) => handleDoubleClick(task)}
-              onDelete={(task) => handleDeleteTask(task)}
-            />
-          )
-        ) : (
-          ""
-        )} */}
         <div style={{ textAlign: "left" }}>
           <Button
             style={{ marginRight: 5 }}
@@ -441,21 +439,21 @@ function ProjectActivity(props) {
           </Button>
           Column Width :
           <input
-            style={{ width: 100 }}
+            style={{ width: 60 }}
             type="number"
             value={colWidth}
             onChange={(e) => setColWidth(e.target.value)}
           />
           {"    "}Row Height :
           <input
-            style={{ width: 100 }}
+            style={{ width: 60 }}
             type="number"
             value={rowHeight}
             onChange={(e) => setRowHeight(parseInt(e.target.value))}
           />
           {"    "}List Cell Width :
           <input
-            style={{ width: 100 }}
+            style={{ width: 60 }}
             type="number"
             value={listCellWidth}
             onChange={(e) => setListCellWidth(parseInt(e.target.value))}
@@ -463,7 +461,7 @@ function ProjectActivity(props) {
           {"    "}Month format :
           <Form.Select
             value={monthFormat}
-            style={{ width: 200, display: "inline-block" }}
+            style={{ width: 150, display: "inline-block" }}
             onChange={(e) => setMonthFormat(e.target.value)}
           >
             <option value={"ja-JP"}>Japan</option>
@@ -472,12 +470,19 @@ function ProjectActivity(props) {
           {"    "}Hidden Plan :
           <Form.Select
             value={hiddenPlan}
-            style={{ width: 200, display: "inline-block" }}
+            style={{ width: 100, display: "inline-block" }}
             onChange={(e) => setHiddenPlan(e.target.value)}
           >
             <option value={"Yes"}>Yes</option>
             <option value={"No"}>No</option>
           </Form.Select>
+          <Form style={{ display: `inline-block`, width: 200 }}>
+            <Form.Check
+              type="switch"
+              label="Drag Mode"
+              onChange={() => setSwitchMode(!switchMode)}
+            />
+          </Form>
         </div>
         <Modal show={show} centered className="modalAddActivity">
           <Form onSubmit={handleAddActivity}>
