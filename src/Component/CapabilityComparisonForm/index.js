@@ -1410,6 +1410,8 @@ function CapabilityComparisonForm() {
                   Data After
                 </div>
                 <Row className="mb-3">
+                  <Col>Maximum : {maximumData(listData2)} </Col>
+                  <Col>Minumum : {minimumData(listData2)} </Col>
                   <Col>Average : {averageData(listData2)} </Col>
                   <Col>Sigma : {sigmaData(listData2)}</Col>
                   <Col>Cp : {cpData(listData2)}</Col>
