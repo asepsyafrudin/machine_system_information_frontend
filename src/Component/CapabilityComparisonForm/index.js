@@ -7,6 +7,7 @@ import {
   Col,
   FloatingLabel,
   Form,
+  Modal,
   Row,
   Spinner,
   Tab,
@@ -43,11 +44,12 @@ import ModalAlert from "../ModalAlert";
 import ModalConfirm from "../ModalConfirm";
 import { ExcelRenderer } from "react-excel-renderer";
 import { HiDownload } from "react-icons/hi";
-import { BiExport, BiReset } from "react-icons/bi";
+import { BiEdit, BiExport, BiReset } from "react-icons/bi";
 import CapabilityFormatExcel from "../../Asset/File/Format Excel Import Capability Comparison.xlsx";
 import GraphDistribution from "../GraphDistribution";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import { MdOutlineDelete } from "react-icons/md";
 
 function CapabilityComparisonForm() {
   const { id } = useParams();
@@ -82,6 +84,10 @@ function CapabilityComparisonForm() {
   const [project, setProject] = useState("");
   const [listData2, setListData2] = useState([]);
   const [position, setPosition] = useState("");
+  const [dataEdit, setDataEdit] = useState("");
+  const [idDataEdit, setIdDataEdit] = useState("");
+  const [idDataEdit2, setIdDataEdit2] = useState("");
+  const [showModalEditData, setShowModalEditData] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -310,17 +316,52 @@ function CapabilityComparisonForm() {
   const handleDeleteData = (e) => {
     const index = e.target.id;
     let array = listData;
-    array.splice(index, 1);
-    setListData(array);
-    setActionValue(actionValue + 1);
+    let confirm = window.confirm("Do You Want To Delete?");
+    if (confirm) {
+      array.splice(index, 1);
+      setListData(array);
+      setActionValue(actionValue + 1);
+    }
   };
 
   const handleDeleteData2 = (e) => {
     const index = e.target.id;
     let array = listData2;
-    array.splice(index, 1);
-    setListData2(array);
-    setActionValue(actionValue + 1);
+    let confirm = window.confirm("Do You Want To Delete?");
+    if (confirm) {
+      array.splice(index, 1);
+      setListData2(array);
+      setActionValue(actionValue + 1);
+    }
+  };
+
+  const handleEditData = (e) => {
+    const index = e.target.id;
+    setIdDataEdit(index);
+    setDataEdit(listData[index].data);
+    setShowModalEditData(true);
+  };
+
+  const handleEditData2 = (e) => {
+    const index = e.target.id;
+    setIdDataEdit2(index);
+    setDataEdit(listData2[index].data);
+    setShowModalEditData(true);
+  };
+
+  const handleSaveDataEdit = (e) => {
+    e.preventDefault();
+    if (idDataEdit) {
+      let currentList = listData;
+      currentList[idDataEdit].data = dataEdit;
+      setListData(currentList);
+      setActionValue((prev) => prev + 1);
+    } else if (idDataEdit2) {
+      let currentList = listData2;
+      currentList[idDataEdit2].data = dataEdit;
+      setListData2(currentList);
+      setActionValue((prev) => prev + 1);
+    }
   };
 
   const maximumData = (listData) => {
@@ -1232,9 +1273,24 @@ function CapabilityComparisonForm() {
                                         id={index}
                                         type="button"
                                         size="sm"
+                                        variant="danger"
                                         onClick={handleDeleteData}
                                       >
-                                        Delete
+                                        <MdOutlineDelete
+                                          style={{ pointerEvents: "none" }}
+                                        />
+                                      </Button>
+                                      <Button
+                                        style={{ marginLeft: 5 }}
+                                        id={index}
+                                        type="button"
+                                        size="sm"
+                                        variant="success"
+                                        onClick={handleEditData}
+                                      >
+                                        <BiEdit
+                                          style={{ pointerEvents: "none" }}
+                                        />
                                       </Button>
                                     </td>
                                   ) : (
@@ -1246,9 +1302,24 @@ function CapabilityComparisonForm() {
                                       id={index}
                                       type="button"
                                       size="sm"
+                                      variant="danger"
                                       onClick={handleDeleteData}
                                     >
-                                      Delete
+                                      <MdOutlineDelete
+                                        style={{ pointerEvents: "none" }}
+                                      />
+                                    </Button>
+                                    <Button
+                                      style={{ marginLeft: 5 }}
+                                      id={index}
+                                      type="button"
+                                      size="sm"
+                                      variant="success"
+                                      onClick={handleEditData}
+                                    >
+                                      <BiEdit
+                                        style={{ pointerEvents: "none" }}
+                                      />
                                     </Button>
                                   </td>
                                 )}
@@ -1290,9 +1361,24 @@ function CapabilityComparisonForm() {
                                         id={index}
                                         type="button"
                                         size="sm"
+                                        variant="danger"
                                         onClick={handleDeleteData2}
                                       >
-                                        Delete
+                                        <MdOutlineDelete
+                                          style={{ pointerEvents: "none" }}
+                                        />
+                                      </Button>
+                                      <Button
+                                        style={{ marginLeft: 5 }}
+                                        id={index}
+                                        type="button"
+                                        size="sm"
+                                        variant="success"
+                                        onClick={handleEditData2}
+                                      >
+                                        <BiEdit
+                                          style={{ pointerEvents: "none" }}
+                                        />
                                       </Button>
                                     </td>
                                   ) : (
@@ -1304,9 +1390,24 @@ function CapabilityComparisonForm() {
                                       id={index}
                                       type="button"
                                       size="sm"
+                                      variant="danger"
                                       onClick={handleDeleteData2}
                                     >
-                                      Delete
+                                      <MdOutlineDelete
+                                        style={{ pointerEvents: "none" }}
+                                      />
+                                    </Button>
+                                    <Button
+                                      style={{ marginLeft: 5 }}
+                                      id={index}
+                                      type="button"
+                                      size="sm"
+                                      variant="success"
+                                      onClick={handleEditData2}
+                                    >
+                                      <BiEdit
+                                        style={{ pointerEvents: "none" }}
+                                      />
                                     </Button>
                                   </td>
                                 )}
@@ -1455,6 +1556,47 @@ function CapabilityComparisonForm() {
           message={message}
           onHandleConfirm={(confirm) => handleConfirm(confirm)}
         />
+        <Modal
+          show={showModalEditData}
+          onHide={() => {
+            setShowModalEditData(false);
+            setIdDataEdit("");
+            setIdDataEdit2("");
+          }}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Input New Number</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleSaveDataEdit}>
+              <Form.Control
+                placeholder="Enter New Number"
+                value={dataEdit}
+                onChange={(e) => setDataEdit(e.target.value)}
+                type="number"
+                lang="en"
+                step={".001"}
+                required
+              />
+              <Button style={{ marginTop: 5 }} type="submit">
+                Save
+              </Button>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setShowModalEditData(false);
+                setIdDataEdit("");
+                setIdDataEdit2("");
+              }}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </>
   );

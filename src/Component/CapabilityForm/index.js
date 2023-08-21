@@ -7,6 +7,7 @@ import {
   Button,
   Col,
   Form,
+  Modal,
   Row,
   Spinner,
   Tab,
@@ -44,11 +45,12 @@ import ModalAlert from "../ModalAlert";
 import ModalConfirm from "../ModalConfirm";
 import { ExcelRenderer } from "react-excel-renderer";
 import { HiDownload } from "react-icons/hi";
-import { BiExport, BiReset } from "react-icons/bi";
+import { BiEdit, BiExport, BiReset } from "react-icons/bi";
 import CapabilityFormatExcel from "../../Asset/File/Format Excel Import Capability.xlsx";
 import GraphDistribution from "../GraphDistribution";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import { MdOutlineDelete } from "react-icons/md";
 
 function CapabilityForm() {
   const { id } = useParams();
@@ -81,6 +83,9 @@ function CapabilityForm() {
   const [showModalConfirm, setShowModalConfirm] = useState(false);
   const fileRef = useRef(null);
   const [position, setPosition] = useState("");
+  const [idDataEdit, setIdDataEdit] = useState("");
+  const [showModalEditData, setShowModalEditData] = useState(false);
+  const [dataEdit, setDataEdit] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -284,9 +289,29 @@ function CapabilityForm() {
   const handleDeleteData = (e) => {
     const index = e.target.id;
     let array = listData;
-    array.splice(index, 1);
-    setListData(array);
-    setActionValue(actionValue + 1);
+    let confirm = window.confirm("Do You Want To Delete?");
+    if (confirm) {
+      array.splice(index, 1);
+      setListData(array);
+      setActionValue(actionValue + 1);
+    }
+  };
+
+  const handleEditData = (e) => {
+    const index = e.target.id;
+    setIdDataEdit(index);
+    setDataEdit(listData[index].data);
+    setShowModalEditData(true);
+  };
+
+  const handleSaveDataEdit = (e) => {
+    e.preventDefault();
+    if (idDataEdit) {
+      let currentList = listData;
+      currentList[idDataEdit].data = dataEdit;
+      setListData(currentList);
+      setActionValue((prev) => prev + 1);
+    }
   };
 
   const maximumData = (listData) => {
@@ -1103,9 +1128,22 @@ function CapabilityForm() {
                                     id={index}
                                     type="button"
                                     size="sm"
+                                    variant="danger"
                                     onClick={handleDeleteData}
                                   >
-                                    Delete
+                                    <MdOutlineDelete
+                                      style={{ pointerEvents: "none" }}
+                                    />
+                                  </Button>
+                                  <Button
+                                    style={{ marginLeft: 5 }}
+                                    id={index}
+                                    type="button"
+                                    size="sm"
+                                    variant="success"
+                                    onClick={handleEditData}
+                                  >
+                                    <BiEdit style={{ pointerEvents: "none" }} />
                                   </Button>
                                 </td>
                               ) : (
@@ -1117,9 +1155,22 @@ function CapabilityForm() {
                                   id={index}
                                   type="button"
                                   size="sm"
+                                  variant="danger"
                                   onClick={handleDeleteData}
                                 >
-                                  Delete
+                                  <MdOutlineDelete
+                                    style={{ pointerEvents: "none" }}
+                                  />
+                                </Button>
+                                <Button
+                                  style={{ marginLeft: 5 }}
+                                  id={index}
+                                  type="button"
+                                  size="sm"
+                                  variant="success"
+                                  onClick={handleEditData}
+                                >
+                                  <BiEdit style={{ pointerEvents: "none" }} />
                                 </Button>
                               </td>
                             )}
@@ -1249,6 +1300,45 @@ function CapabilityForm() {
           message={message}
           onHandleConfirm={(confirm) => handleConfirm(confirm)}
         />
+        <Modal
+          show={showModalEditData}
+          onHide={() => {
+            setShowModalEditData(false);
+            setIdDataEdit("");
+          }}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Input New Number</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleSaveDataEdit}>
+              <Form.Control
+                placeholder="Enter New Number"
+                value={dataEdit}
+                onChange={(e) => setDataEdit(e.target.value)}
+                type="number"
+                lang="en"
+                step={".001"}
+                required
+              />
+              <Button style={{ marginTop: 5 }} type="submit">
+                Save
+              </Button>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setShowModalEditData(false);
+                setIdDataEdit("");
+              }}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </>
   );
