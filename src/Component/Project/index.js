@@ -39,6 +39,14 @@ import { MdEmail, MdVideoLibrary } from "react-icons/md";
 import { GrEdit, GrShareOption } from "react-icons/gr";
 import { Link } from "react-router-dom";
 import "./project.css";
+import {
+  PE_2WV_AISS,
+  PE_4WV_SONAR_EFI,
+  PE_AOI,
+  PE_METER,
+  PE_SMD,
+  PE_WSS,
+} from "../../Config/groupingName";
 
 function Project(props) {
   const { actionState, actionStateValue } = props;
@@ -56,6 +64,7 @@ function Project(props) {
   const [member, setMember] = useState([]);
   const [projectIdEdit, setProjectIdEdit] = useState("");
   const [userId, setUserId] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [show, setShow] = useState(false);
   const [message, setMessage] = useState("");
   const [page, setPage] = useState(1);
@@ -116,6 +125,7 @@ function Project(props) {
 
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
+    setUserEmail(user.email);
     const position = user.position;
     const section_id = user.section_id;
     const positionThatCanOpenProject = [
@@ -196,12 +206,28 @@ function Project(props) {
   };
 
   const handleMember = () => {
-    if (memberId !== "") {
-      if (parseInt(memberId) !== parseInt(userId)) {
-        const check = member.find((value) => value === parseInt(memberId));
-        if (!check) {
-          setMember((prev) => [...prev, parseInt(memberId)]);
+    let grouppingName = memberId.replace(/^\[\'|\'\]$/g, "").split(",");
+    if (grouppingName.length > 1) {
+      for (let index = 0; index < grouppingName.length; index++) {
+        if (grouppingName[index] !== userEmail) {
+          const user = tableUser.find(
+            (value) => value.email === grouppingName[index]
+          );
+
+          if (user) {
+            const check = member.find((value) => value === parseInt(user.id));
+            if (!check) {
+              setMember((prev) => [...prev, parseInt(user.id)]);
+            }
+          }
         }
+      }
+    } else if (parseInt(grouppingName[0]) !== parseInt(userId)) {
+      const check = member.find(
+        (value) => value === parseInt(grouppingName[0])
+      );
+      if (!check) {
+        setMember((prev) => [...prev, parseInt(memberId)]);
       }
     }
   };
@@ -380,6 +406,7 @@ function Project(props) {
       setMemberListOfProject(memberIddata);
       setShowModalShare(true);
       setProjectIdEdit(checkProject.id);
+      setCcMailList((prev) => [...prev, checkProject.manager_id]);
     }
   };
 
@@ -424,6 +451,26 @@ function Project(props) {
       );
       if (!check) {
         setTotalMemberToEmail((prev) => [...prev, memberToEmail]);
+      }
+    }
+  };
+
+  const handleAddAllToEmail = () => {
+    const project = tableProject.find((value) => value.id === projectIdEdit);
+    if (memberListOfProject.length > 0) {
+      for (let index = 0; index < memberListOfProject.length; index++) {
+        const check = totalMemberToEmail.find(
+          (value) => parseInt(value) === parseInt(memberListOfProject[index])
+        );
+        if (
+          !check &&
+          parseInt(memberListOfProject[index]) !== parseInt(project.manager_id)
+        ) {
+          setTotalMemberToEmail((prev) => [
+            ...prev,
+            memberListOfProject[index],
+          ]);
+        }
       }
     }
   };
@@ -507,12 +554,18 @@ function Project(props) {
             .post(shareFinishProjectForSMDNewModelApi, data)
             .then((response) => {
               setShowSuccess(true);
+              setCcMailList([]);
+              setTotalMemberToEmail([]);
+              setProjectIdEdit("");
             });
         } else {
           axios
             .post(shareFinishProjectToUserCommonApi, data)
             .then((response) => {
               setShowSuccess(true);
+              setCcMailList([]);
+              setTotalMemberToEmail([]);
+              setProjectIdEdit("");
             });
         }
       }
@@ -631,6 +684,12 @@ function Project(props) {
                   Open This
                 </option>
                 {userOption()}
+                <option value={PE_2WV_AISS}>PE 2WV AISS</option>
+                <option value={PE_4WV_SONAR_EFI}>PE 4WV SONAR EFI</option>
+                <option value={PE_AOI}>PE AIO</option>
+                <option value={PE_METER}>PE METER</option>
+                <option value={PE_SMD}>PE SMD</option>
+                <option value={PE_WSS}>PE WSS</option>
               </Form.Select>
             </Form.Group>
             <Form.Group as={Col}>
@@ -1051,8 +1110,15 @@ function Project(props) {
                   </Form.Group>
                   <Form.Group as={Col}>
                     <Form.Label></Form.Label> <br />
-                    <Button type="button" onClick={handleAddToEmail}>
+                    <Button
+                      style={{ marginRight: 5 }}
+                      type="button"
+                      onClick={handleAddToEmail}
+                    >
                       Add
+                    </Button>
+                    <Button type="button" onClick={handleAddAllToEmail}>
+                      Add All
                     </Button>
                   </Form.Group>
                 </Row>
