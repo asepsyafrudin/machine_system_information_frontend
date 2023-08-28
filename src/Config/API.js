@@ -323,3 +323,9 @@ export const shareFinishProjectForSMDNewModelApi = `${port}/api/email/shareFinis
 
 //fedbackFTA
 export const sendFeedbackFtaApi = `${port}/api/email/sendFeedback`;
+
+//setting
+export const saveSettingProjectApi = `${port}/api/setting/save`;
+export const getSettingByProjectIdApi = (id) => {
+  return `${port}/api/setting/getSetting/${id}`;
+};

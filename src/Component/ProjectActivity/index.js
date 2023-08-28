@@ -11,6 +11,8 @@ import {
   getActivityByProjectIdApi,
   getAllUsersApi,
   getProjectByIdApi,
+  getSettingByProjectIdApi,
+  saveSettingProjectApi,
 } from "../../Config/API";
 import { SiStarbucks } from "react-icons/si";
 import TitleSection from "../TitleSection";
@@ -51,6 +53,7 @@ function ProjectActivity(props) {
   const [monthFormat, setMonthFormat] = useState("en-US");
   const [hiddenPlan, setHiddenPlan] = useState("Yes");
   const [switchMode, setSwitchMode] = useState(false);
+  const [openSetting, setOpenSetting] = useState(false);
 
   const backgroundColorDelay = (endProject, progressBar) => {
     let currentDate = new Date();
@@ -116,6 +119,28 @@ function ProjectActivity(props) {
               }
               setActivity(activityData);
             });
+        });
+
+      axios
+        .get(getSettingByProjectIdApi(id), {
+          signal: controller.signal,
+        })
+        .then((response) => {
+          const data = isMount && response.data.data[0];
+          if (data) {
+            setColWidth(parseInt(data.column_width));
+            setRowHeight(parseInt(data.row_height));
+            setListCellWidth(parseInt(data.list_cell_width));
+            setMonthFormat(data.month_format);
+            setHiddenPlan(data.hidden_plan);
+            setSwitchMode(() => {
+              if (data.switchMode === 1) {
+                return true;
+              } else {
+                return false;
+              }
+            });
+          }
         });
     }
 
@@ -266,6 +291,23 @@ function ProjectActivity(props) {
     dispatch({ type: CHANGEDATA });
     let newTasks = activity.map((t) => (t.id === task.id ? task : t));
     setActivity(newTasks);
+  };
+
+  const saveSettingProjectActivity = () => {
+    const data = {
+      projectId: id,
+      columnWidth: colWidth,
+      rowHeight: rowHeight,
+      listCellWidth: listCellWidth,
+      monthFormat: monthFormat,
+      hiddenPlan: hiddenPlan,
+      switchMode: switchMode,
+    };
+
+    axios.post(saveSettingProjectApi, data).then((response) => {
+      setOpenSetting(false);
+      window.alert("Setting Format Already Save into Database");
+    });
   };
 
   const ganttChartFormat = () => {
@@ -437,52 +479,7 @@ function ProjectActivity(props) {
           >
             Month
           </Button>
-          Column Width :
-          <input
-            style={{ width: 60 }}
-            type="number"
-            value={colWidth}
-            onChange={(e) => setColWidth(e.target.value)}
-          />
-          {"    "}Row Height :
-          <input
-            style={{ width: 60 }}
-            type="number"
-            value={rowHeight}
-            onChange={(e) => setRowHeight(parseInt(e.target.value))}
-          />
-          {"    "}List Cell Width :
-          <input
-            style={{ width: 60 }}
-            type="number"
-            value={listCellWidth}
-            onChange={(e) => setListCellWidth(parseInt(e.target.value))}
-          />
-          {"    "}Month format :
-          <Form.Select
-            value={monthFormat}
-            style={{ width: 150, display: "inline-block" }}
-            onChange={(e) => setMonthFormat(e.target.value)}
-          >
-            <option value={"ja-JP"}>Japan</option>
-            <option value={"en-US"}>English</option>
-          </Form.Select>
-          {"    "}Hidden Plan :
-          <Form.Select
-            value={hiddenPlan}
-            style={{ width: 100, display: "inline-block" }}
-            onChange={(e) => setHiddenPlan(e.target.value)}
-          >
-            <option value={"Yes"}>Yes</option>
-            <option value={"No"}>No</option>
-          </Form.Select>
-          <Form style={{ display: `inline-block`, width: 200 }}>
-            <Form.Check
-              type="switch"
-              label="Drag Mode"
-              onChange={() => setSwitchMode(!switchMode)}
-            />
-          </Form>
+          <Button onClick={() => setOpenSetting(true)}>Setting</Button>
         </div>
         <Modal show={show} centered className="modalAddActivity">
           <Form onSubmit={handleAddActivity}>
@@ -616,6 +613,112 @@ function ProjectActivity(props) {
               variant="secondary"
               onClick={() => {
                 setShowNotif(false);
+              }}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal
+          show={openSetting}
+          onHide={() => {
+            setOpenSetting(false);
+          }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Setting</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>Column Width</Form.Label>
+              </Col>
+              <Col>
+                <Form.Control
+                  type={"number"}
+                  placeholder="Enter Column Width"
+                  value={colWidth}
+                  onChange={(e) => setColWidth(e.target.value)}
+                />
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>Row Height</Form.Label>
+              </Col>
+              <Col>
+                <Form.Control
+                  type={"number"}
+                  placeholder="Enter Row Height"
+                  value={rowHeight}
+                  onChange={(e) => setRowHeight(parseInt(e.target.value))}
+                />
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>List Cell Width</Form.Label>
+              </Col>
+              <Col>
+                <Form.Control
+                  type={"number"}
+                  placeholder="Enter List Cell Width"
+                  value={listCellWidth}
+                  onChange={(e) => setListCellWidth(parseInt(e.target.value))}
+                />
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>Month Format</Form.Label>
+              </Col>
+              <Col>
+                <Form.Select
+                  value={monthFormat}
+                  style={{ width: 150, display: "inline-block" }}
+                  onChange={(e) => setMonthFormat(e.target.value)}
+                >
+                  <option value={"ja-JP"}>Japan</option>
+                  <option value={"en-US"}>English</option>
+                </Form.Select>
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>Hidden Plan</Form.Label>
+              </Col>
+              <Col>
+                <Form.Select
+                  value={hiddenPlan}
+                  style={{ width: 100, display: "inline-block" }}
+                  onChange={(e) => setHiddenPlan(e.target.value)}
+                >
+                  <option value={"Yes"}>Yes</option>
+                  <option value={"No"}>No</option>
+                </Form.Select>
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>Drag Mode</Form.Label>
+              </Col>
+              <Col>
+                <Form.Check
+                  type="switch"
+                  label="Drag Mode"
+                  onChange={() => setSwitchMode(!switchMode)}
+                />
+              </Col>
+            </Row>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button type="button" onClick={saveSettingProjectActivity}>
+              Save
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setOpenSetting(false);
               }}
             >
               Close
