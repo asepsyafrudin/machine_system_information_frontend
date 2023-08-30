@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../../Component/Header";
 import Footer from "../../Component/Footer";
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,6 +14,7 @@ import { getProjectByIdApi } from "../../Config/API";
 function ProjectActivityPage(props) {
   const { dataChangeCount, dispatch, todoChangeCount } = props;
   const { id } = useParams();
+  const [accessMember, setAccessMember] = useState(true);
 
   const navigate = useNavigate();
 
@@ -48,7 +49,7 @@ function ProjectActivityPage(props) {
           );
           if (!checkPosition) {
             if (!checkMember) {
-              navigate("/forbidden");
+              setAccessMember(false);
             }
           }
         });
@@ -68,11 +69,13 @@ function ProjectActivityPage(props) {
           dataChangeCount={dataChangeCount}
           dispatch={dispatch}
           todoChangeCount={todoChangeCount}
+          accessMember={accessMember}
         />
         <ToDoList
           id={id}
           dataChangeCount={dataChangeCount}
           dispatch={dispatch}
+          accessMember={accessMember}
           todoChangeCount={todoChangeCount}
         />
         <TrialDataOnActivity id={id} />

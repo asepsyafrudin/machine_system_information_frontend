@@ -32,9 +32,11 @@ import { getExtFileName } from "../../Config/fileType";
 import { GoDesktopDownload } from "react-icons/go";
 import { SAVETODO, TODOCHANGECOUNT } from "../../Context/const";
 import PaginationTable from "../Pagination";
+import { MdDoneOutline } from "react-icons/md";
+import { AiOutlineClose, AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 
 function ToDoList(props) {
-  const { id, dispatch, todoChangeCount } = props;
+  const { id, accessMember, dispatch, todoChangeCount } = props;
   const refAttachment = useRef();
   const [show, setShow] = useState(false);
   const [todo, setTodo] = useState([]);
@@ -335,15 +337,17 @@ function ToDoList(props) {
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
-        <div style={{ textAlign: "right", marginBottom: 2 }}>
-          <Button style={{ marginRight: 5 }} onClick={handleSaveData}>
-            <BsSave pointerEvents={"none"} /> Save
-          </Button>
-          <Button onClick={() => setShow(true)}>
-            <BsPlusCircleFill pointerEvents={"none"} />
-            Add
-          </Button>
-        </div>
+        {accessMember && (
+          <div style={{ textAlign: "right", marginBottom: 2 }}>
+            <Button style={{ marginRight: 5 }} onClick={handleSaveData}>
+              <BsSave pointerEvents={"none"} /> Save
+            </Button>
+            <Button onClick={() => setShow(true)}>
+              <BsPlusCircleFill pointerEvents={"none"} />
+              Add
+            </Button>
+          </div>
+        )}
         <TitleSection
           title="To Do List"
           icon={<RiTodoFill style={{ marginRight: 5 }} />}
@@ -357,7 +361,7 @@ function ToDoList(props) {
               <th>PIC</th>
               <th>Status</th>
               <th>Actual Finish</th>
-              <th>Action</th>
+              {accessMember && <th>Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -373,38 +377,57 @@ function ToDoList(props) {
                     <td>
                       {value.status === "Finish" ? value.actual_finish : ""}
                     </td>
-                    <td>
-                      <Button
-                        id={value.id}
-                        style={{ marginRight: 5 }}
-                        onClick={handleClickStatus}
-                      >
-                        Status {value.status === "Open" ? "Finish" : "Open"}
-                      </Button>
-                      <Button
-                        style={{ marginRight: 5 }}
-                        id={value.id}
-                        onClick={handleClickEdit}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="danger"
-                        id={value.id}
-                        onClick={handleDelete}
-                        style={{ marginRight: 5 }}
-                      >
-                        Delete
-                      </Button>
-                      <Button
-                        variant="success"
-                        id={value.id}
-                        onClick={handleShowAttachment}
-                        ref={refAttachment}
-                      >
-                        <CgAttachment style={{ pointerEvents: "none" }} />
-                      </Button>
-                    </td>
+                    {accessMember && (
+                      <td>
+                        {value.status === "Open" ? (
+                          <Button
+                            id={value.id}
+                            style={{ marginRight: 5 }}
+                            onClick={handleClickStatus}
+                            title="Mark Done"
+                          >
+                            <MdDoneOutline style={{ pointerEvents: "none" }} />
+                          </Button>
+                        ) : (
+                          <Button
+                            id={value.id}
+                            style={{ marginRight: 5 }}
+                            onClick={handleClickStatus}
+                            variant="warning"
+                            title="Mark Open"
+                          >
+                            <AiOutlineClose style={{ pointerEvents: "none" }} />
+                          </Button>
+                        )}
+                        <Button
+                          style={{ marginRight: 5 }}
+                          id={value.id}
+                          onClick={handleClickEdit}
+                          variant="secondary"
+                          title="Edit"
+                        >
+                          <AiOutlineEdit style={{ pointerEvents: "none" }} />
+                        </Button>
+                        <Button
+                          variant="danger"
+                          id={value.id}
+                          onClick={handleDelete}
+                          style={{ marginRight: 5 }}
+                          title="Delete"
+                        >
+                          <AiOutlineDelete style={{ pointerEvents: "none" }} />
+                        </Button>
+                        <Button
+                          variant="success"
+                          id={value.id}
+                          onClick={handleShowAttachment}
+                          ref={refAttachment}
+                          title="Attachment"
+                        >
+                          <CgAttachment style={{ pointerEvents: "none" }} />
+                        </Button>
+                      </td>
+                    )}
                   </tr>
                 );
               })

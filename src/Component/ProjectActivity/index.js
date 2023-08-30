@@ -27,7 +27,8 @@ import { MdDeleteForever } from "react-icons/md";
 import TaskListTable from "../TaskListTable";
 
 function ProjectActivity(props) {
-  const { id, dataChangeCount, dispatch, todoChangeCount } = props;
+  const { id, accessMember, dataChangeCount, dispatch, todoChangeCount } =
+    props;
   const [project, setProject] = useState([]);
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -212,38 +213,44 @@ function ProjectActivity(props) {
   };
 
   const handleDoubleClick = (task) => {
-    const findData = activity.find((value) => value.id === task.id);
-    if (findData) {
-      setActivityName(findData.name);
-      setFinishDate(dateParse(findData.end));
-      setStartDate(dateParse(findData.start));
-      setType(findData.type);
-      setDepedencies(findData.dependencies[0]);
-      setProgress(findData.progress);
-      setIdUpdate(findData.id);
-      setRemark(findData.remark);
-      setShow(true);
+    if (accessMember) {
+      const findData = activity.find((value) => value.id === task.id);
+      if (findData) {
+        setActivityName(findData.name);
+        setFinishDate(dateParse(findData.end));
+        setStartDate(dateParse(findData.start));
+        setType(findData.type);
+        setDepedencies(findData.dependencies[0]);
+        setProgress(findData.progress);
+        setIdUpdate(findData.id);
+        setRemark(findData.remark);
+        setShow(true);
+      }
     }
   };
 
   const handleDeleteTask = (task) => {
-    const confirm = window.confirm("Do you want to delete this activity?");
-    if (confirm) {
-      const filterData = activity.filter((value) => value.id !== task.id);
-      setActivity(filterData);
-      setShow(false);
-      dispatch({ type: CHANGEDATA });
+    if (accessMember) {
+      const confirm = window.confirm("Do you want to delete this activity?");
+      if (confirm) {
+        const filterData = activity.filter((value) => value.id !== task.id);
+        setActivity(filterData);
+        setShow(false);
+        dispatch({ type: CHANGEDATA });
+      }
     }
   };
 
   const handleDeleteActivity = (id) => {
-    const confirm = window.confirm("Do you want to delete this activity?");
-    if (confirm) {
-      const filterData = activity.filter((value) => value.id !== id);
-      setActivity(filterData);
-      resetForm("");
-      setShow(false);
-      dispatch({ type: CHANGEDATA });
+    if (accessMember) {
+      const confirm = window.confirm("Do you want to delete this activity?");
+      if (confirm) {
+        const filterData = activity.filter((value) => value.id !== id);
+        setActivity(filterData);
+        resetForm("");
+        setShow(false);
+        dispatch({ type: CHANGEDATA });
+      }
     }
   };
 
@@ -288,26 +295,30 @@ function ProjectActivity(props) {
   };
 
   const handleTaskChange = (task) => {
-    dispatch({ type: CHANGEDATA });
-    let newTasks = activity.map((t) => (t.id === task.id ? task : t));
-    setActivity(newTasks);
+    if (accessMember) {
+      dispatch({ type: CHANGEDATA });
+      let newTasks = activity.map((t) => (t.id === task.id ? task : t));
+      setActivity(newTasks);
+    }
   };
 
   const saveSettingProjectActivity = () => {
-    const data = {
-      projectId: id,
-      columnWidth: colWidth,
-      rowHeight: rowHeight,
-      listCellWidth: listCellWidth,
-      monthFormat: monthFormat,
-      hiddenPlan: hiddenPlan,
-      switchMode: switchMode,
-    };
+    if (accessMember) {
+      const data = {
+        projectId: id,
+        columnWidth: colWidth,
+        rowHeight: rowHeight,
+        listCellWidth: listCellWidth,
+        monthFormat: monthFormat,
+        hiddenPlan: hiddenPlan,
+        switchMode: switchMode,
+      };
 
-    axios.post(saveSettingProjectApi, data).then((response) => {
-      setOpenSetting(false);
-      window.alert("Setting Format Already Save into Database");
-    });
+      axios.post(saveSettingProjectApi, data).then((response) => {
+        setOpenSetting(false);
+        window.alert("Setting Format Already Save into Database");
+      });
+    }
   };
 
   const ganttChartFormat = () => {
@@ -416,24 +427,26 @@ function ProjectActivity(props) {
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
-        <div style={{ textAlign: "right", marginBottom: 2 }}>
-          <Row>
-            <Col sm={6} style={{ textAlign: "left" }}>
-              <Button style={{ marginRight: 5 }} onClick={handleBackPage}>
-                <FaBackward pointerEvents={"none"} /> Back to Project Page
-              </Button>
-            </Col>
-            <Col sm={6} style={{ textAlign: "right" }}>
-              <Button style={{ marginRight: 5 }} onClick={handleSaveData}>
-                <BsSave pointerEvents={"none"} /> Save
-              </Button>
-              <Button onClick={() => setShow(true)}>
-                <BsPlusCircleFill pointerEvents={"none"} />
-                Add
-              </Button>
-            </Col>
-          </Row>
-        </div>
+        {accessMember && (
+          <div style={{ textAlign: "right", marginBottom: 2 }}>
+            <Row>
+              <Col sm={6} style={{ textAlign: "left" }}>
+                <Button style={{ marginRight: 5 }} onClick={handleBackPage}>
+                  <FaBackward pointerEvents={"none"} /> Back to Project Page
+                </Button>
+              </Col>
+              <Col sm={6} style={{ textAlign: "right" }}>
+                <Button style={{ marginRight: 5 }} onClick={handleSaveData}>
+                  <BsSave pointerEvents={"none"} /> Save
+                </Button>
+                <Button onClick={() => setShow(true)}>
+                  <BsPlusCircleFill pointerEvents={"none"} />
+                  Add
+                </Button>
+              </Col>
+            </Row>
+          </div>
+        )}
         <TitleSection
           title={`Project Schedule ${titleProject}`}
           icon={<SiStarbucks style={{ marginRight: 5 }} />}
@@ -479,7 +492,9 @@ function ProjectActivity(props) {
           >
             Month
           </Button>
-          <Button onClick={() => setOpenSetting(true)}>Setting</Button>
+          {accessMember && (
+            <Button onClick={() => setOpenSetting(true)}>Setting</Button>
+          )}
         </div>
         <Modal show={show} centered className="modalAddActivity">
           <Form onSubmit={handleAddActivity}>
