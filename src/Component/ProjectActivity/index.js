@@ -721,6 +721,7 @@ function ProjectActivity(props) {
                 <Form.Check
                   type="switch"
                   label="Drag Mode"
+                  value={switchMode}
                   onChange={() => setSwitchMode(!switchMode)}
                 />
               </Col>
