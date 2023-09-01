@@ -391,6 +391,7 @@ function Project(props) {
         setSubjectEmail(checkProject.project_name);
         setShowEmailModal(true);
         setProjectIdEdit(checkProject.id);
+        setCcMailList((prev) => [...prev, userId]);
       }
     }
   };
