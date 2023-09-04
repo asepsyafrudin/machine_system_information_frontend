@@ -800,8 +800,8 @@ function Project(props) {
               <th>Project Name</th>
               <th>Category</th>
               <th>PIC</th>
-              <th>Budget</th>
-              <th>Saving</th>
+              <th>Created Date</th>
+              <th>Created By</th>
               <th>Start Date</th>
               <th>SOP Date</th>
               {/* <th>Last Update</th> */}
@@ -821,8 +821,10 @@ function Project(props) {
                       {subCategoryLabel(value.sub_category)}
                     </td>
                     <td>{userNameFunction(value.manager_id)}</td>
-                    <td>{parseFloat(value.budget).toLocaleString()}</td>
-                    <td>{parseFloat(value.saving_cost).toLocaleString()}</td>
+                    {/* <td>{parseFloat(value.budget).toLocaleString()}</td>
+                    <td>{parseFloat(value.saving_cost).toLocaleString()}</td> */}
+                    <td>{moment(value.create_date).format("LL")}</td>
+                    <td>{userNameFunction(value.user_id)}</td>
                     <td>{moment(value.start).format("LL")}</td>
                     <td>{moment(value.finish).format("LL")}</td>
                     {/* <td>{moment(value.create_date).format("LL")}</td> */}

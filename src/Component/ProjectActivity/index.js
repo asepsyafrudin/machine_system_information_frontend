@@ -452,16 +452,25 @@ function ProjectActivity(props) {
           icon={<SiStarbucks style={{ marginRight: 5 }} />}
         />
         <div>
-          <Row className="mb-3" style={{ textAlign: "left" }}>
+          <Row className="mb-1" style={{ textAlign: "left" }}>
             <Col sm={2}>PIC</Col>
             <Col sm={4}>: {userNameFunction(project.manager_id)}</Col>
           </Row>
-          <Row className="mb-3" style={{ textAlign: "left" }}>
+          <Row className="mb-1" style={{ textAlign: "left" }}>
             <Col sm={2}>Category</Col>
             <Col sm={10}>: {category}</Col>
           </Row>
-
-          <Row className="mb-3" style={{ textAlign: "left" }}>
+          <Row className="mb-1" style={{ textAlign: "left" }}>
+            <Col sm={2}>Budget</Col>
+            <Col sm={10}>: {parseFloat(project.budget).toLocaleString()}</Col>
+          </Row>
+          <Row className="mb-1" style={{ textAlign: "left" }}>
+            <Col sm={2}>Saving Cost</Col>
+            <Col sm={10}>
+              : {parseFloat(project.saving_cost).toLocaleString()}
+            </Col>
+          </Row>
+          <Row className="mb-1" style={{ textAlign: "left" }}>
             <Col sm={2}>Description</Col>
             <Col sm={4}>: {description}</Col>
             <Col sm={6} style={{ textAlign: "right" }}>
