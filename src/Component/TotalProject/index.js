@@ -44,7 +44,7 @@ function TotalProject(props) {
   const [userId, setUserId] = useState("");
 
   const maxPagesShow = 3;
-  const dataPerPage = 5;
+  const dataPerPage = 10;
 
   useEffect(() => {
     let isMounted = true;
@@ -97,7 +97,7 @@ function TotalProject(props) {
     axios.post(searchProjectApi, data).then((response) => {
       const data = response.data.data;
       const filter = data.filter((value) => value.status !== "cancel");
-      setTableProject(filter);
+      setTableProject(data);
       const totalPageData = Math.ceil(filter.length / dataPerPage);
       setStotalPageData(totalPageData);
       projectWillBeLaunch(filter);
@@ -255,6 +255,7 @@ function TotalProject(props) {
       "On Progress",
       "Finish",
       "Waiting Detail Activity",
+      "cancel",
     ];
     if (data.length > 0) {
       for (let index = 0; index < data.length; index++) {
@@ -304,31 +305,30 @@ function TotalProject(props) {
   const tableListProject = (page) => {
     const listTable = [];
     if (tableProject.length > 0) {
+      const filter = tableProject.filter((value) => value.status !== "cancel");
       for (
         let index = (page - 1) * dataPerPage;
-        index < page * dataPerPage && index < tableProject.length;
+        index < page * dataPerPage && index < filter.length;
         index++
       ) {
         listTable.push(
           <tr key={index + 1}>
             <td>{index + 1}</td>
-            <td>{tableProject[index].project_name}</td>
+            <td>{filter[index].project_name}</td>
 
-            <td>{productNameFunction(tableProject[index].product_id)}</td>
+            <td>{productNameFunction(filter[index].product_id)}</td>
             <td>
-              {tableProject[index].category} <br />
-              {subCategoryLabel(tableProject[index].sub_category)}
+              {filter[index].category} <br />
+              {subCategoryLabel(filter[index].sub_category)}
             </td>
-            <td>{userNameFunction(tableProject[index].manager_id)}</td>
-            <td>{parseFloat(tableProject[index].budget).toLocaleString()}</td>
+            <td>{userNameFunction(filter[index].manager_id)}</td>
+            <td>{parseFloat(filter[index].budget).toLocaleString()}</td>
+            <td>{parseFloat(filter[index].saving_cost).toLocaleString()}</td>
+            <td>{moment(filter[index].start).format("LL")}</td>
+            <td>{moment(filter[index].finish).format("LL")}</td>
             <td>
-              {parseFloat(tableProject[index].saving_cost).toLocaleString()}
-            </td>
-            <td>{moment(tableProject[index].start).format("LL")}</td>
-            <td>{moment(tableProject[index].finish).format("LL")}</td>
-            <td>
-              {statusFunction(tableProject[index].status)} <br />
-              {buttonView(tableProject[index].id)}
+              {statusFunction(filter[index].status)} <br />
+              {buttonView(filter[index].id)}
             </td>
           </tr>
         );
@@ -370,6 +370,7 @@ function TotalProject(props) {
         "On Progress",
         "Finish",
         "Waiting Detail Activity",
+        "cancel",
       ];
       let checkData = notCryteria.find((value) => value === filter);
 
