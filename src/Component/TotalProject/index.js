@@ -96,22 +96,24 @@ function TotalProject(props) {
 
     axios.post(searchProjectApi, data).then((response) => {
       const data = response.data.data;
-      const filter = data.filter((value) => value.status !== "cancel");
-      setTableProject(data);
-      const totalPageData = Math.ceil(filter.length / dataPerPage);
-      setStotalPageData(totalPageData);
-      projectWillBeLaunch(filter);
-      setTotalItem(filter.length);
-      let budget = 0;
-      let saving = 0;
-      if (filter.length > 0) {
-        for (let index = 0; index < filter.length; index++) {
-          budget += parseFloat(filter[index].budget);
-          saving += parseFloat(filter[index].saving_cost);
+      if (data.length > 0) {
+        const filter = data.filter((value) => value.status !== "cancel");
+        setTableProject(data);
+        const totalPageData = Math.ceil(filter.length / dataPerPage);
+        setStotalPageData(totalPageData);
+        projectWillBeLaunch(filter);
+        setTotalItem(filter.length);
+        let budget = 0;
+        let saving = 0;
+        if (filter.length > 0) {
+          for (let index = 0; index < filter.length; index++) {
+            budget += parseFloat(filter[index].budget);
+            saving += parseFloat(filter[index].saving_cost);
+          }
         }
+        setTotalBudget(budget);
+        setTotalSavingCost(saving);
       }
-      setTotalBudget(budget);
-      setTotalSavingCost(saving);
     });
 
     axios
