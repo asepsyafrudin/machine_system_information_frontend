@@ -324,8 +324,10 @@ function TotalProject(props) {
               {subCategoryLabel(filter[index].sub_category)}
             </td>
             <td>{userNameFunction(filter[index].manager_id)}</td>
-            <td>{parseFloat(filter[index].budget).toLocaleString()}</td>
-            <td>{parseFloat(filter[index].saving_cost).toLocaleString()}</td>
+            {/* <td>{moment(filter[index].create_date)}</td>
+            <td>{userNameFunction(filter[index].user_id)}</td> */}
+            <td>{moment(filter[index].create_date).format("LL")}</td>
+            <td>{userNameFunction(filter[index].user_id)}</td>
             <td>{moment(filter[index].start).format("LL")}</td>
             <td>{moment(filter[index].finish).format("LL")}</td>
             <td>
@@ -598,8 +600,8 @@ function TotalProject(props) {
                   <th>Product</th>
                   <th>Category</th>
                   <th>PIC</th>
-                  <th>Budget</th>
-                  <th>Saving</th>
+                  <th>Created Date</th>
+                  <th>Created By</th>
                   <th>Start Date</th>
                   <th>SOP Date</th>
                   <th>Status</th>
