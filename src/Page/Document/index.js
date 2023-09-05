@@ -201,6 +201,7 @@ function Document() {
                   <th>No</th>
                   <th>File Name</th>
                   <th>File Type</th>
+                  <th>Upload Date</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -213,6 +214,7 @@ function Document() {
                         {fileName(value.name)}
                       </td>
                       <td>{getExtFileName(value.name)}</td>
+                      <td>{value.create_date}</td>
                       <td>
                         <a href={value.file} target="_blank" rel="noreferrer">
                           <Button size="sm">
