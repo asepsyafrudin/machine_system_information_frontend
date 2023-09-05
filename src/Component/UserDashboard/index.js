@@ -535,6 +535,62 @@ function UserDashboard(props) {
                     </a>
                   </td>
                 </tr>
+                <tr>
+                  <td style={{ textAlign: "left" }}>
+                    E-SS [Electronics Suggestion System]
+                  </td>
+                  <td style={{ textAlign: "left" }}>
+                    <a
+                      href="http://bit.ly/E-SSUSULAN-DNIAF"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Button size="sm">Open</Button>
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ textAlign: "left" }}>
+                    Dypsis [Denso Indonesia Personal System]
+                  </td>
+                  <td style={{ textAlign: "left" }}>
+                    <a
+                      href="http://172.31.30.241/dipsys/login.php"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Button size="sm">Open</Button>
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ textAlign: "left" }}>
+                    Quins [Quality Integrated Information System]
+                  </td>
+                  <td style={{ textAlign: "left" }}>
+                    <a
+                      href="http://quins.dnia.asia.denso/QUINS/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Button size="sm">Open</Button>
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ textAlign: "left" }}>
+                    EPS [Electronics Purchase System]
+                  </td>
+                  <td style={{ textAlign: "left" }}>
+                    <a
+                      href="http://172.31.3.216/EPS/index.php"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Button size="sm">Open</Button>
+                    </a>
+                  </td>
+                </tr>
               </tbody>
             </Table>
           </div>
