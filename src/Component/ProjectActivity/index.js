@@ -1,7 +1,16 @@
 import React from "react";
 import GanttChart from "../GanttChart";
 import { ViewMode } from "gantt-task-react";
-import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import {
+  Alert,
+  Badge,
+  Button,
+  CloseButton,
+  Col,
+  Form,
+  Modal,
+  Row,
+} from "react-bootstrap";
 import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
@@ -13,6 +22,8 @@ import {
   getProjectByIdApi,
   getSettingByProjectIdApi,
   saveSettingProjectApi,
+  shareFinishProjectForSMDNewModelApi,
+  shareFinishProjectToUserCommonApi,
 } from "../../Config/API";
 import { SiStarbucks } from "react-icons/si";
 import TitleSection from "../TitleSection";
@@ -25,6 +36,7 @@ import { FaBackward } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { MdDeleteForever } from "react-icons/md";
 import TaskListTable from "../TaskListTable";
+import { BiShare } from "react-icons/bi";
 
 function ProjectActivity(props) {
   const { id, accessMember, dataChangeCount, dispatch, todoChangeCount } =
@@ -55,6 +67,16 @@ function ProjectActivity(props) {
   const [hiddenPlan, setHiddenPlan] = useState("Yes");
   const [switchMode, setSwitchMode] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
+  const [shareStatus, setShareStatus] = useState(true);
+  const [showModalShare, setShowModalShare] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [memberToEmail, setMemberToEmail] = useState("");
+  const [memberListOfProject, setMemberListOfProject] = useState([]);
+  const [totalMemberToEmail, setTotalMemberToEmail] = useState([]);
+  const [ccMailList, setCcMailList] = useState([]);
+  const [showAlert, setShowAlert] = useState(false);
+  const [ccMail, setCcMail] = useState("");
+  const [userId, setUserId] = useState("");
 
   const backgroundColorDelay = (endProject, progressBar) => {
     let currentDate = new Date();
@@ -69,6 +91,8 @@ function ProjectActivity(props) {
   useEffect(() => {
     let isMount = true;
     const controller = new AbortController();
+    const user = JSON.parse(localStorage.getItem("user"));
+    setUserId(user.id);
 
     if (id) {
       axios
@@ -81,6 +105,11 @@ function ProjectActivity(props) {
           setProject(dataProject);
           setDescription(dataProject.description);
           setCategory(dataProject.category);
+          let memberIdData = [];
+          for (let index = 0; index < dataProject.member.length; index++) {
+            memberIdData.push(dataProject.member[index].user_id);
+          }
+          setMemberListOfProject(memberIdData);
 
           const data = {
             name: "Total Schedule",
@@ -93,6 +122,9 @@ function ProjectActivity(props) {
           };
           let activityData = [];
           activityData.push(data);
+          if (dataProject.status === "Finish") {
+            setShareStatus(false);
+          }
 
           axios
             .get(getActivityByProjectIdApi(dataProject.id))
@@ -170,6 +202,150 @@ function ProjectActivity(props) {
     setRemark("");
     setShow(false);
   };
+
+  const colorBgBadge = (value) => {
+    switch (value) {
+      case 1:
+        return "primary";
+      case 2:
+        return "secondary";
+      case 3:
+        return "success";
+      case 4:
+        return "danger";
+      case 5:
+        return "warning";
+      case 6:
+        return "info";
+      case 7:
+        return "dark";
+      default:
+        break;
+    }
+  };
+
+  const optionMemberToEmailFunction = () => {
+    let option = [];
+    if (memberListOfProject.length > 0) {
+      for (let index = 0; index < memberListOfProject.length; index++) {
+        option.push(
+          <option key={index} value={memberListOfProject[index]}>
+            {userNameFunction(memberListOfProject[index])}
+          </option>
+        );
+      }
+    }
+    return option;
+  };
+
+  const handleAddToEmail = () => {
+    if (memberToEmail) {
+      const check = totalMemberToEmail.find(
+        (value) => parseInt(value) === parseInt(memberToEmail)
+      );
+      if (!check) {
+        setTotalMemberToEmail((prev) => [...prev, memberToEmail]);
+      }
+    }
+  };
+
+  const handleAddAllToEmail = () => {
+    if (memberListOfProject.length > 0) {
+      for (let index = 0; index < memberListOfProject.length; index++) {
+        const check = totalMemberToEmail.find(
+          (value) => parseInt(value) === parseInt(memberListOfProject[index])
+        );
+        if (
+          !check &&
+          parseInt(memberListOfProject[index]) !== parseInt(project.manager_id)
+        ) {
+          setTotalMemberToEmail((prev) => [
+            ...prev,
+            memberListOfProject[index],
+          ]);
+        }
+      }
+    }
+  };
+
+  const handleDeleteToEmail = (e) => {
+    const id = e.target.id;
+    let filter = totalMemberToEmail.filter(
+      (value) => parseInt(value) !== parseInt(id)
+    );
+    setTotalMemberToEmail(filter);
+  };
+
+  const handleAddCcEmail = () => {
+    if (ccMail) {
+      const check = ccMailList.find(
+        (value) => parseInt(value) === parseInt(ccMail)
+      );
+      if (!check) {
+        setCcMailList((prev) => [...prev, ccMail]);
+      }
+    }
+  };
+
+  const handleDeleteCcEmail = (e) => {
+    const id = e.target.id;
+    let filter = ccMailList.filter((value) => parseInt(value) !== parseInt(id));
+    setCcMailList(filter);
+  };
+
+  const handleShowModalShare = (e) => {
+    if (project) {
+      let memberIddata = [];
+      for (let index = 0; index < project.member.length; index++) {
+        memberIddata.push(project.member[index].user_id);
+      }
+      setMemberListOfProject(memberIddata);
+      setShowModalShare(true);
+      setCcMailList((prev) => [...prev, project.manager_id]);
+    }
+  };
+
+  const handleShareProjectFinishToUser = (e) => {
+    e.preventDefault();
+    if (totalMemberToEmail.length > 0) {
+      let data = {
+        user_id: userId,
+        toEmail: totalMemberToEmail,
+        ccEmail: ccMailList,
+        project_id: project.id,
+      };
+
+      let confirm = window.confirm("Do you want to send email?");
+      if (confirm) {
+        if (project.product_id === 19 && project.category === "New Model") {
+          axios.post(shareFinishProjectForSMDNewModelApi, data).then(() => {
+            setShowSuccess(true);
+            setCcMailList([]);
+            setTotalMemberToEmail([]);
+          });
+        } else {
+          axios.post(shareFinishProjectToUserCommonApi, data).then(() => {
+            setShowSuccess(true);
+            setCcMailList([]);
+            setTotalMemberToEmail([]);
+          });
+        }
+      }
+    } else {
+      setShowAlert(true);
+    }
+  };
+
+  const handleCloseModalEmail = () => {
+    setShowModalShare(false);
+    setTotalMemberToEmail([]);
+    setMemberToEmail("");
+    setShowAlert(false);
+    setShowSuccess(false);
+    setCcMailList([]);
+    setCcMail("");
+  };
+
   const handleAddActivity = (e) => {
     e.preventDefault();
     let data = {
@@ -258,7 +434,7 @@ function ProjectActivity(props) {
     const confirm = window.confirm("Do you Want To Save This?");
     if (confirm) {
       const dataSave = activity.filter((value) => value.type !== "project");
-      axios.post(createActivityApi, dataSave).then((response) => {
+      axios.post(createActivityApi, dataSave).then(() => {
         setIdUpdate("");
         setMessage("Data Already SAVE");
         setShowNotif(true);
@@ -314,7 +490,7 @@ function ProjectActivity(props) {
         switchMode: switchMode,
       };
 
-      axios.post(saveSettingProjectApi, data).then((response) => {
+      axios.post(saveSettingProjectApi, data).then(() => {
         setOpenSetting(false);
         window.alert("Setting Format Already Save into Database");
       });
@@ -436,6 +612,13 @@ function ProjectActivity(props) {
                 </Button>
               </Col>
               <Col sm={6} style={{ textAlign: "right" }}>
+                <Button
+                  disabled={shareStatus}
+                  style={{ marginRight: 5 }}
+                  onClick={handleShowModalShare}
+                >
+                  <BiShare pointerEvents={"none"} /> Share
+                </Button>
                 <Button style={{ marginRight: 5 }} onClick={handleSaveData}>
                   <BsSave pointerEvents={"none"} /> Save
                 </Button>
@@ -746,6 +929,153 @@ function ProjectActivity(props) {
                 setOpenSetting(false);
               }}
             >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal show={showModalShare} onHide={handleCloseModalEmail}>
+          <Modal.Header>
+            <Modal.Title>Share Project Finish to Member</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {!showSuccess ? (
+              <>
+                <Form onSubmit={handleShareProjectFinishToUser}>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Form.Group as={Col}>
+                      <Form.Label>To</Form.Label>
+                      <Form.Select
+                        value={memberToEmail}
+                        onChange={(e) => setMemberToEmail(e.target.value)}
+                      >
+                        <option value="" disabled>
+                          Open This
+                        </option>
+                        {optionMemberToEmailFunction()}
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group as={Col}>
+                      <Form.Label></Form.Label> <br />
+                      <Button
+                        style={{ marginRight: 5 }}
+                        type="button"
+                        onClick={handleAddToEmail}
+                      >
+                        Add
+                      </Button>
+                      <Button type="button" onClick={handleAddAllToEmail}>
+                        Add All
+                      </Button>
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Col>
+                      {totalMemberToEmail.length > 0
+                        ? totalMemberToEmail.map((value, index) => {
+                            return (
+                              <Badge
+                                key={index}
+                                style={{ marginRight: 2 }}
+                                bg={colorBgBadge(index + 1)}
+                              >
+                                <h6>
+                                  {CapitalCaseFirstWord(
+                                    tableUser.length > 0 &&
+                                      tableUser.find(
+                                        (value2) =>
+                                          value2.id === parseInt(value)
+                                      ).username
+                                  )}{" "}
+                                  <CloseButton
+                                    id={value}
+                                    onClick={handleDeleteToEmail}
+                                  />
+                                </h6>
+                              </Badge>
+                            );
+                          })
+                        : "Data Is Not Available"}
+                    </Col>
+                  </Row>{" "}
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Form.Group as={Col}>
+                      <Form.Label>Cc</Form.Label>
+                      <Form.Select
+                        value={ccMail}
+                        onChange={(e) => setCcMail(e.target.value)}
+                      >
+                        <option value="" disabled>
+                          Open This
+                        </option>
+                        {optionMemberToEmailFunction()}
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group as={Col}>
+                      <Form.Label></Form.Label> <br />
+                      <Button type="button" onClick={handleAddCcEmail}>
+                        Add
+                      </Button>
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Col>
+                      {ccMailList.length > 0
+                        ? ccMailList.map((value, index) => {
+                            return (
+                              <Badge
+                                key={index}
+                                style={{ marginRight: 2 }}
+                                bg={colorBgBadge(index + 1)}
+                              >
+                                <h6>
+                                  {CapitalCaseFirstWord(
+                                    tableUser.length > 0 &&
+                                      tableUser.find(
+                                        (value2) =>
+                                          value2.id === parseInt(value)
+                                      ).username
+                                  )}{" "}
+                                  <CloseButton
+                                    id={value}
+                                    onClick={handleDeleteCcEmail}
+                                  />
+                                </h6>
+                              </Badge>
+                            );
+                          })
+                        : "Data Is Not Available"}
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col style={{ textAlign: "left" }}>
+                      <Button variant="primary" type="submit">
+                        Send Email
+                      </Button>
+                    </Col>
+                  </Row>
+                </Form>
+                <Alert
+                  show={showAlert}
+                  variant="warning"
+                  onClose={() => setShowAlert(false)}
+                  dismissible
+                >
+                  Please Add Users to Email
+                </Alert>
+              </>
+            ) : (
+              <Alert
+                show={showSuccess}
+                variant="success"
+                onClose={() => setShowSuccess(false)}
+                dismissible
+              >
+                Email Already Send to Users
+              </Alert>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModalEmail}>
               Close
             </Button>
           </Modal.Footer>
