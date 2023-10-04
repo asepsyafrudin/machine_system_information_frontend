@@ -73,6 +73,7 @@ function ToDoList(props) {
         })
         .catch((error) => console.log(error));
     }
+    
     axios
       .get(getTodoByProjectIdApi(id, page))
       .then((response) => {
