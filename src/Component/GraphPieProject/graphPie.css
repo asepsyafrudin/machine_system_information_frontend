@@ -1,0 +1,59 @@
+.LegendList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  list-style: none; /* Remove default bullets */
+}
+
+.LegendList li {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.BulletLabel {
+  display: flex;
+  align-items: center;
+}
+
+.CirecleBullet {
+  border-radius: 50%;
+}
+
+.BulletLabelText {
+  margin-left: 10px;
+}
+
+.CenteredLabelValue {
+  font-size: 36px;
+  font-weight: 600;
+  fill: #0088fe;
+}
+
+.legendPie {
+  width: 15px;
+  height: 15px;
+  border-radius: 5px;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.colorRed {
+  background-color: red;
+}
+
+.colorBlue {
+  background-color: #0088fe;
+}
+
+.colorOrange {
+  background-color: #ff8042;
+}
+
+.colorYellow {
+  background-color: #82ca9d;
+}
+
+.colorAbuAbu {
+  background-color: #707f91;
+}

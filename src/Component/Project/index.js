@@ -31,6 +31,7 @@ import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { v4 as uuid } from "uuid";
 import { STATUSOPEN } from "../../Config/const";
 import { BsListNested } from "react-icons/bs";
+import { IoMdCreate } from "react-icons/io";
 import { RiCreativeCommonsNdFill } from "react-icons/ri";
 import moment from "moment";
 import PaginationTable from "../Pagination";
@@ -47,6 +48,8 @@ import {
   PE_SMD,
   PE_WSS,
 } from "../../Config/groupingName";
+import GraphBarProject from "../GraphBarProject";
+import GraphPieProject from "../GraphPieProject";
 
 function Project(props) {
   const { actionState, actionStateValue } = props;
@@ -84,6 +87,11 @@ function Project(props) {
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
   const [showModalShare, setShowModalShare] = useState(false);
+  const [showModalCreateProject, setShowModalCreateProject] = useState(false);
+  const [userPosition, setUserPosition] = useState("");
+  const [userSection, setUserSection] = useState("");
+  const [filterBy, setFilterBy] = useState("");
+  const [detailFilterValue, setDetailFilterValue] = useState("");
 
   const maxPagesShow = 3;
 
@@ -127,7 +135,9 @@ function Project(props) {
     setUserId(user.id);
     setUserEmail(user.email);
     const position = user.position;
+    setUserPosition(position);
     const section_id = user.section_id;
+    setUserSection(section_id);
     const positionThatCanOpenProject = [
       "Departement Manager",
       "Assistant General Manager",
@@ -141,41 +151,50 @@ function Project(props) {
     );
 
     if (user.position === "Administrator") {
-      axios
-        .get(getAllProjectByPageApi(page))
-        .then((response) => {
-          isMount && setTableProject(response.data.data);
-          isMount && setStotalPageData(response.data.totalPageData);
-          isMount && setNumberStart(response.data.numberStart);
-        })
-        .then((error) => console.log(error));
+      if (filterBy && detailFilterValue) {
+      } else {
+        axios
+          .get(getAllProjectByPageApi(page))
+          .then((response) => {
+            isMount && setTableProject(response.data.data);
+            isMount && setStotalPageData(response.data.totalPageData);
+            isMount && setNumberStart(response.data.numberStart);
+          })
+          .then((error) => console.log(error));
+      }
     } else if (checkPosition) {
-      axios
-        .get(getProjectBySectionIdAndPage(page, section_id))
-        .then((response) => {
-          isMount && setTableProject(response.data.data);
-          isMount && setStotalPageData(response.data.totalPageData);
-          isMount && setNumberStart(response.data.numberStart);
-        })
-        .catch((error) => console.log(error));
+      if (filterBy && detailFilterValue) {
+      } else {
+        axios
+          .get(getProjectBySectionIdAndPage(page, section_id))
+          .then((response) => {
+            isMount && setTableProject(response.data.data);
+            isMount && setStotalPageData(response.data.totalPageData);
+            isMount && setNumberStart(response.data.numberStart);
+          })
+          .catch((error) => console.log(error));
+      }
     } else {
-      axios
-        .get(getProjectByPageAndUser(page, user.id), {
-          signal: controller.signal,
-        })
-        .then((response) => {
-          const data = isMount && response.data.data;
-          setTableProject(data);
-          isMount && setStotalPageData(response.data.totalPageData);
-          isMount && setNumberStart(response.data.numberStart);
-        });
+      if (filterBy && detailFilterValue) {
+      } else {
+        axios
+          .get(getProjectByPageAndUser(page, user.id), {
+            signal: controller.signal,
+          })
+          .then((response) => {
+            const data = isMount && response.data.data;
+            setTableProject(data);
+            isMount && setStotalPageData(response.data.totalPageData);
+            isMount && setNumberStart(response.data.numberStart);
+          });
+      }
     }
 
     return () => {
       isMount = false;
       controller.abort();
     };
-  }, [actionStateValue, page]);
+  }, [actionStateValue, page, filterBy, detailFilterValue]);
 
   const productOption = () => {
     let option = [];
@@ -582,660 +601,790 @@ function Project(props) {
       );
     }
   };
-  return (
-    <div className="capabilityFormContainer">
-      <div className="capabilityForm">
-        <TitleSection
-          title="Create project"
-          icon={<RiCreativeCommonsNdFill style={{ marginRight: 5 }} />}
-        />
-        <Form onSubmit={handleSaveCreateProject}>
-          <Row className="mb-3" style={{ textAlign: "left" }}>
-            <Form.Group as={Col}>
-              <Form.Label>Select Product</Form.Label>
-              <Form.Select
-                value={product}
-                onChange={(e) => setProduct(e.target.value)}
-                required
-              >
-                <option value="" disabled>
-                  Open This
-                </option>
-                {productOption()}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group as={Col}>
-              <Form.Label>Project Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter Project Name"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                required
-              />
-            </Form.Group>
-            <Form.Group as={Col}>
-              <Form.Label>PIC</Form.Label>
-              <Form.Select
-                value={manager}
-                onChange={(e) => setManager(e.target.value)}
-                required
-              >
-                <option value="" disabled>
-                  Open This
-                </option>
-                {userOption()}
-              </Form.Select>
-            </Form.Group>
-          </Row>
-          <Row className="mb-3" style={{ textAlign: "left" }}>
-            <Form.Group as={Col}>
-              <Form.Label>Budget (*Rupiah)</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Budget"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-                lang="en"
-                step={".001"}
-                required
-              />
-            </Form.Group>
-            <Form.Group as={Col}>
-              <Form.Label>Saving Cost Estimation (*Rupiah)</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Saving Cost"
-                value={savingCost}
-                onChange={(e) => setSavingCost(e.target.value)}
-                lang="en"
-                step={".001"}
-                required
-              />
-            </Form.Group>
-            <Form.Group as={Col}>
-              <Form.Label>Start Project Date</Form.Label>
-              <Form.Control
-                type="date"
-                placeholder="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                required
-              />
-            </Form.Group>
-          </Row>
-          <Row className="mb-3" style={{ textAlign: "left" }}>
-            <Form.Group as={Col}>
-              <Form.Label>SOP Project Date</Form.Label>
-              <Form.Control
-                type="date"
-                placeholder="Saving Cost"
-                value={sopDate}
-                onChange={(e) => setSopDate(e.target.value)}
-                required
-              />
-            </Form.Group>
-            <Form.Group as={Col}>
-              <Form.Label>Choose Members to Add</Form.Label>
-              <Form.Select
-                value={memberId}
-                onChange={(e) => setMemberId(e.target.value)}
-              >
-                <option value="" disabled>
-                  Open This
-                </option>
-                {userOption()}
-                <option value={PE_2WV_AISS}>PE 2WV AISS</option>
-                <option value={PE_4WV_SONAR_EFI}>PE 4WV SONAR EFI</option>
-                <option value={PE_AOI}>PE AIO</option>
-                <option value={PE_METER}>PE METER</option>
-                <option value={PE_SMD}>PE SMD</option>
-                <option value={PE_WSS}>PE WSS</option>
-              </Form.Select>
-            </Form.Group>
-            <Form.Group as={Col}>
-              <Form.Label></Form.Label> <br />
-              <Button type="button" onClick={handleMember}>
-                Click to Add Member
-              </Button>
-            </Form.Group>
-          </Row>
-          <Row className="mb-3" style={{ textAlign: "left" }}>
-            <Col>Our Members</Col>
-          </Row>
 
-          <Row className="mb-3" style={{ textAlign: "left" }}>
-            <Col>
-              {member.length > 0
-                ? member.map((value, index) => {
-                    return (
-                      <Badge
-                        key={index}
-                        style={{ marginRight: 2 }}
-                        bg={colorBgBadge(index + 1)}
-                      >
-                        <h6>
-                          {CapitalCaseFirstWord(
-                            tableUser.length > 0 &&
-                              tableUser.find(
-                                (value2) => value2.id === parseInt(value)
-                              ).username
-                          )}{" "}
-                          <CloseButton id={value} onClick={deleteMembers} />
-                        </h6>
-                      </Badge>
-                    );
-                  })
-                : "Data Is Not Available"}
-            </Col>
-          </Row>
-          <Row>
-            <Col sm={4}>
-              <Row className="mb-3" style={{ textAlign: "left" }}>
-                <Col>
-                  <Form.Label>Category</Form.Label>
+  const filterItemLogic = () => {
+    let option = [];
+    if (filterBy === "category") {
+      option.push(
+        <>
+          <option value={"New Model"}>New Model</option>
+          <option value={"Quality"}>Quality</option>
+          <option value={"Intergrated Factory"}>Intergrated Factory</option>
+          <option value={"Productivity"}>Productivity</option>
+          <option value={"Profit Improvement"}>Profit Improvement</option>
+        </>
+      );
+    } else if (filterBy === "pic") {
+      for (let index = 0; index < memberListOfProject.length; index++) {
+        option.push(
+          <option key={index} value={memberListOfProject[index]}>
+            {userNameFunction(memberListOfProject[index])}
+          </option>
+        );
+      }
+    } else {
+      option.push(
+        <>
+          <option value={"Not Yet Started"}>Not Yet Started</option>
+          <option value={"On Progress"}>On Progress</option>
+          <option value={"Delay"}>Delay</option>
+          <option value={"Finish"}>Finish</option>
+          <option value={"Waiting Detail Activity"}>
+            Waiting Detail Activity
+          </option>
+          <option value={"cancel"}>cancel</option>
+          <option value={"Delay"}>Delay</option>
+        </>
+      );
+    }
+    return option;
+  };
+  return (
+    <>
+      <Row>
+        <Col lg={6}>
+          <div className="capabilityFormContainer">
+            <div className="capabilityForm">
+              {" "}
+              Project Monitoring
+              <GraphBarProject
+                userId={userId}
+                userPosition={userPosition}
+                userSection={userSection}
+              />
+            </div>
+          </div>
+        </Col>
+        <Col lg={6}>
+          <div className="capabilityFormContainer">
+            <div className="capabilityForm">
+              {" "}
+              Project Status
+              <GraphPieProject
+                userId={userId}
+                userPosition={userPosition}
+                userSection={userSection}
+              />
+            </div>
+          </div>
+        </Col>
+      </Row>
+
+      <div className="capabilityFormContainer">
+        <div className="capabilityForm">
+          <div style={{ textAlign: "right", marginBottom: 5 }}>
+            <Button
+              onClick={() => {
+                setShowModalCreateProject(true);
+                handleReset();
+              }}
+            >
+              {" "}
+              <IoMdCreate style={{ pointerEvents: "none" }} /> Create Project
+            </Button>
+          </div>
+          <div style={{ marginBottom: 5 }}>
+            <Row>
+              <Col lg={3}>
+                <Form.Select
+                  value={filterBy}
+                  onChange={(e) => setFilterBy(e.target.value)}
+                >
+                  <option value="">Filter By</option>
+                  <option value="category">Category</option>
+                  <option value="pic">PIC</option>
+                  <option value="status">Status</option>
+                </Form.Select>
+              </Col>
+              <Col lg={3}>
+                {filterBy !== "" && (
                   <Form.Select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    value={detailFilterValue}
+                    onChange={(e) => setDetailFilterValue(e.target.value)}
+                  >
+                    <option value="">Select Detail</option>
+                    {filterItemLogic()}
+                  </Form.Select>
+                )}
+              </Col>
+              <Col lg={3}>
+                {filterBy !== "" && (
+                  <Button
+                    onClick={() => {
+                      setFilterBy("");
+                    }}
+                  >
+                    Reset
+                  </Button>
+                )}
+              </Col>
+            </Row>
+          </div>
+          <TitleSection
+            title="Project List"
+            icon={<BsListNested style={{ marginRight: 5 }} />}
+          />
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>NO</th>
+                <th>Project Name</th>
+                <th>Category</th>
+                <th>PIC</th>
+                <th>Created Date</th>
+                <th>Created By</th>
+                <th>Start Date</th>
+                <th>SOP Date</th>
+                {/* <th>Last Update</th> */}
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableProject.length > 0 ? (
+                tableProject.map((value, index) => {
+                  return (
+                    <tr key={index}>
+                      <td>{numberStart + index}</td>
+                      <td>{value.project_name}</td>
+                      <td>
+                        {value.category} <br />
+                        {subCategoryLabel(value.sub_category)}
+                      </td>
+                      <td>{userNameFunction(value.manager_id)}</td>
+                      {/* <td>{parseFloat(value.budget).toLocaleString()}</td>
+                    <td>{parseFloat(value.saving_cost).toLocaleString()}</td> */}
+                      <td>{moment(value.create_date).format("LL")}</td>
+                      <td>{userNameFunction(value.user_id)}</td>
+                      <td>{moment(value.start).format("LL")}</td>
+                      <td>{moment(value.finish).format("LL")}</td>
+                      {/* <td>{moment(value.create_date).format("LL")}</td> */}
+                      <td>
+                        {statusFunction(value.status, value.id)}
+                        <br />
+                        {value.status === "Finish" && (
+                          <Button
+                            id={value.id}
+                            size="sm"
+                            variant="primary"
+                            onClick={handleShowModalShare}
+                          >
+                            <GrShareOption style={{ pointerEvents: "none" }} />
+                          </Button>
+                        )}
+                      </td>
+                      <td>
+                        {value.user_id === userId && (
+                          <Button
+                            title="Cancel Project"
+                            size="sm"
+                            variant="danger"
+                            style={{ marginRight: 2 }}
+                            id={value.id}
+                            onClick={handleChangeStatus}
+                          >
+                            <GoGitCompare style={{ pointerEvents: "none" }} />
+                          </Button>
+                        )}
+                        <Button
+                          title="Edit"
+                          size="sm"
+                          style={{ marginRight: 2 }}
+                          variant="success"
+                          id={value.id}
+                          onClick={handleEdit}
+                        >
+                          <GrEdit style={{ pointerEvents: "none" }} />
+                        </Button>
+                        <Link to={`/projectActivity/${value.id}`}>
+                          <Button
+                            title="View"
+                            size="sm"
+                            style={{ marginRight: 2 }}
+                            id={value.id}
+                            variant="dark"
+                          >
+                            <MdVideoLibrary style={{ pointerEvents: "none" }} />
+                          </Button>
+                        </Link>
+                        <Button
+                          title="SendEmail"
+                          size="sm"
+                          style={{ marginRight: 2 }}
+                          id={value.id}
+                          variant="warning"
+                          onClick={handleSendEmail}
+                        >
+                          <MdEmail style={{ pointerEvents: "none" }} />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={11}>Data is Not Available</td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+          <div className="paginationTableProduct">
+            <PaginationTable
+              totalPage={totalPageData}
+              maxPagesShow={maxPagesShow}
+              onChangePage={(e) => setPage(e)}
+              pageActive={page}
+            />
+          </div>
+        </div>
+        <Modal
+          show={show}
+          onHide={() => {
+            setShow(false);
+          }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>{message}</Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setShow(false);
+              }}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal show={showEmailModal} onHide={handleCloseModalEmail}>
+          <Modal.Header closeButton>
+            <Modal.Title>Send Email To Member</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {!showSuccess ? (
+              <>
+                <Form onSubmit={handleSendEmailToUser}>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Form.Group as={Col}>
+                      <Form.Label>To</Form.Label>
+                      <Form.Select
+                        value={memberToEmail}
+                        onChange={(e) => setMemberToEmail(e.target.value)}
+                      >
+                        <option value="" disabled>
+                          Open This
+                        </option>
+                        {optionMemberToEmailFunction()}
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group as={Col}>
+                      <Form.Label></Form.Label> <br />
+                      <Button type="button" onClick={handleAddToEmail}>
+                        Add
+                      </Button>
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Col>
+                      {totalMemberToEmail.length > 0
+                        ? totalMemberToEmail.map((value, index) => {
+                            return (
+                              <Badge
+                                key={index}
+                                style={{ marginRight: 2 }}
+                                bg={colorBgBadge(index + 1)}
+                              >
+                                <h6>
+                                  {CapitalCaseFirstWord(
+                                    tableUser.length > 0 &&
+                                      tableUser.find(
+                                        (value2) =>
+                                          value2.id === parseInt(value)
+                                      ).username
+                                  )}{" "}
+                                  <CloseButton
+                                    id={value}
+                                    onClick={handleDeleteToEmail}
+                                  />
+                                </h6>
+                              </Badge>
+                            );
+                          })
+                        : "Data Is Not Available"}
+                    </Col>
+                  </Row>{" "}
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Form.Group as={Col}>
+                      <Form.Label>Cc</Form.Label>
+                      <Form.Select
+                        value={ccMail}
+                        onChange={(e) => setCcMail(e.target.value)}
+                      >
+                        <option value="" disabled>
+                          Open This
+                        </option>
+                        {optionMemberToEmailFunction()}
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group as={Col}>
+                      <Form.Label></Form.Label> <br />
+                      <Button type="button" onClick={handleAddCcEmail}>
+                        Add
+                      </Button>
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Col>
+                      {ccMailList.length > 0
+                        ? ccMailList.map((value, index) => {
+                            return (
+                              <Badge
+                                key={index}
+                                style={{ marginRight: 2 }}
+                                bg={colorBgBadge(index + 1)}
+                              >
+                                <h6>
+                                  {CapitalCaseFirstWord(
+                                    tableUser.length > 0 &&
+                                      tableUser.find(
+                                        (value2) =>
+                                          value2.id === parseInt(value)
+                                      ).username
+                                  )}{" "}
+                                  <CloseButton
+                                    id={value}
+                                    onClick={handleDeleteCcEmail}
+                                  />
+                                </h6>
+                              </Badge>
+                            );
+                          })
+                        : "Data Is Not Available"}
+                    </Col>
+                  </Row>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Form.Group as={Col}>
+                      <Form.Label>Subject</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter Subject"
+                        onChange={(e) => setSubjectEmail(e.target.value)}
+                        value={subjectEmail}
+                        required
+                      />
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Form.Group as={Col}>
+                      <Form.Label>Body</Form.Label>
+                      <Form.Control
+                        as={"textarea"}
+                        style={{ height: 100 }}
+                        placeholder="Enter Body"
+                        onChange={(e) => setBodyEmail(e.target.value)}
+                        value={bodyEmail}
+                        required
+                      />
+                    </Form.Group>
+                  </Row>
+                  <Row>
+                    <Col style={{ textAlign: "left" }}>
+                      <Button variant="primary" type="submit">
+                        Send Email
+                      </Button>
+                    </Col>
+                  </Row>
+                </Form>
+                <Alert
+                  show={showAlert}
+                  variant="warning"
+                  onClose={() => setShowAlert(false)}
+                  dismissible
+                >
+                  Please Add Users to Email
+                </Alert>
+              </>
+            ) : (
+              <Alert
+                show={showSuccess}
+                variant="success"
+                onClose={() => setShowSuccess(false)}
+                dismissible
+              >
+                Email Already Send to Users
+              </Alert>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModalEmail}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal show={showModalShare} onHide={handleCloseModalEmail}>
+          <Modal.Header>
+            <Modal.Title>Share Project Finish to Member</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {!showSuccess ? (
+              <>
+                <Form onSubmit={handleShareProjectFinishToUser}>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Form.Group as={Col}>
+                      <Form.Label>To</Form.Label>
+                      <Form.Select
+                        value={memberToEmail}
+                        onChange={(e) => setMemberToEmail(e.target.value)}
+                      >
+                        <option value="" disabled>
+                          Open This
+                        </option>
+                        {optionMemberToEmailFunction()}
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group as={Col}>
+                      <Form.Label></Form.Label> <br />
+                      <Button
+                        style={{ marginRight: 5 }}
+                        type="button"
+                        onClick={handleAddToEmail}
+                      >
+                        Add
+                      </Button>
+                      <Button type="button" onClick={handleAddAllToEmail}>
+                        Add All
+                      </Button>
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Col>
+                      {totalMemberToEmail.length > 0
+                        ? totalMemberToEmail.map((value, index) => {
+                            return (
+                              <Badge
+                                key={index}
+                                style={{ marginRight: 2 }}
+                                bg={colorBgBadge(index + 1)}
+                              >
+                                <h6>
+                                  {CapitalCaseFirstWord(
+                                    tableUser.length > 0 &&
+                                      tableUser.find(
+                                        (value2) =>
+                                          value2.id === parseInt(value)
+                                      ).username
+                                  )}{" "}
+                                  <CloseButton
+                                    id={value}
+                                    onClick={handleDeleteToEmail}
+                                  />
+                                </h6>
+                              </Badge>
+                            );
+                          })
+                        : "Data Is Not Available"}
+                    </Col>
+                  </Row>{" "}
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Form.Group as={Col}>
+                      <Form.Label>Cc</Form.Label>
+                      <Form.Select
+                        value={ccMail}
+                        onChange={(e) => setCcMail(e.target.value)}
+                      >
+                        <option value="" disabled>
+                          Open This
+                        </option>
+                        {optionMemberToEmailFunction()}
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group as={Col}>
+                      <Form.Label></Form.Label> <br />
+                      <Button type="button" onClick={handleAddCcEmail}>
+                        Add
+                      </Button>
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Col>
+                      {ccMailList.length > 0
+                        ? ccMailList.map((value, index) => {
+                            return (
+                              <Badge
+                                key={index}
+                                style={{ marginRight: 2 }}
+                                bg={colorBgBadge(index + 1)}
+                              >
+                                <h6>
+                                  {CapitalCaseFirstWord(
+                                    tableUser.length > 0 &&
+                                      tableUser.find(
+                                        (value2) =>
+                                          value2.id === parseInt(value)
+                                      ).username
+                                  )}{" "}
+                                  <CloseButton
+                                    id={value}
+                                    onClick={handleDeleteCcEmail}
+                                  />
+                                </h6>
+                              </Badge>
+                            );
+                          })
+                        : "Data Is Not Available"}
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col style={{ textAlign: "left" }}>
+                      <Button variant="primary" type="submit">
+                        Send Email
+                      </Button>
+                    </Col>
+                  </Row>
+                </Form>
+                <Alert
+                  show={showAlert}
+                  variant="warning"
+                  onClose={() => setShowAlert(false)}
+                  dismissible
+                >
+                  Please Add Users to Email
+                </Alert>
+              </>
+            ) : (
+              <Alert
+                show={showSuccess}
+                variant="success"
+                onClose={() => setShowSuccess(false)}
+                dismissible
+              >
+                Email Already Send to Users
+              </Alert>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModalEmail}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal
+          show={showModalCreateProject}
+          size="lg"
+          centered
+          onHide={() => {
+            setShowModalCreateProject(false);
+            handleReset();
+          }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Form Project</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleSaveCreateProject}>
+              <Row className="mb-3" style={{ textAlign: "left" }}>
+                <Form.Group as={Col}>
+                  <Form.Label>Select Product</Form.Label>
+                  <Form.Select
+                    value={product}
+                    onChange={(e) => setProduct(e.target.value)}
                     required
                   >
                     <option value="" disabled>
                       Open This
                     </option>
-                    <option value="New Model">New Model</option>
-                    <option value="Quality">Quality</option>
-                    <option value="Integrated Factory">
-                      Integrated Factory
-                    </option>
-                    <option value="Productivity">Productivity</option>
-                    <option value="Profit Improvement">
-                      Profit Improvement
-                    </option>
+                    {productOption()}
                   </Form.Select>
-                </Col>
-              </Row>
-              <Row className="mb-3" style={{ textAlign: "left" }}>
-                <Col>
-                  <Form.Label>Sub Category (*optional)</Form.Label>
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Label>Project Name</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Enter Sub Category"
-                    value={subCategory}
-                    onChange={(e) => setSubCategory(e.target.value)}
+                    placeholder="Enter Project Name"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    required
                   />
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Label>PIC</Form.Label>
+                  <Form.Select
+                    value={manager}
+                    onChange={(e) => setManager(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>
+                      Open This
+                    </option>
+                    {userOption()}
+                  </Form.Select>
+                </Form.Group>
+              </Row>
+              <Row className="mb-3" style={{ textAlign: "left" }}>
+                <Form.Group as={Col}>
+                  <Form.Label>Budget (*Rupiah)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="Budget"
+                    value={budget}
+                    onChange={(e) => setBudget(e.target.value)}
+                    lang="en"
+                    step={".001"}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Label>Saving Cost Estimation (*Rupiah)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="Saving Cost"
+                    value={savingCost}
+                    onChange={(e) => setSavingCost(e.target.value)}
+                    lang="en"
+                    step={".001"}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Label>Start Project Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    placeholder="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    required
+                  />
+                </Form.Group>
+              </Row>
+              <Row className="mb-3" style={{ textAlign: "left" }}>
+                <Form.Group as={Col}>
+                  <Form.Label>SOP Project Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    placeholder="Saving Cost"
+                    value={sopDate}
+                    onChange={(e) => setSopDate(e.target.value)}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Label>Choose Members to Add</Form.Label>
+                  <Form.Select
+                    value={memberId}
+                    onChange={(e) => setMemberId(e.target.value)}
+                  >
+                    <option value="" disabled>
+                      Open This
+                    </option>
+                    {userOption()}
+                    <option value={PE_2WV_AISS}>PE 2WV AISS</option>
+                    <option value={PE_4WV_SONAR_EFI}>PE 4WV SONAR EFI</option>
+                    <option value={PE_AOI}>PE AOI</option>
+                    <option value={PE_METER}>PE METER</option>
+                    <option value={PE_SMD}>PE SMD</option>
+                    <option value={PE_WSS}>PE WSS</option>
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Label></Form.Label> <br />
+                  <Button type="button" onClick={handleMember}>
+                    Click to Add Member
+                  </Button>
+                </Form.Group>
+              </Row>
+              <Row className="mb-3" style={{ textAlign: "left" }}>
+                <Col>Our Members</Col>
+              </Row>
+
+              <Row className="mb-3" style={{ textAlign: "left" }}>
+                <Col>
+                  {member.length > 0
+                    ? member.map((value, index) => {
+                        return (
+                          <Badge
+                            key={index}
+                            style={{ marginRight: 2 }}
+                            bg={colorBgBadge(index + 1)}
+                          >
+                            <h6>
+                              {CapitalCaseFirstWord(
+                                tableUser.length > 0 &&
+                                  tableUser.find(
+                                    (value2) => value2.id === parseInt(value)
+                                  ).username
+                              )}{" "}
+                              <CloseButton id={value} onClick={deleteMembers} />
+                            </h6>
+                          </Badge>
+                        );
+                      })
+                    : "Data Is Not Available"}
                 </Col>
               </Row>
-            </Col>
-            <Col sm={8} style={{ textAlign: "left" }}>
-              <Form.Label>Description (*optional)</Form.Label>
-              <Form.Control
-                as="textarea"
-                style={{ height: 120 }}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              ></Form.Control>
-            </Col>
-          </Row>
-          <Row className="mb-3" style={{ textAlign: "right" }}>
-            <Col>
-              <Button type="submit" style={{ marginRight: 5 }}>
-                {projectIdEdit ? "Update" : "Save"}
-              </Button>
-              <Button type="button" onClick={handleReset}>
-                Reset
-              </Button>
-            </Col>
-          </Row>
-        </Form>
-      </div>
-      <div className="capabilityForm">
-        <TitleSection
-          title="Project List"
-          icon={<BsListNested style={{ marginRight: 5 }} />}
-        />
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>NO</th>
-              <th>Project Name</th>
-              <th>Category</th>
-              <th>PIC</th>
-              <th>Created Date</th>
-              <th>Created By</th>
-              <th>Start Date</th>
-              <th>SOP Date</th>
-              {/* <th>Last Update</th> */}
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableProject.length > 0 ? (
-              tableProject.map((value, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{numberStart + index}</td>
-                    <td>{value.project_name}</td>
-                    <td>
-                      {value.category} <br />
-                      {subCategoryLabel(value.sub_category)}
-                    </td>
-                    <td>{userNameFunction(value.manager_id)}</td>
-                    {/* <td>{parseFloat(value.budget).toLocaleString()}</td>
-                    <td>{parseFloat(value.saving_cost).toLocaleString()}</td> */}
-                    <td>{moment(value.create_date).format("LL")}</td>
-                    <td>{userNameFunction(value.user_id)}</td>
-                    <td>{moment(value.start).format("LL")}</td>
-                    <td>{moment(value.finish).format("LL")}</td>
-                    {/* <td>{moment(value.create_date).format("LL")}</td> */}
-                    <td>
-                      {statusFunction(value.status, value.id)}
-                      <br />
-                      {value.status === "Finish" && (
-                        <Button
-                          id={value.id}
-                          size="sm"
-                          variant="primary"
-                          onClick={handleShowModalShare}
-                        >
-                          <GrShareOption style={{ pointerEvents: "none" }} />
-                        </Button>
-                      )}
-                    </td>
-                    <td>
-                      {value.user_id === userId && (
-                        <Button
-                          title="Cancel Project"
-                          size="sm"
-                          variant="danger"
-                          style={{ marginRight: 2 }}
-                          id={value.id}
-                          onClick={handleChangeStatus}
-                        >
-                          <GoGitCompare style={{ pointerEvents: "none" }} />
-                        </Button>
-                      )}
-                      <Button
-                        title="Edit"
-                        size="sm"
-                        style={{ marginRight: 2 }}
-                        variant="success"
-                        id={value.id}
-                        onClick={handleEdit}
+              <Row>
+                <Col sm={4}>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Col>
+                      <Form.Label>Category</Form.Label>
+                      <Form.Select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        required
                       >
-                        <GrEdit style={{ pointerEvents: "none" }} />
-                      </Button>
-                      <Link to={`/projectActivity/${value.id}`}>
-                        <Button
-                          title="View"
-                          size="sm"
-                          style={{ marginRight: 2 }}
-                          id={value.id}
-                          variant="dark"
-                        >
-                          <MdVideoLibrary style={{ pointerEvents: "none" }} />
-                        </Button>
-                      </Link>
-                      <Button
-                        title="SendEmail"
-                        size="sm"
-                        style={{ marginRight: 2 }}
-                        id={value.id}
-                        variant="warning"
-                        onClick={handleSendEmail}
-                      >
-                        <MdEmail style={{ pointerEvents: "none" }} />
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan={11}>Data is Not Available</td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
-        <div className="paginationTableProduct">
-          <PaginationTable
-            totalPage={totalPageData}
-            maxPagesShow={maxPagesShow}
-            onChangePage={(e) => setPage(e)}
-            pageActive={page}
-          />
-        </div>
+                        <option value="" disabled>
+                          Open This
+                        </option>
+                        <option value="New Model">New Model</option>
+                        <option value="Quality">Quality</option>
+                        <option value="Integrated Factory">
+                          Integrated Factory
+                        </option>
+                        <option value="Productivity">Productivity</option>
+                        <option value="Profit Improvement">
+                          Profit Improvement
+                        </option>
+                      </Form.Select>
+                    </Col>
+                  </Row>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Col>
+                      <Form.Label>Sub Category (*optional)</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter Sub Category"
+                        value={subCategory}
+                        onChange={(e) => setSubCategory(e.target.value)}
+                      />
+                    </Col>
+                  </Row>
+                </Col>
+                <Col sm={8} style={{ textAlign: "left" }}>
+                  <Form.Label>Description (*optional)</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    style={{ height: 120 }}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  ></Form.Control>
+                </Col>
+              </Row>
+              <Row className="mb-3" style={{ textAlign: "right" }}>
+                <Col>
+                  <Button type="submit" style={{ marginRight: 5 }}>
+                    {projectIdEdit ? "Update" : "Save"}
+                  </Button>
+                  <Button type="button" onClick={handleReset}>
+                    Reset
+                  </Button>
+                </Col>
+              </Row>
+            </Form>
+          </Modal.Body>
+        </Modal>
       </div>
-      <Modal
-        show={show}
-        onHide={() => {
-          setShow(false);
-        }}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{message}</Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setShow(false);
-            }}
-          >
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <Modal show={showEmailModal} onHide={handleCloseModalEmail}>
-        <Modal.Header closeButton>
-          <Modal.Title>Send Email To Member</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {!showSuccess ? (
-            <>
-              <Form onSubmit={handleSendEmailToUser}>
-                <Row className="mb-3" style={{ textAlign: "left" }}>
-                  <Form.Group as={Col}>
-                    <Form.Label>To</Form.Label>
-                    <Form.Select
-                      value={memberToEmail}
-                      onChange={(e) => setMemberToEmail(e.target.value)}
-                    >
-                      <option value="" disabled>
-                        Open This
-                      </option>
-                      {optionMemberToEmailFunction()}
-                    </Form.Select>
-                  </Form.Group>
-                  <Form.Group as={Col}>
-                    <Form.Label></Form.Label> <br />
-                    <Button type="button" onClick={handleAddToEmail}>
-                      Add
-                    </Button>
-                  </Form.Group>
-                </Row>
-                <Row className="mb-3" style={{ textAlign: "left" }}>
-                  <Col>
-                    {totalMemberToEmail.length > 0
-                      ? totalMemberToEmail.map((value, index) => {
-                          return (
-                            <Badge
-                              key={index}
-                              style={{ marginRight: 2 }}
-                              bg={colorBgBadge(index + 1)}
-                            >
-                              <h6>
-                                {CapitalCaseFirstWord(
-                                  tableUser.length > 0 &&
-                                    tableUser.find(
-                                      (value2) => value2.id === parseInt(value)
-                                    ).username
-                                )}{" "}
-                                <CloseButton
-                                  id={value}
-                                  onClick={handleDeleteToEmail}
-                                />
-                              </h6>
-                            </Badge>
-                          );
-                        })
-                      : "Data Is Not Available"}
-                  </Col>
-                </Row>{" "}
-                <Row className="mb-3" style={{ textAlign: "left" }}>
-                  <Form.Group as={Col}>
-                    <Form.Label>Cc</Form.Label>
-                    <Form.Select
-                      value={ccMail}
-                      onChange={(e) => setCcMail(e.target.value)}
-                    >
-                      <option value="" disabled>
-                        Open This
-                      </option>
-                      {optionMemberToEmailFunction()}
-                    </Form.Select>
-                  </Form.Group>
-                  <Form.Group as={Col}>
-                    <Form.Label></Form.Label> <br />
-                    <Button type="button" onClick={handleAddCcEmail}>
-                      Add
-                    </Button>
-                  </Form.Group>
-                </Row>
-                <Row className="mb-3" style={{ textAlign: "left" }}>
-                  <Col>
-                    {ccMailList.length > 0
-                      ? ccMailList.map((value, index) => {
-                          return (
-                            <Badge
-                              key={index}
-                              style={{ marginRight: 2 }}
-                              bg={colorBgBadge(index + 1)}
-                            >
-                              <h6>
-                                {CapitalCaseFirstWord(
-                                  tableUser.length > 0 &&
-                                    tableUser.find(
-                                      (value2) => value2.id === parseInt(value)
-                                    ).username
-                                )}{" "}
-                                <CloseButton
-                                  id={value}
-                                  onClick={handleDeleteCcEmail}
-                                />
-                              </h6>
-                            </Badge>
-                          );
-                        })
-                      : "Data Is Not Available"}
-                  </Col>
-                </Row>
-                <Row className="mb-3" style={{ textAlign: "left" }}>
-                  <Form.Group as={Col}>
-                    <Form.Label>Subject</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter Subject"
-                      onChange={(e) => setSubjectEmail(e.target.value)}
-                      value={subjectEmail}
-                      required
-                    />
-                  </Form.Group>
-                </Row>
-                <Row className="mb-3" style={{ textAlign: "left" }}>
-                  <Form.Group as={Col}>
-                    <Form.Label>Body</Form.Label>
-                    <Form.Control
-                      as={"textarea"}
-                      style={{ height: 100 }}
-                      placeholder="Enter Body"
-                      onChange={(e) => setBodyEmail(e.target.value)}
-                      value={bodyEmail}
-                      required
-                    />
-                  </Form.Group>
-                </Row>
-                <Row>
-                  <Col style={{ textAlign: "left" }}>
-                    <Button variant="primary" type="submit">
-                      Send Email
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-              <Alert
-                show={showAlert}
-                variant="warning"
-                onClose={() => setShowAlert(false)}
-                dismissible
-              >
-                Please Add Users to Email
-              </Alert>
-            </>
-          ) : (
-            <Alert
-              show={showSuccess}
-              variant="success"
-              onClose={() => setShowSuccess(false)}
-              dismissible
-            >
-              Email Already Send to Users
-            </Alert>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModalEmail}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <Modal show={showModalShare} onHide={handleCloseModalEmail}>
-        <Modal.Header>
-          <Modal.Title>Share Project Finish to Member</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {!showSuccess ? (
-            <>
-              <Form onSubmit={handleShareProjectFinishToUser}>
-                <Row className="mb-3" style={{ textAlign: "left" }}>
-                  <Form.Group as={Col}>
-                    <Form.Label>To</Form.Label>
-                    <Form.Select
-                      value={memberToEmail}
-                      onChange={(e) => setMemberToEmail(e.target.value)}
-                    >
-                      <option value="" disabled>
-                        Open This
-                      </option>
-                      {optionMemberToEmailFunction()}
-                    </Form.Select>
-                  </Form.Group>
-                  <Form.Group as={Col}>
-                    <Form.Label></Form.Label> <br />
-                    <Button
-                      style={{ marginRight: 5 }}
-                      type="button"
-                      onClick={handleAddToEmail}
-                    >
-                      Add
-                    </Button>
-                    <Button type="button" onClick={handleAddAllToEmail}>
-                      Add All
-                    </Button>
-                  </Form.Group>
-                </Row>
-                <Row className="mb-3" style={{ textAlign: "left" }}>
-                  <Col>
-                    {totalMemberToEmail.length > 0
-                      ? totalMemberToEmail.map((value, index) => {
-                          return (
-                            <Badge
-                              key={index}
-                              style={{ marginRight: 2 }}
-                              bg={colorBgBadge(index + 1)}
-                            >
-                              <h6>
-                                {CapitalCaseFirstWord(
-                                  tableUser.length > 0 &&
-                                    tableUser.find(
-                                      (value2) => value2.id === parseInt(value)
-                                    ).username
-                                )}{" "}
-                                <CloseButton
-                                  id={value}
-                                  onClick={handleDeleteToEmail}
-                                />
-                              </h6>
-                            </Badge>
-                          );
-                        })
-                      : "Data Is Not Available"}
-                  </Col>
-                </Row>{" "}
-                <Row className="mb-3" style={{ textAlign: "left" }}>
-                  <Form.Group as={Col}>
-                    <Form.Label>Cc</Form.Label>
-                    <Form.Select
-                      value={ccMail}
-                      onChange={(e) => setCcMail(e.target.value)}
-                    >
-                      <option value="" disabled>
-                        Open This
-                      </option>
-                      {optionMemberToEmailFunction()}
-                    </Form.Select>
-                  </Form.Group>
-                  <Form.Group as={Col}>
-                    <Form.Label></Form.Label> <br />
-                    <Button type="button" onClick={handleAddCcEmail}>
-                      Add
-                    </Button>
-                  </Form.Group>
-                </Row>
-                <Row className="mb-3" style={{ textAlign: "left" }}>
-                  <Col>
-                    {ccMailList.length > 0
-                      ? ccMailList.map((value, index) => {
-                          return (
-                            <Badge
-                              key={index}
-                              style={{ marginRight: 2 }}
-                              bg={colorBgBadge(index + 1)}
-                            >
-                              <h6>
-                                {CapitalCaseFirstWord(
-                                  tableUser.length > 0 &&
-                                    tableUser.find(
-                                      (value2) => value2.id === parseInt(value)
-                                    ).username
-                                )}{" "}
-                                <CloseButton
-                                  id={value}
-                                  onClick={handleDeleteCcEmail}
-                                />
-                              </h6>
-                            </Badge>
-                          );
-                        })
-                      : "Data Is Not Available"}
-                  </Col>
-                </Row>
-                <Row>
-                  <Col style={{ textAlign: "left" }}>
-                    <Button variant="primary" type="submit">
-                      Send Email
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-              <Alert
-                show={showAlert}
-                variant="warning"
-                onClose={() => setShowAlert(false)}
-                dismissible
-              >
-                Please Add Users to Email
-              </Alert>
-            </>
-          ) : (
-            <Alert
-              show={showSuccess}
-              variant="success"
-              onClose={() => setShowSuccess(false)}
-              dismissible
-            >
-              Email Already Send to Users
-            </Alert>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModalEmail}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
+    </>
   );
 }
 

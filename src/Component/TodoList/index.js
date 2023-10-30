@@ -22,6 +22,7 @@ import {
   createFileApi,
   deleteFileByIdApi,
   deleteTodoListByIdApi,
+  getAllUsersApi,
   getFileByIdApi,
   getTodoByProjectIdApi,
   getUserByUserIdApi,
@@ -36,7 +37,7 @@ import { MdDoneOutline } from "react-icons/md";
 import { AiOutlineClose, AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 
 function ToDoList(props) {
-  const { id, accessMember, dispatch, todoChangeCount } = props;
+  const { id, accessMember, dispatch, todoChangeCount, memberProject } = props;
   const refAttachment = useRef();
   const [show, setShow] = useState(false);
   const [todo, setTodo] = useState([]);
@@ -59,6 +60,8 @@ function ToDoList(props) {
   const [totalPageData, setTotalPageData] = useState(1);
   const [page, setPage] = useState(1);
   const [numberStart, setNumberStart] = useState("");
+  const [allUser, setAllUser] = useState([]);
+  const [picId, setPicId] = useState("");
 
   const maxPagesShow = 3;
 
@@ -73,7 +76,7 @@ function ToDoList(props) {
         })
         .catch((error) => console.log(error));
     }
-    
+
     axios
       .get(getTodoByProjectIdApi(id, page))
       .then((response) => {
@@ -91,6 +94,13 @@ function ToDoList(props) {
         }
       });
     }
+
+    axios
+      .get(getAllUsersApi)
+      .then((response) => {
+        isMounted && setAllUser(response.data.data);
+      })
+      .catch((error) => console.log(error));
 
     return () => {
       isMounted = false;
@@ -127,6 +137,7 @@ function ToDoList(props) {
       status: status,
       pic: pic,
       user_id: userId,
+      pic_id: picId,
     };
 
     if (idEdit) {
@@ -206,6 +217,7 @@ function ToDoList(props) {
               status: newStatus,
               actual_finish: moment().format("YYYY-MM-DD"),
               user_id: todo[index].user_id,
+              pic_id: todo[index].pic_id,
             });
           } else {
             newListTodo.push(todo[index]);
@@ -230,6 +242,7 @@ function ToDoList(props) {
       setIdEdit(id);
       setStatus(findData.status);
       setPic(findData.pic);
+      setPicId(findData.pic_id);
     }
     setShow(true);
   };
@@ -262,6 +275,15 @@ function ToDoList(props) {
 
   const handleChangeFile = (e) => {
     setFile([...e.target.files]);
+  };
+
+  const functionName = (id) => {
+    const dataUser = allUser.find((value) => value.id === parseInt(id));
+    if (dataUser) {
+      return dataUser.username;
+    }
+
+    return "";
   };
 
   const saveAttachment = (e) => {
@@ -335,6 +357,29 @@ function ToDoList(props) {
     return loading;
   };
 
+  const optionMember = () => {
+    let option = [];
+    console.log(memberProject);
+    if (memberProject) {
+      for (let index = 0; index < memberProject.length; index++) {
+        option.push(
+          <option key={index} value={memberProject[index].user_id}>
+            {functionName(memberProject[index].user_id)}
+          </option>
+        );
+      }
+    }
+    return option;
+  };
+
+  const functionPic = (pic, picId) => {
+    if (picId) {
+      return functionName(picId);
+    } else {
+      return pic;
+    }
+  };
+
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -360,6 +405,7 @@ function ToDoList(props) {
               <th>Item</th>
               <th>Due Date</th>
               <th>PIC</th>
+              <th>Create By</th>
               <th>Status</th>
               <th>Actual Finish</th>
               {accessMember && <th>Action</th>}
@@ -373,7 +419,8 @@ function ToDoList(props) {
                     <td>{index + numberStart}</td>
                     <td>{value.item}</td>
                     <td>{value.due_date}</td>
-                    <td>{value.pic}</td>
+                    <td>{functionPic(value.pic, value.pic_id)}</td>
+                    <td>{functionName(value.user_id)}</td>
                     <td>{statusFunction(value.status, value.due_date)}</td>
                     <td>
                       {value.status === "Finish" ? value.actual_finish : ""}
@@ -481,13 +528,16 @@ function ToDoList(props) {
             <Row className="mb-3">
               <Form.Group as={Col}>
                 <Form.Label>PIC</Form.Label>
-                <Form.Control
-                  value={pic}
-                  onChange={(e) => setPic(e.target.value)}
-                  type="text"
-                  placeholder="Enter PIC"
+                <Form.Select
                   required
-                />
+                  value={picId}
+                  onChange={(e) => setPicId(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Open This
+                  </option>
+                  {optionMember()}
+                </Form.Select>
               </Form.Group>
             </Row>
             <Row className="mb-3">

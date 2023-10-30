@@ -8,10 +8,13 @@ import { BsBack } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { GlobalConsumer } from "../../Context/store";
 import { SETPROJECTEVENT } from "../../Context/const";
+import DashboardProject from "../DashboardProject";
+import { useEffect } from "react";
 
 function NavigationProject(props) {
   const { projectEvent, dispatch } = props;
   const [actionState, setActionState] = useState(1);
+  const [userId, setUserId] = useState("");
 
   const handleEvent = (eventName) => {
     dispatch({
@@ -19,6 +22,12 @@ function NavigationProject(props) {
       payload: eventName,
     });
   };
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+    setUserId(userId);
+  }, []);
   return (
     <Tab.Container
       id="left-tabs-admin"
@@ -29,6 +38,16 @@ function NavigationProject(props) {
         <Col sm={2} className="navigationAdmin">
           <div className="menuListAdmin tabTitle">Project Dashboard</div>
           <Nav variant="pills" className="flex-column">
+            <Nav.Item>
+              <Nav.Link
+                eventKey={"myDashboard"}
+                onClick={() => handleEvent("myDashboard")}
+                className="tabTitle"
+              >
+                <AiOutlineFundProjectionScreen style={{ marginRight: 5 }} />
+                Project Dashboard
+              </Nav.Link>
+            </Nav.Item>
             <Nav.Item>
               <Nav.Link
                 eventKey={"totalProject"}
@@ -59,6 +78,13 @@ function NavigationProject(props) {
         </Col>
         <Col sm={10}>
           <Tab.Content className="tabViewMenuAdmin">
+            <Tab.Pane eventKey={"myDashboard"}>
+              <DashboardProject
+                actionState={(value) => setActionState(actionState + value)}
+                actionStateValue={actionState}
+                userId={userId}
+              />
+            </Tab.Pane>
             <Tab.Pane eventKey={"totalProject"}>
               <TotalProject
                 actionState={(value) => setActionState(actionState + value)}

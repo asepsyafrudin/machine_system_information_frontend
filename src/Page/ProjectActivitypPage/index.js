@@ -15,6 +15,7 @@ function ProjectActivityPage(props) {
   const { dataChangeCount, dispatch, todoChangeCount } = props;
   const { id } = useParams();
   const [accessMember, setAccessMember] = useState(true);
+  const [project, setProject] = useState("");
 
   const navigate = useNavigate();
 
@@ -31,6 +32,7 @@ function ProjectActivityPage(props) {
         })
         .then((response) => {
           const project = isMounted && response.data.data[0];
+          setProject(project);
           const member = project.member;
           const checkMember = member.find(
             (value) => value.user_id === parseInt(userId)
@@ -70,6 +72,7 @@ function ProjectActivityPage(props) {
           dispatch={dispatch}
           todoChangeCount={todoChangeCount}
           accessMember={accessMember}
+          memberProject={project.member}
         />
         <ToDoList
           id={id}
@@ -77,6 +80,7 @@ function ProjectActivityPage(props) {
           dispatch={dispatch}
           accessMember={accessMember}
           todoChangeCount={todoChangeCount}
+          memberProject={project.member}
         />
         <TrialDataOnActivity id={id} />
         <DocumentProject id={id} />
