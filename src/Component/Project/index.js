@@ -223,7 +223,7 @@ function Project(props) {
               listData.push(result[index]);
             }
           }
-          const totalPageData = Math.ceil(listData.length / dataPerPage);
+          const totalPageData = Math.ceil(result.length / dataPerPage);
           const numberStart = (page - 1) * dataPerPage + 1;
           setDataForGraph(result);
           setTableProject(listData);
@@ -240,7 +240,7 @@ function Project(props) {
           ) {
             listData.push(filterData[index]);
           }
-          const totalPageData = Math.ceil(listData.length / dataPerPage);
+          const totalPageData = Math.ceil(filterData.length / dataPerPage);
           const numberStart = (page - 1) * dataPerPage + 1;
           setDataForGraph(filterData);
           setTableProject(listData);
