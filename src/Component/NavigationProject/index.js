@@ -8,8 +8,8 @@ import { BsBack } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { GlobalConsumer } from "../../Context/store";
 import { SETPROJECTEVENT } from "../../Context/const";
-import DashboardProject from "../DashboardProject";
 import { useEffect } from "react";
+import ToDoListSummary from "../ToDoListSummary";
 
 function NavigationProject(props) {
   const { projectEvent, dispatch } = props;
@@ -40,16 +40,6 @@ function NavigationProject(props) {
           <Nav variant="pills" className="flex-column">
             <Nav.Item>
               <Nav.Link
-                eventKey={"myDashboard"}
-                onClick={() => handleEvent("myDashboard")}
-                className="tabTitle"
-              >
-                <AiOutlineFundProjectionScreen style={{ marginRight: 5 }} />
-                Project Dashboard
-              </Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link
                 eventKey={"totalProject"}
                 onClick={() => handleEvent("totalProject")}
                 className="tabTitle"
@@ -68,6 +58,16 @@ function NavigationProject(props) {
                 My Project
               </Nav.Link>
             </Nav.Item>
+            <Nav.Item>
+              <Nav.Link
+                eventKey={"myDashboard"}
+                onClick={() => handleEvent("myDashboard")}
+                className="tabTitle"
+              >
+                <AiOutlineFundProjectionScreen style={{ marginRight: 5 }} />
+                Todo List Summary
+              </Nav.Link>
+            </Nav.Item>
             <Nav.Item style={{ marginTop: 30 }}>
               <Link to={"/home"}>
                 <BsBack style={{ marginRight: 5 }} />
@@ -78,13 +78,6 @@ function NavigationProject(props) {
         </Col>
         <Col sm={10}>
           <Tab.Content className="tabViewMenuAdmin">
-            <Tab.Pane eventKey={"myDashboard"}>
-              <DashboardProject
-                actionState={(value) => setActionState(actionState + value)}
-                actionStateValue={actionState}
-                userId={userId}
-              />
-            </Tab.Pane>
             <Tab.Pane eventKey={"totalProject"}>
               <TotalProject
                 actionState={(value) => setActionState(actionState + value)}
@@ -98,6 +91,13 @@ function NavigationProject(props) {
               />
             </Tab.Pane>
           </Tab.Content>
+          <Tab.Pane eventKey={"myDashboard"}>
+            <ToDoListSummary
+              actionState={(value) => setActionState(actionState + value)}
+              actionStateValue={actionState}
+              userId={userId}
+            />
+          </Tab.Pane>
         </Col>
       </Row>
     </Tab.Container>

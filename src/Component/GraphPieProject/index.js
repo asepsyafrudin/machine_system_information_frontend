@@ -36,9 +36,8 @@ const renderCustomizedLabel = ({
 };
 
 function GraphPieProject(props) {
-  const { userId, userPosition, userSection } = props;
+  const { userId, userPosition, userSection, dataForGraph } = props;
   const [data, setData] = useState([]);
-  const [totalProject, setTotalProject] = useState([]);
 
   useEffect(() => {
     const dataFilter = (category, status, data) => {
@@ -71,176 +70,76 @@ function GraphPieProject(props) {
       }
     };
 
-    if (userId && userSection) {
-      const positionThatCanOpenProject = [
-        "Departement Manager",
-        "Assistant General Manager",
-        "General Manager",
-        "Director",
-        "President",
-      ];
+    if (userId && userPosition) {
+      if (dataForGraph.length > 0) {
+        const status = [
+          "Not Yet Started",
+          "On Progress",
+          "Finish",
+          "Waiting Detail Activity",
+          "cancel",
+          "Delay",
+        ];
 
-      const checkUserPosition = positionThatCanOpenProject.find(
-        (value) => value === userPosition
-      );
+        const category = [
+          "Productivity",
+          "Quality",
+          "Integrated Factory",
+          "New Model",
+          "Profit Improvement",
+        ];
 
-      if (!checkUserPosition) {
-        axios.get(getProjectByUserApi(userId)).then((response) => {
-          const projectArrayList = response.data.data;
-          setTotalProject(response.data.data);
-          if (projectArrayList.length > 0) {
-            const status = [
-              "Not Yet Started",
-              "On Progress",
-              "Finish",
-              "Waiting Detail Activity",
-              "cancel",
-              "Delay",
-            ];
-
-            const category = [
-              "Productivity",
-              "Quality",
-              "Integrated Factory",
-              "New Model",
-              "Profit Improvement",
-            ];
-
-            const dataAfterFilter = [];
-            for (let index1 = 0; index1 < category.length; index1++) {
-              for (let index2 = 0; index2 < status.length; index2++) {
-                const filter = dataFilter(
-                  category[index1],
-                  status[index2],
-                  projectArrayList
-                );
-                dataAfterFilter.push({
-                  category: category[index1],
-                  status: status[index2],
-                  data: filter,
-                });
-              }
-            }
-
-            const countingDataBaseOnStatus = (status) => {
-              let counter = 0;
-              for (let index = 0; index < dataAfterFilter.length; index++) {
-                if (dataAfterFilter[index].status === status) {
-                  counter += dataAfterFilter[index].data.length;
-                }
-              }
-              return counter;
-            };
-            const dataGraph = [
-              {
-                name: "Group A",
-                value: countingDataBaseOnStatus("Finish"),
-              },
-              {
-                name: "Group B",
-                value: countingDataBaseOnStatus("Waiting Detail Activity"),
-              },
-              {
-                name: "Group C",
-                value: countingDataBaseOnStatus("On Progress"),
-              },
-              {
-                name: "Group D",
-                value: countingDataBaseOnStatus("Not Yet Started"),
-              },
-              {
-                name: "Group E",
-                value: countingDataBaseOnStatus("Delay"),
-              },
-            ];
-
-            setData(dataGraph);
+        const dataAfterFilter = [];
+        for (let index1 = 0; index1 < category.length; index1++) {
+          for (let index2 = 0; index2 < status.length; index2++) {
+            const filter = dataFilter(
+              category[index1],
+              status[index2],
+              dataForGraph
+            );
+            dataAfterFilter.push({
+              category: category[index1],
+              status: status[index2],
+              data: filter,
+            });
           }
-        });
-      } else {
-        axios
-          .get(getAllProjectApi)
-          .then((response) => {
-            const dataResponse = response.data.data;
-            if (dataResponse.length > 0) {
-              const projectArrayList = dataResponse.filter(
-                (value) => value.section_id === parseInt(userSection)
-              );
-              setTotalProject(projectArrayList);
-              if (projectArrayList.length > 0) {
-                const status = [
-                  "Not Yet Started",
-                  "On Progress",
-                  "Finish",
-                  "Waiting Detail Activity",
-                  "cancel",
-                  "Delay",
-                ];
-
-                const category = [
-                  "Productivity",
-                  "Quality",
-                  "Integrated Factory",
-                  "New Model",
-                  "Profit Improvement",
-                ];
-
-                const dataAfterFilter = [];
-                for (let index1 = 0; index1 < category.length; index1++) {
-                  for (let index2 = 0; index2 < status.length; index2++) {
-                    const filter = dataFilter(
-                      category[index1],
-                      status[index2],
-                      projectArrayList
-                    );
-                    dataAfterFilter.push({
-                      category: category[index1],
-                      status: status[index2],
-                      data: filter,
-                    });
-                  }
-                }
-
-                const countingDataBaseOnStatus = (status) => {
-                  let counter = 0;
-                  for (let index = 0; index < dataAfterFilter.length; index++) {
-                    if (dataAfterFilter[index].status === status) {
-                      counter += dataAfterFilter[index].data.length;
-                    }
-                  }
-                  return counter;
-                };
-                const dataGraph = [
-                  {
-                    name: "Group A",
-                    value: countingDataBaseOnStatus("Finish"),
-                  },
-                  {
-                    name: "Group B",
-                    value: countingDataBaseOnStatus("Waiting Detail Activity"),
-                  },
-                  {
-                    name: "Group C",
-                    value: countingDataBaseOnStatus("On Progress"),
-                  },
-                  {
-                    name: "Group D",
-                    value: countingDataBaseOnStatus("Not Yet Started"),
-                  },
-                  {
-                    name: "Group E",
-                    value: countingDataBaseOnStatus("Delay"),
-                  },
-                ];
-
-                setData(dataGraph);
-              }
+        }
+        const countingDataBaseOnStatus = (status) => {
+          let counter = 0;
+          for (let index = 0; index < dataAfterFilter.length; index++) {
+            if (dataAfterFilter[index].status === status) {
+              counter += dataAfterFilter[index].data.length;
             }
-          })
-          .catch((error) => console.log(error));
+          }
+          return counter;
+        };
+        const dataGraph = [
+          {
+            name: "Group A",
+            value: countingDataBaseOnStatus("Finish"),
+          },
+          {
+            name: "Group B",
+            value: countingDataBaseOnStatus("Waiting Detail Activity"),
+          },
+          {
+            name: "Group C",
+            value: countingDataBaseOnStatus("On Progress"),
+          },
+          {
+            name: "Group D",
+            value: countingDataBaseOnStatus("Not Yet Started"),
+          },
+          {
+            name: "Group E",
+            value: countingDataBaseOnStatus("Delay"),
+          },
+        ];
+
+        setData(dataGraph);
       }
     }
-  }, [userId, userPosition, userSection]);
+  }, [userId, userPosition, userSection, dataForGraph]);
 
   return (
     <div>

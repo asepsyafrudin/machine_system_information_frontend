@@ -20,7 +20,7 @@ function ListContentCapability() {
 
   useEffect(() => {
     if (search === "") {
-      axios.get(getAllCapabilityApi(1)).then((response) => {
+      axios.get(getAllCapabilityApi(page)).then((response) => {
         const data = response.data.data;
         if (data.length > 0) {
           setTableCapability(data);

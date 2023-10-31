@@ -1,4 +1,4 @@
-const port = "http://192.168.223.253:8080";
+const port = "http://192.168.1.99:8080";
 
 //users Api
 export const registerUserApi = `${port}/api/users/create_users`;
@@ -301,6 +301,10 @@ export const getTodoByProjectIdApi = (id, page) => {
 };
 export const deleteTodoListByIdApi = (id) => {
   return `${port}/api/todo/delete/${id}`;
+};
+
+export const getTodoByUserIdApi = (userId) => {
+  return `${port}/api/todo/get/${userId}`;
 };
 //token
 

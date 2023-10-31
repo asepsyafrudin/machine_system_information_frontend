@@ -15,10 +15,10 @@ import { useEffect } from "react";
 import {
   createProjectApi,
   getAllProductApi,
-  getAllProjectByPageApi,
+  getAllProjectApi,
   getAllUsersApi,
-  getProjectByPageAndUser,
   getProjectBySectionIdAndPage,
+  getProjectByUserApi,
   sendEmailApi,
   shareFinishProjectForSMDNewModelApi,
   shareFinishProjectToUserCommonApi,
@@ -32,7 +32,6 @@ import { v4 as uuid } from "uuid";
 import { STATUSOPEN } from "../../Config/const";
 import { BsListNested } from "react-icons/bs";
 import { IoMdCreate } from "react-icons/io";
-import { RiCreativeCommonsNdFill } from "react-icons/ri";
 import moment from "moment";
 import PaginationTable from "../Pagination";
 import { GoGitCompare } from "react-icons/go";
@@ -92,8 +91,10 @@ function Project(props) {
   const [userSection, setUserSection] = useState("");
   const [filterBy, setFilterBy] = useState("");
   const [detailFilterValue, setDetailFilterValue] = useState("");
+  const [dataForGraph, setDataForGraph] = useState([]);
 
   const maxPagesShow = 3;
+  const dataPerPage = 10;
 
   useEffect(() => {
     let isMount = true;
@@ -150,51 +151,189 @@ function Project(props) {
       (value) => value === position
     );
 
+    const filterFunctionLogic = (filterItem, filterDetailItem, data) => {
+      if (filterItem === "category") {
+        if (data.length > 0) {
+          let listData = [];
+          const filterData = data.filter(
+            (value) => value.category === filterDetailItem
+          );
+          for (
+            let index = (page - 1) * dataPerPage;
+            index < page * dataPerPage && index < filterData.length;
+            index++
+          ) {
+            listData.push(filterData[index]);
+          }
+          const totalPageData = Math.ceil(filterData.length / dataPerPage);
+          const numberStart = (page - 1) * dataPerPage + 1;
+          setDataForGraph(filterData);
+          console.log(filterData);
+          setTableProject(listData);
+          setStotalPageData(totalPageData);
+          setNumberStart(numberStart);
+        }
+      } else if (filterItem === "pic") {
+        if (data.length > 0) {
+          let listData = [];
+          const filterData = data.filter(
+            (value) => value.manager_id === parseInt(filterDetailItem)
+          );
+          for (
+            let index = (page - 1) * dataPerPage;
+            index < page * dataPerPage && index < filterData.length;
+            index++
+          ) {
+            listData.push(filterData[index]);
+          }
+          const totalPageData = Math.ceil(filterData.length / dataPerPage);
+          const numberStart = (page - 1) * dataPerPage + 1;
+          setDataForGraph(filterData);
+          setTableProject(listData);
+          setStotalPageData(totalPageData);
+          setNumberStart(numberStart);
+        }
+      } else {
+        let listData = [];
+        if (filterDetailItem === "Delay") {
+          let notCryteria = [
+            "Not Yet Started",
+            "On Progress",
+            "Finish",
+            "Waiting Detail Activity",
+            "cancel",
+          ];
+
+          let result = [];
+          for (let index = 0; index < data.length; index++) {
+            let checkData = notCryteria.find(
+              (value) => value === data[index].status
+            );
+            if (!checkData) {
+              result.push(data[index]);
+            }
+          }
+
+          if (result.length > 0) {
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < result.length;
+              index++
+            ) {
+              listData.push(result[index]);
+            }
+          }
+          const totalPageData = Math.ceil(listData.length / dataPerPage);
+          const numberStart = (page - 1) * dataPerPage + 1;
+          setDataForGraph(result);
+          setTableProject(listData);
+          setStotalPageData(totalPageData);
+          setNumberStart(numberStart);
+        } else {
+          const filterData = data.filter(
+            (value) => value.status === filterDetailItem
+          );
+          for (
+            let index = (page - 1) * dataPerPage;
+            index < page * dataPerPage && index < filterData.length;
+            index++
+          ) {
+            listData.push(filterData[index]);
+          }
+          const totalPageData = Math.ceil(listData.length / dataPerPage);
+          const numberStart = (page - 1) * dataPerPage + 1;
+          setDataForGraph(filterData);
+          setTableProject(listData);
+          setStotalPageData(totalPageData);
+          setNumberStart(numberStart);
+        }
+      }
+    };
+
     if (user.position === "Administrator") {
-      if (filterBy && detailFilterValue) {
-      } else {
-        axios
-          .get(getAllProjectByPageApi(page))
-          .then((response) => {
-            isMount && setTableProject(response.data.data);
-            isMount && setStotalPageData(response.data.totalPageData);
-            isMount && setNumberStart(response.data.numberStart);
-          })
-          .then((error) => console.log(error));
-      }
+      axios
+        .get(getAllProjectApi)
+        .then((response) => {
+          const data = isMount && response.data.data;
+          if (filterBy && detailFilterValue) {
+            filterFunctionLogic(filterBy, detailFilterValue, data);
+          } else {
+            const totalPageData = Math.ceil(data.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
+            let listData = [];
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < data.length;
+              index++
+            ) {
+              listData.push(data[index]);
+            }
+            setDataForGraph(data);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
+          }
+        })
+        .then((error) => console.log(error));
     } else if (checkPosition) {
-      if (filterBy && detailFilterValue) {
-      } else {
-        axios
-          .get(getProjectBySectionIdAndPage(page, section_id))
-          .then((response) => {
-            isMount && setTableProject(response.data.data);
-            isMount && setStotalPageData(response.data.totalPageData);
-            isMount && setNumberStart(response.data.numberStart);
-          })
-          .catch((error) => console.log(error));
-      }
+      axios
+        .get(getProjectBySectionIdAndPage(page, section_id))
+        .then((response) => {
+          const data = isMount && response.data.data;
+          if (filterBy && detailFilterValue) {
+            filterFunctionLogic(filterBy, detailFilterValue, data);
+          } else {
+            const totalPageData = Math.ceil(data.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
+            let listData = [];
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < data.length;
+              index++
+            ) {
+              listData.push(data[index]);
+            }
+
+            setDataForGraph(data);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
+          }
+        })
+        .catch((error) => console.log(error));
     } else {
-      if (filterBy && detailFilterValue) {
-      } else {
-        axios
-          .get(getProjectByPageAndUser(page, user.id), {
-            signal: controller.signal,
-          })
-          .then((response) => {
-            const data = isMount && response.data.data;
-            setTableProject(data);
-            isMount && setStotalPageData(response.data.totalPageData);
-            isMount && setNumberStart(response.data.numberStart);
-          });
-      }
+      axios
+        .get(getProjectByUserApi(userId), {
+          signal: controller.signal,
+        })
+        .then((response) => {
+          const data = isMount && response.data.data;
+          if (filterBy && detailFilterValue) {
+            filterFunctionLogic(filterBy, detailFilterValue, data);
+          } else {
+            const totalPageData = Math.ceil(data.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
+            let listData = [];
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < data.length;
+              index++
+            ) {
+              listData.push(data[index]);
+            }
+            setDataForGraph(data);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
+          }
+        });
     }
 
     return () => {
       isMount = false;
       controller.abort();
     };
-  }, [actionStateValue, page, filterBy, detailFilterValue]);
+  }, [actionStateValue, page, filterBy, detailFilterValue, userId]);
 
   const productOption = () => {
     let option = [];
@@ -319,6 +458,7 @@ function Project(props) {
     if (projectIdEdit) {
       let newData = { ...data, id: projectIdEdit };
       axios.put(updateProjectApi, newData);
+      setShowModalCreateProject(false);
       setMessage("Project already Update");
       setShow(true);
       handleReset();
@@ -328,6 +468,7 @@ function Project(props) {
       let confirm = window.confirm("Do you want to save?");
       if (confirm) {
         axios.post(createProjectApi, newData).then((response) => {
+          setShowModalCreateProject(false);
           setMessage("Project already created");
           setShow(true);
           handleReset();
@@ -393,6 +534,7 @@ function Project(props) {
         }
         setMember(memberIddata);
       }
+      setShowModalCreateProject(true);
     }
   };
 
@@ -609,19 +751,13 @@ function Project(props) {
         <>
           <option value={"New Model"}>New Model</option>
           <option value={"Quality"}>Quality</option>
-          <option value={"Intergrated Factory"}>Intergrated Factory</option>
+          <option value={"Integrated Factory"}>Integrated Factory</option>
           <option value={"Productivity"}>Productivity</option>
           <option value={"Profit Improvement"}>Profit Improvement</option>
         </>
       );
     } else if (filterBy === "pic") {
-      for (let index = 0; index < memberListOfProject.length; index++) {
-        option.push(
-          <option key={index} value={memberListOfProject[index]}>
-            {userNameFunction(memberListOfProject[index])}
-          </option>
-        );
-      }
+      return userOption();
     } else {
       option.push(
         <>
@@ -651,6 +787,7 @@ function Project(props) {
                 userId={userId}
                 userPosition={userPosition}
                 userSection={userSection}
+                dataForGraph={dataForGraph}
               />
             </div>
           </div>
@@ -664,6 +801,7 @@ function Project(props) {
                 userId={userId}
                 userPosition={userPosition}
                 userSection={userSection}
+                dataForGraph={dataForGraph}
               />
             </div>
           </div>
