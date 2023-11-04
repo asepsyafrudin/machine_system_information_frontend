@@ -119,6 +119,9 @@ export const getCommentByVideoIdApi = (id, page) => {
   return `${port}/api/comment/get/${id}/${page}`;
 };
 
+export const getCommentBySelectedId = (id) => {
+  return `${port}/api/comment/getCommentBySelectedId/${id}`;
+};
 export const deleteCommentApi = (id) => {
   return `${port}/api/comment/delete/${id}`;
 };
@@ -303,9 +306,11 @@ export const deleteTodoListByIdApi = (id) => {
   return `${port}/api/todo/delete/${id}`;
 };
 
-export const getTodoByUserIdApi = (userId) => {
-  return `${port}/api/todo/get/${userId}`;
+export const getTodoByUserIdApi = (userId, page) => {
+  return `${port}/api/todo/get/${userId}/${page}`;
 };
+
+export const updateTodoListByIdApi = `${port}/api/todo/update`;
 //token
 
 export const createTokenApi = `${port}/api/token/createToken`;

@@ -359,7 +359,6 @@ function ToDoList(props) {
 
   const optionMember = () => {
     let option = [];
-    console.log(memberProject);
     if (memberProject) {
       for (let index = 0; index < memberProject.length; index++) {
         option.push(

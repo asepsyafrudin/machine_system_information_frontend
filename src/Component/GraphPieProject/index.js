@@ -137,6 +137,8 @@ function GraphPieProject(props) {
         ];
 
         setData(dataGraph);
+      } else {
+        setData([])
       }
     }
   }, [userId, userPosition, userSection, dataForGraph]);

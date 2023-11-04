@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import GanttChart from "../GanttChart";
 import { ViewMode } from "gantt-task-react";
 import {
@@ -77,6 +77,10 @@ function ProjectActivity(props) {
   const [showAlert, setShowAlert] = useState(false);
   const [ccMail, setCcMail] = useState("");
   const [userId, setUserId] = useState("");
+  const refDescription = useRef("");
+  if (description) {
+    refDescription.current.innerText = description;
+  }
 
   const backgroundColorDelay = (endProject, progressBar) => {
     let currentDate = new Date();
@@ -637,25 +641,25 @@ function ProjectActivity(props) {
         <div>
           <Row className="mb-1" style={{ textAlign: "left" }}>
             <Col sm={2}>PIC</Col>
-            <Col sm={4}>: {userNameFunction(project.manager_id)}</Col>
+            <Col sm={4}>{userNameFunction(project.manager_id)}</Col>
           </Row>
           <Row className="mb-1" style={{ textAlign: "left" }}>
             <Col sm={2}>Category</Col>
-            <Col sm={10}>: {category}</Col>
+            <Col sm={10}>{category}</Col>
           </Row>
           <Row className="mb-1" style={{ textAlign: "left" }}>
             <Col sm={2}>Budget</Col>
-            <Col sm={10}>: {parseFloat(project.budget).toLocaleString()}</Col>
+            <Col sm={10}>{parseFloat(project.budget).toLocaleString()}</Col>
           </Row>
           <Row className="mb-1" style={{ textAlign: "left" }}>
             <Col sm={2}>Saving Cost</Col>
             <Col sm={10}>
-              : {parseFloat(project.saving_cost).toLocaleString()}
+              {parseFloat(project.saving_cost).toLocaleString()}
             </Col>
           </Row>
           <Row className="mb-1" style={{ textAlign: "left" }}>
             <Col sm={2}>Description</Col>
-            <Col sm={4}>: {description}</Col>
+            <Col sm={4} ref={refDescription}></Col>
             <Col sm={6} style={{ textAlign: "right" }}>
               <div className="box-plan" /> Plan
               <div className="box-actual" /> Progress

@@ -49,9 +49,11 @@ import {
 } from "../../Config/groupingName";
 import GraphBarProject from "../GraphBarProject";
 import GraphPieProject from "../GraphPieProject";
+import { useRef } from "react";
 
 function Project(props) {
   const { actionState, actionStateValue } = props;
+  const [description, setDescription] = useState("");
   const [tableProduct, setTableProduct] = useState([]);
   const [tableProject, setTableProject] = useState([]);
   const [product, setProduct] = useState("");
@@ -82,7 +84,6 @@ function Project(props) {
   const [subjectEmail, setSubjectEmail] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
   const [showModalShare, setShowModalShare] = useState(false);
@@ -92,6 +93,7 @@ function Project(props) {
   const [filterBy, setFilterBy] = useState("");
   const [detailFilterValue, setDetailFilterValue] = useState("");
   const [dataForGraph, setDataForGraph] = useState([]);
+  const refDescription = useRef("");
 
   const maxPagesShow = 3;
   const dataPerPage = 10;
@@ -168,7 +170,6 @@ function Project(props) {
           const totalPageData = Math.ceil(filterData.length / dataPerPage);
           const numberStart = (page - 1) * dataPerPage + 1;
           setDataForGraph(filterData);
-          console.log(filterData);
           setTableProject(listData);
           setStotalPageData(totalPageData);
           setNumberStart(numberStart);
@@ -517,6 +518,7 @@ function Project(props) {
     if (confirm) {
       let data = tableProject.find((value) => value.id === id);
       if (data) {
+        setShowModalCreateProject(true);
         setProjectIdEdit(data.id);
         setProduct(data.product_id);
         setProjectName(data.project_name);
@@ -534,7 +536,6 @@ function Project(props) {
         }
         setMember(memberIddata);
       }
-      setShowModalCreateProject(true);
     }
   };
 
@@ -742,6 +743,10 @@ function Project(props) {
         <div className="label-subcategory">{CapitalCaseFirstWord(value)}</div>
       );
     }
+  };
+
+  const handleChangeDescription = (e) => {
+    setDescription(e.target.value);
   };
 
   const filterItemLogic = () => {
@@ -1504,8 +1509,8 @@ function Project(props) {
                     as="textarea"
                     style={{ height: 120 }}
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  ></Form.Control>
+                    onChange={handleChangeDescription}
+                  />
                 </Col>
               </Row>
               <Row className="mb-3" style={{ textAlign: "right" }}>
