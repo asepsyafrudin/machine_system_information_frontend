@@ -1,15 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Button, Col, Form, Modal, Row, Table } from "react-bootstrap";
+import {
+  Badge,
+  Button,
+  Col,
+  Form,
+  Modal,
+  ProgressBar,
+  Row,
+  Spinner,
+  Table,
+} from "react-bootstrap";
 import TitleSection from "../TitleSection";
 import { BsListNested } from "react-icons/bs";
 import "./todoSummary.css";
 import axios from "axios";
 import {
-  deleteTodoListByIdApi,
+  createFileApi,
+  deleteFileByIdApi,
   getAllProjectApi,
   getAllUsersApi,
   getCommentBySelectedId,
-  getProjectByIdApi,
+  getFileByIdApi,
   getTodoByUserIdApi,
   postCommentApi,
   updateTodoListByIdApi,
@@ -21,6 +32,10 @@ import { useRef } from "react";
 import PaginationTable from "../Pagination";
 import { GrView } from "react-icons/gr";
 import CommentCard from "../CommentCard";
+import { fileName } from "../../Config/fileName";
+import { getExtFileName } from "../../Config/fileType";
+import { GoDesktopDownload } from "react-icons/go";
+import { RiDeleteBin2Fill } from "react-icons/ri";
 
 function ToDoListSummary(props) {
   const { userId } = props;
@@ -42,6 +57,7 @@ function ToDoListSummary(props) {
   const [actual_finish, setActualFinish] = useState("");
   const [projectId, setProjectId] = useState("");
   const [file, setFile] = useState([]);
+  const [percentProgress, setPercentProgress] = useState(0);
   const [tableFile, setTableFile] = useState([]);
   const [tableComment, setTableComment] = useState([]);
   const [picId, setPicId] = useState("");
@@ -51,9 +67,18 @@ function ToDoListSummary(props) {
   const [showModalMarkAsFinish, setShowModalMarkAsFinish] = useState(false);
   const [comment, setComment] = useState("");
 
-  const refFile = useRef();
-
   useEffect(() => {
+    const controller = new AbortController();
+    let isMounted = true;
+    if (idEdit) {
+      axios
+        .get(getFileByIdApi(idEdit))
+        .then((response) => {
+          isMounted && setTableFile(response.data.data);
+        })
+        .catch((error) => console.log(error));
+    }
+
     if (userId) {
       axios
         .get(getTodoByUserIdApi(userId, page))
@@ -81,6 +106,11 @@ function ToDoListSummary(props) {
         setTableComment(response.data.data);
       });
     }
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [userId, page, action, idEdit]);
 
   const functionName = (id) => {
@@ -223,28 +253,26 @@ function ToDoListSummary(props) {
     setShow(true);
   };
 
-  const handleDelete = (e) => {
+  const handleEditComment = (e) => {
+    // const id = e;
+  };
+
+  const handleChangeFile = (e) => {
+    setFile([...e.target.files]);
+  };
+
+  const handleDeleteFile = (e) => {
     const id = e.target.id;
-    const confirm = window.confirm("Do you want to delete?");
+    const confirm = window.confirm("Apakah file Akan di Hapus?");
     if (confirm) {
-      axios.delete(deleteTodoListByIdApi(id)).then((response) => {
-        window.alert("data already delete");
-        setAction((prev) => prev + 1);
-      });
+      axios
+        .delete(deleteFileByIdApi(id))
+        .then((response) => {
+          setAction((prev) => prev + 1);
+        })
+        .catch((error) => console.log(error));
     }
   };
-
-  const handleEditComment = (e) => {
-    const id = e;
-  };
-
-  const handleShowAttachment = (e) => {};
-
-  const handleChangeFile = (e) => {};
-
-  const saveAttachment = (e) => {};
-
-  const handleDeleteFile = (e) => {};
   const resetForm = () => {
     setItemName("");
     setDueDate("");
@@ -253,7 +281,6 @@ function ToDoListSummary(props) {
     setProjectId("");
     setAssignBy("");
     setShow(false);
-    setShowModalMarkAsFinish(false);
   };
 
   const handleSendComment = () => {
@@ -300,6 +327,62 @@ function ToDoListSummary(props) {
       }
     }
     return option;
+  };
+
+  const loadingPostData = (loadingData) => {
+    let loading = [];
+    if (loadingData) {
+      loading.push(
+        <Spinner
+          as="span"
+          animation="grow"
+          size="sm"
+          role="status"
+          aria-hidden="true"
+          key={new Date()}
+        />
+      );
+    }
+    return loading;
+  };
+
+  const saveAttachment = (e) => {
+    e.preventDefault();
+    if (file.length > 0) {
+      let formData = new FormData();
+      formData.append("id", idEdit);
+      for (let index = 0; index < file.length; index++) {
+        formData.append("file", file[index]);
+      }
+      const onUploadProgress = (progressEvent) => {
+        const { loaded, total } = progressEvent;
+        let percent = Math.floor((loaded * 100) / total);
+        if (percent < 100) {
+          setPercentProgress(percent);
+          // console.log(`${loaded} bytes of ${total} bytes. ${percent}%`);
+        }
+      };
+
+      setLoading(true);
+      axios
+        .post(createFileApi, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress,
+        })
+
+        .then((response) => {
+          refAttachment.current.value = "";
+          resetForm();
+          setPercentProgress(0);
+          setLoading(false);
+          setAction((prev) => prev + 1);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   };
 
   return (
@@ -509,7 +592,7 @@ function ToDoListSummary(props) {
           <Modal.Title>Progress View</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
+          <Form onSubmit={saveAttachment}>
             <Row>
               <Col lg={8}>
                 <Form.Label>Input Attachment</Form.Label>
@@ -518,13 +601,94 @@ function ToDoListSummary(props) {
             </Row>
             <Row>
               <Col lg={8}>
-                <Form.Control required type="file" ref={refFile} multiple />
+                <Form.Control
+                  multiple
+                  type="file"
+                  required
+                  ref={refAttachment}
+                  onChange={handleChangeFile}
+                />
               </Col>
-              <Col lg={4}>
-                <Button type="submit">Submit Attachment</Button>
+              <Col sm={4}>
+                <Button type="submit">{loadingPostData(loading)}Submit</Button>
               </Col>
             </Row>
           </Form>
+          <Row>
+            <Col>
+              {percentProgress > 0 && (
+                <ProgressBar
+                  animated
+                  now={percentProgress}
+                  label={`${percentProgress}%`}
+                />
+              )}
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <Table>
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>File Name</th>
+                    <th>File Type</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tableFile.length > 0 ? (
+                    tableFile.map((value, index) => {
+                      return (
+                        <tr key={index}>
+                          <td>{index + 1}</td>
+                          <td style={{ textAlign: "left", paddingLeft: 20 }}>
+                            {fileName(value.name)}
+                          </td>
+                          <td>{getExtFileName(value.name)}</td>
+                          <td>
+                            <a
+                              href={value.file}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <Button size="sm" style={{ marginRight: 5 }}>
+                                <GoDesktopDownload
+                                  style={{
+                                    marginRight: 5,
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                                OPEN
+                              </Button>
+                            </a>
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              id={value.id}
+                              onClick={handleDeleteFile}
+                            >
+                              <RiDeleteBin2Fill
+                                style={{
+                                  marginRight: 5,
+                                  pointerEvents: "none",
+                                }}
+                              />
+                              Delete
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr key={1}>
+                      <td colSpan={4}>No File</td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
           <Row className="mb-3 mt-3">
             <Form.Control as={Col}>
               <Form.Label>Input Progress</Form.Label>

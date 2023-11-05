@@ -194,7 +194,7 @@ function Project(props) {
           setStotalPageData(totalPageData);
           setNumberStart(numberStart);
         }
-      } else {
+      } else if (filterItem === "status") {
         let listData = [];
         if (filterDetailItem === "Delay") {
           let notCryteria = [
@@ -233,6 +233,26 @@ function Project(props) {
         } else {
           const filterData = data.filter(
             (value) => value.status === filterDetailItem
+          );
+          for (
+            let index = (page - 1) * dataPerPage;
+            index < page * dataPerPage && index < filterData.length;
+            index++
+          ) {
+            listData.push(filterData[index]);
+          }
+          const totalPageData = Math.ceil(filterData.length / dataPerPage);
+          const numberStart = (page - 1) * dataPerPage + 1;
+          setDataForGraph(filterData);
+          setTableProject(listData);
+          setStotalPageData(totalPageData);
+          setNumberStart(numberStart);
+        }
+      } else if (filterItem === "product") {
+        if (data.length > 0) {
+          let listData = [];
+          const filterData = data.filter(
+            (value) => value.product_id === parseInt(filterDetailItem)
           );
           for (
             let index = (page - 1) * dataPerPage;
@@ -763,7 +783,7 @@ function Project(props) {
       );
     } else if (filterBy === "pic") {
       return userOption();
-    } else {
+    } else if (filterBy === "status") {
       option.push(
         <>
           <option value={"Not Yet Started"}>Not Yet Started</option>
@@ -777,9 +797,12 @@ function Project(props) {
           <option value={"Delay"}>Delay</option>
         </>
       );
+    } else if (filterBy === "product") {
+      return productOption();
     }
     return option;
   };
+
   return (
     <>
       <Row>
@@ -837,6 +860,7 @@ function Project(props) {
                   <option value="category">Category</option>
                   <option value="pic">PIC</option>
                   <option value="status">Status</option>
+                  <option value="product">Product</option>
                 </Form.Select>
               </Col>
               <Col lg={3}>
