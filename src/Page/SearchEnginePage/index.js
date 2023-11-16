@@ -30,7 +30,8 @@ function SearchEnginePage(props) {
           <span className="searchTitle2">
             {" "}
             You can find information here to check machine document, video, and
-            others
+            others , Type "all" or Click Button Search All to see All Document
+            and Video.
           </span>
           <br />
           <br />
