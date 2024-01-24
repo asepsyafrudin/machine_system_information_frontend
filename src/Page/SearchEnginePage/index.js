@@ -18,6 +18,10 @@ function SearchEnginePage(props) {
     navigate(`/searching_page/${searchingText}`);
   };
 
+  const searchAll = () => {
+    navigate(`/searching_page/all`);
+  };
+
   return (
     <div>
       <Header />
@@ -30,7 +34,8 @@ function SearchEnginePage(props) {
           <span className="searchTitle2">
             {" "}
             You can find information here to check machine document, video, and
-            others
+            others , Type "all" or Click Button Search All to see All Document
+            and Video.
           </span>
           <br />
           <br />
@@ -50,6 +55,9 @@ function SearchEnginePage(props) {
               </InputGroup>
               <br />
               <Button type="submit">Search</Button>
+              <Button type="button" onClick={searchAll}>
+                Search All
+              </Button>
               <Button
                 variant="success"
                 type="button"
