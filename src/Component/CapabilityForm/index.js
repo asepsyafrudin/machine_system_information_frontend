@@ -51,6 +51,7 @@ import GraphDistribution from "../GraphDistribution";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { MdOutlineDelete } from "react-icons/md";
+import { round } from "../../Config/function";
 
 function CapabilityForm() {
   const { id } = useParams();
@@ -348,7 +349,7 @@ function CapabilityForm() {
         value = value + parseFloat(listData[index].data);
       }
       average = value / listData.length;
-      let number = (Math.round(average * 1000) / 1000).toFixed(3);
+      let number = round(average, 3);
       return number;
     }
     return average;
@@ -365,7 +366,7 @@ function CapabilityForm() {
       }
 
       sigma = Math.sqrt(sum / (listData.length - 1));
-      let number = (Math.round(sigma * 1000) / 1000).toFixed(3);
+      let number = round(sigma, 3);
       return number;
     }
     return sigma;
@@ -386,7 +387,7 @@ function CapabilityForm() {
       } else if (type === SINGLE_STANDARD_MIN) {
         cp = (average - parseFloat(standard)) / (parseInt(sigma) * sigmaValue);
       }
-      let number = (Math.round(cp * 100) / 100).toFixed(2);
+      let number = round(cp, 2);
       return number;
     }
     return cp;
@@ -414,7 +415,7 @@ function CapabilityForm() {
         return cpk;
       }
     }
-    let number = (Math.round(cpk * 100) / 100).toFixed(2);
+    let number = round(cpk, 2);
     return number;
   };
 

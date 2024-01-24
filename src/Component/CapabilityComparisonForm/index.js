@@ -50,6 +50,7 @@ import GraphDistribution from "../GraphDistribution";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { MdOutlineDelete } from "react-icons/md";
+import { round } from "../../Config/function";
 
 function CapabilityComparisonForm() {
   const { id } = useParams();
@@ -398,7 +399,7 @@ function CapabilityComparisonForm() {
         value = value + parseFloat(data[index].data);
       }
       average = value / data.length;
-      let number = (Math.round(average * 1000) / 1000).toFixed(3);
+      let number = round(average, 3);
       return number;
     }
     return average;
@@ -415,7 +416,7 @@ function CapabilityComparisonForm() {
       }
 
       sigma = Math.sqrt(sum / (data.length - 1));
-      let number = (Math.round(sigma * 1000) / 1000).toFixed(3);
+      let number = sigma(sigma, 3);
       return number;
     }
     return sigma;
@@ -436,7 +437,7 @@ function CapabilityComparisonForm() {
       } else if (type === SINGLE_STANDARD_MIN) {
         cp = (average - parseFloat(standard)) / (parseInt(sigma) * sigmaValue);
       }
-      let number = (Math.round(cp * 100) / 100).toFixed(2);
+      let number = sigma(cp, 2);
       return number;
     }
     return cp;
@@ -464,7 +465,7 @@ function CapabilityComparisonForm() {
         return cpk;
       }
     }
-    let number = (Math.round(cpk * 100) / 100).toFixed(2);
+    let number = round(cpk, 2);
     return number;
   };
 
