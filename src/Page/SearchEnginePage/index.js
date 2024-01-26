@@ -54,7 +54,9 @@ function SearchEnginePage(props) {
                 />
               </InputGroup>
               <br />
-              <Button type="submit">Search</Button>
+              <Button type="submit" style={{ marginRight: 5 }}>
+                Search
+              </Button>
               <Button type="button" onClick={searchAll}>
                 Search All
               </Button>

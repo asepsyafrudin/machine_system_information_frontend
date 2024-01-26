@@ -1,5 +1,6 @@
 .searchEngineContainer {
     display: flex;
+    text-align: center;
     justify-content: center;
     align-items: center;
     height: 90vh;
@@ -13,8 +14,16 @@
     font-style: normal;
     font-size: 30px;
     font-family: fantasy;
+    width: 500px;
+}
+.searchTitle2 {
+    width: 600px;
+    display: inline-block;
 }
 
+
 .searchBoxSubmit {
-    width: 600px;
+    display: flex;
+    justify-content: center;
+
 }
