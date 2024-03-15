@@ -46,7 +46,8 @@ import ModalConfirm from "../ModalConfirm";
 import { ExcelRenderer } from "react-excel-renderer";
 import { HiDownload } from "react-icons/hi";
 import { BiEdit, BiExport, BiReset } from "react-icons/bi";
-import CapabilityFormatExcel from "../../Asset/File/Format Excel Import Capability.xlsx";
+import CapabilityFormatExcel from "../../Asset/File/Capability Form V3.0.4.xlsx";
+// import CapabilityFormatExcel2 from "../../Asset/File/Format Excel Import Capability.xlsx";
 import GraphDistribution from "../GraphDistribution";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
@@ -89,7 +90,6 @@ function CapabilityForm() {
   const [dataEdit, setDataEdit] = useState("");
 
   useEffect(() => {
-    let isMounted = true;
     const controller = new AbortController();
 
     axios
@@ -97,7 +97,7 @@ function CapabilityForm() {
         signal: controller.signal,
       })
       .then((response) => {
-        isMounted && setTableProduct(response.data.data);
+        setTableProduct(response.data.data);
       })
       .catch((error) => console.log(error));
 
@@ -106,12 +106,12 @@ function CapabilityForm() {
         signal: controller.signal,
       })
       .then((response) => {
-        isMounted && setTableLine(response.data.data);
+        setTableLine(response.data.data);
       })
       .catch((error) => console.log(error));
 
     axios.get(getAllMachineApi).then((response) => {
-      isMounted && setTableMachine(response.data.data);
+      setTableMachine(response.data.data);
     });
 
     axios
@@ -119,7 +119,7 @@ function CapabilityForm() {
         signal: controller.signal,
       })
       .then((response) => {
-        isMounted && setTableProject(response.data.data);
+        setTableProject(response.data.data);
       })
       .catch((error) => console.log(error));
 
@@ -128,7 +128,7 @@ function CapabilityForm() {
         signal: controller.signal,
       })
       .then((response) => {
-        const result = isMounted ? response.data.data : [];
+        const result = response.data.data;
         if (result.length > 0) {
           setMachine(result[0].machine_id);
           setUserIdDataView(result[0].user_id);
@@ -159,11 +159,6 @@ function CapabilityForm() {
       setUserId(user.id);
       setPosition(user.position);
     }
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
   }, [id, updateMode, userId]);
 
   const handleSetProduct = (e) => {
@@ -275,10 +270,10 @@ function CapabilityForm() {
         const rows = response.rows;
         console.log(rows);
         if (rows.length > 1) {
-          for (let index = 0; index < rows.length - 1; index++) {
+          for (let index = 0; index < 30; index++) {
             let data = {
               no: listData.length + 1,
-              data: rows[index + 1][1],
+              data: rows[index + 18][68],
             };
             setListData((prev) => [...prev, data]);
           }
@@ -560,23 +555,55 @@ function CapabilityForm() {
     navigate("/capabilityList");
   };
 
-  const handleExportData = () => {
-    const dataExport = [];
-    for (let index = 0; index < listData.length; index++) {
-      dataExport.push({
-        no: index + 1,
-        data: listData[index].data,
-      });
+  const handleExportData = (e) => {
+    // const dataExport = [];
+    // for (let index = 0; index < listData.length; index++) {
+    //   dataExport.push({
+    //     no: index + 1,
+    //     data: listData[index].data,
+    //   });
+    // }
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    const rABS = !!reader.readAsBinaryString;
+    reader.onload = (e) => {
+      const fileData = e.target.result;
+      const wb = XLSX.read(fileData, { type: rABS ? "binary" : "array" });
+      let arr = this.xslToJson(wb);
+    };
+    if (rABS) {
+      reader.readAsBinaryString(file);
+    } else {
+      reader.readAsArrayBuffer(file);
     }
+    // const reader = new FileReader();
 
-    const fileType =
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-    const fileExtension = ".xlsx";
-    const ws1 = XLSX.utils.json_to_sheet(dataExport);
-    const wb1 = { Sheets: { data: ws1 }, SheetNames: ["data"] };
-    const excelBuffer = XLSX.write(wb1, { bookType: "xlsx", type: "array" });
-    const data = new Blob([excelBuffer], { type: fileType });
-    FileSaver.saveAs(data, "data-before" + fileExtension);
+    // reader.onload = function () {
+    //   var fileData = reader.result;
+    //   var wb = XLSX.read(fileData, { type: "binary" });
+
+    //   wb.SheetNames.forEach(function (sheetName) {
+    //     var rowObj = XLSX.utils.sheet_to_row_object_array(wb.Sheets[sheetName]);
+    //     var jsonObj = JSON.stringify(rowObj);
+    //     console.log(jsonObj);
+    //   });
+    // };
+
+    // reader.readAsBinaryString(CapabilityFormatExcel);
+
+    // var workbook = XLSX.readFile(CapabilityFormatExcel);
+
+    // console.log("workbook", workbook);
+
+    // const fileType =
+    //   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    // const fileExtension = ".xlsx";
+    // const ws1 = XLSX.utils.json_to_sheet(dataExport);
+    // const wb1 = { Sheets: { data: ws1 }, SheetNames: ["data"] };
+    // const excelBuffer = XLSX.write(wb1, { bookType: "xlsx", type: "array" });
+    // const data = new Blob([excelBuffer], { type: fileType });
+    // FileSaver.saveAs(data, "data-before" + fileExtension);
+   
   };
 
   const handleSave = (e) => {

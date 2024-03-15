@@ -11,12 +11,26 @@ import {
   YAxis,
 } from "recharts";
 import { Col, Row } from "react-bootstrap";
+import { getUserByUserIdApi } from "../../Config/API";
+import axios from "axios";
 
 function GraphBarProject(props) {
   const { userId, userPosition, userSection, dataForGraph } = props;
   const [data, setData] = useState([]);
+  const [section, setSection] = useState("");
 
   useEffect(() => {
+    if (localStorage.getItem("user")) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const { id } = user;
+      axios.get(getUserByUserIdApi(id)).then((response) => {
+        const dataUser = response.data.data;
+        if (dataUser.length > 0) {
+          setSection(dataUser[0].section_id);
+        }
+      });
+    }
+
     const dataFilter = (category, status, data) => {
       if (data.length > 0) {
         let notCryteria = [
@@ -26,6 +40,8 @@ function GraphBarProject(props) {
           "Waiting Detail Activity",
           "cancel",
         ];
+
+      
 
         const check = notCryteria.find((value) => value === status);
         if (!check) {
@@ -58,20 +74,33 @@ function GraphBarProject(props) {
           "Delay",
         ];
 
-        const category = [
-          "Productivity",
-          "Quality",
-          "Integrated Factory",
-          "New Model",
-          "Profit Improvement",
-        ];
+        
+
+        let category;
+        if (section === 4) {
+          category = [
+            "CO2 Neutral",
+            "Logistic Automation",
+            "Vision System",
+            "DX",
+            "Layout"
+          ];
+        } else {
+          category = [
+            "Productivity",
+            "Quality",
+            "Integrated Factory",
+            "New Model",
+            "Profit Improvement",
+          ];
+        }
 
         const dataAfterFilter = [];
         for (let index1 = 0; index1 < category.length; index1++) {
           for (let index2 = 0; index2 < status.length; index2++) {
             const filter = dataFilter(
               category[index1],
-              status[index2],
+              status[index2],            
               dataForGraph
             );
             dataAfterFilter.push({
@@ -82,60 +111,112 @@ function GraphBarProject(props) {
           }
         }
 
-        const dataGraph = [
-          {
-            category: "Productivity",
-            notYetStarted: dataAfterFilter[0].data.length,
-            onProgress: dataAfterFilter[1].data.length,
-            finish: dataAfterFilter[2].data.length,
-            waitingDetailActivity: dataAfterFilter[3].data.length,
-            cancel: dataAfterFilter[4].data.length,
-            delay: dataAfterFilter[5].data.length,
-          },
-          {
-            category: "Quality",
-            notYetStarted: dataAfterFilter[6].data.length,
-            onProgress: dataAfterFilter[7].data.length,
-            finish: dataAfterFilter[8].data.length,
-            waitingDetailActivity: dataAfterFilter[9].data.length,
-            cancel: dataAfterFilter[10].data.length,
-            delay: dataAfterFilter[11].data.length,
-          },
-          {
-            category: "Integrated ",
-            notYetStarted: dataAfterFilter[12].data.length,
-            onProgress: dataAfterFilter[13].data.length,
-            finish: dataAfterFilter[14].data.length,
-            waitingDetailActivity: dataAfterFilter[15].data.length,
-            cancel: dataAfterFilter[16].data.length,
-            delay: dataAfterFilter[17].data.length,
-          },
-          {
-            category: "New Model",
-            notYetStarted: dataAfterFilter[18].data.length,
-            onProgress: dataAfterFilter[19].data.length,
-            finish: dataAfterFilter[20].data.length,
-            waitingDetailActivity: dataAfterFilter[21].data.length,
-            cancel: dataAfterFilter[22].data.length,
-            delay: dataAfterFilter[23].data.length,
-          },
-          {
-            category: `Profit`,
-            notYetStarted: dataAfterFilter[24].data.length,
-            onProgress: dataAfterFilter[25].data.length,
-            finish: dataAfterFilter[26].data.length,
-            waitingDetailActivity: dataAfterFilter[27].data.length,
-            cancel: dataAfterFilter[28].data.length,
-            delay: dataAfterFilter[29].data.length,
-          },
-        ];
+        const dataGraph = () => {
+          if (section === 4) {
+            return [
+              {
+                category: "CO2 Neutral",
+                notYetStarted: dataAfterFilter[0].data.length,
+                onProgress: dataAfterFilter[1].data.length,
+                finish: dataAfterFilter[2].data.length,
+                waitingDetailActivity: dataAfterFilter[3].data.length,
+                cancel: dataAfterFilter[4].data.length,
+                delay: dataAfterFilter[5].data.length,
+              },
+              {
+                category: "Logistic Automation",
+                notYetStarted: dataAfterFilter[6].data.length,
+                onProgress: dataAfterFilter[7].data.length,
+                finish: dataAfterFilter[8].data.length,
+                waitingDetailActivity: dataAfterFilter[9].data.length,
+                cancel: dataAfterFilter[10].data.length,
+                delay: dataAfterFilter[11].data.length,
+              },
+              {
+                category: "Vision System",
+                notYetStarted: dataAfterFilter[12].data.length,
+                onProgress: dataAfterFilter[13].data.length,
+                finish: dataAfterFilter[14].data.length,
+                waitingDetailActivity: dataAfterFilter[15].data.length,
+                cancel: dataAfterFilter[16].data.length,
+                delay: dataAfterFilter[17].data.length,
+              },
+              {
+                category: "DX",
+                notYetStarted: dataAfterFilter[18].data.length,
+                onProgress: dataAfterFilter[19].data.length,
+                finish: dataAfterFilter[20].data.length,
+                waitingDetailActivity: dataAfterFilter[21].data.length,
+                cancel: dataAfterFilter[22].data.length,
+                delay: dataAfterFilter[23].data.length,
+              },
+              {
+                category: "Layout",
+                notYetStarted: dataAfterFilter[24].data.length,
+                onProgress: dataAfterFilter[25].data.length,
+                finish: dataAfterFilter[26].data.length,
+                waitingDetailActivity: dataAfterFilter[27].data.length,
+                cancel: dataAfterFilter[28].data.length,
+                delay: dataAfterFilter[29].data.length,
+              },
+            ];
+          } else {
+            return [
+              {
+                category: "Productivity",
+                notYetStarted: dataAfterFilter[0].data.length,
+                onProgress: dataAfterFilter[1].data.length,
+                finish: dataAfterFilter[2].data.length,
+                waitingDetailActivity: dataAfterFilter[3].data.length,
+                cancel: dataAfterFilter[4].data.length,
+                delay: dataAfterFilter[5].data.length,
+              },
+              {
+                category: "Quality",
+                notYetStarted: dataAfterFilter[6].data.length,
+                onProgress: dataAfterFilter[7].data.length,
+                finish: dataAfterFilter[8].data.length,
+                waitingDetailActivity: dataAfterFilter[9].data.length,
+                cancel: dataAfterFilter[10].data.length,
+                delay: dataAfterFilter[11].data.length,
+              },
+              {
+                category: "Integrated ",
+                notYetStarted: dataAfterFilter[12].data.length,
+                onProgress: dataAfterFilter[13].data.length,
+                finish: dataAfterFilter[14].data.length,
+                waitingDetailActivity: dataAfterFilter[15].data.length,
+                cancel: dataAfterFilter[16].data.length,
+                delay: dataAfterFilter[17].data.length,
+              },
+              {
+                category: "New Model",
+                notYetStarted: dataAfterFilter[18].data.length,
+                onProgress: dataAfterFilter[19].data.length,
+                finish: dataAfterFilter[20].data.length,
+                waitingDetailActivity: dataAfterFilter[21].data.length,
+                cancel: dataAfterFilter[22].data.length,
+                delay: dataAfterFilter[23].data.length,
+              },
+              {
+                category: `Profit`,
+                notYetStarted: dataAfterFilter[24].data.length,
+                onProgress: dataAfterFilter[25].data.length,
+                finish: dataAfterFilter[26].data.length,
+                waitingDetailActivity: dataAfterFilter[27].data.length,
+                cancel: dataAfterFilter[28].data.length,
+                delay: dataAfterFilter[29].data.length,
+              },
+            ];
+          }
+        };
 
         setData(dataGraph);
       } else {
         setData([]);
       }
     }
-  }, [userId, userSection, userPosition, dataForGraph]);
+  }, [userId, userSection, userPosition, dataForGraph, section]);
 
   return (
     <div>

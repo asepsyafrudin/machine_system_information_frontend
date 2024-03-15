@@ -31,6 +31,7 @@ function PaginationTable(props) {
   const handleCurrentPage = (el) => {
     onChangePage(parseInt(el.target.innerText));
   };
+  
   const handleFirstPage = () => {
     onChangePage(1);
   };

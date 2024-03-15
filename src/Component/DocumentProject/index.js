@@ -13,20 +13,17 @@ function DocumentProject(props) {
   const [tableDocument, setTableDocument] = useState([]);
 
   useEffect(() => {
-    let isMounted = true;
+   
     const controller = new AbortController();
     axios
       .get(getDocumentByProjectIdApi(id), {
         signal: controller.signal,
       })
       .then((response) => {
-        isMounted && setTableDocument(response.data.data);
+         setTableDocument(response.data.data);
       });
 
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
+  
   }, [id]);
   return (
     <div className="capabilityFormContainer">

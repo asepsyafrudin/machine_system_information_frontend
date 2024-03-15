@@ -8,6 +8,9 @@ import {
   SETPROJECTEVENT,
   SETUSEREVENT,
   TODOCHANGECOUNT,
+  SETPAGE,
+  SETFILTER,
+  SETFILTERDETAIL
 } from "../const";
 
 const Context = createContext();
@@ -28,6 +31,9 @@ export const GlobalProvider = (Children) => {
       todoChangeCount: 0,
       projectEvent: "totalProject",
       userEvent: "userDashboard",
+      pageEvent: 1,
+      filterEvent: "",
+      filterDetailEvent: ""
     };
 
     dipatch = (action) => {
@@ -76,6 +82,20 @@ export const GlobalProvider = (Children) => {
       if (action.type === SETUSEREVENT) {
         this.setState({ userEvent: action.payload });
       }
+
+      if (action.type === SETPAGE) {
+        this.setState({ pageEvent: action.payload });
+      }
+
+      if (action.type === SETFILTER){
+        this.setState({ filterEvent: action.payload})
+        
+      }
+
+      if(action.type === SETFILTERDETAIL){
+        this.setState({ filterDetailEvent: action.payload })
+        
+      }
     };
 
     render() {
@@ -94,6 +114,9 @@ export const GlobalProvider = (Children) => {
             todoChangeCount: this.state.todoChangeCount,
             projectEvent: this.state.projectEvent,
             userEvent: this.state.userEvent,
+            pageEvent: this.state.pageEvent,
+            filterEvent: this.state.filterEvent,
+            filterDetailEvent: this.state.filterDetailEvent,
             dispatch: this.dipatch,
           }}
         >

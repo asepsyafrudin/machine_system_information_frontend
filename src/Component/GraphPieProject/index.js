@@ -4,7 +4,11 @@ import { PieChart, Pie, Cell } from "recharts";
 import "./graphPie.css";
 import { Col, Row } from "react-bootstrap";
 import axios from "axios";
-import { getAllProjectApi, getProjectByUserApi } from "../../Config/API";
+import {
+  getAllProjectApi,
+  getProjectByUserApi,
+  getUserByUserIdApi,
+} from "../../Config/API";
 
 const COLORS = ["#0088FE", "#707F91", "#82CA9D", "#FF8042", "red"];
 
@@ -38,8 +42,20 @@ const renderCustomizedLabel = ({
 function GraphPieProject(props) {
   const { userId, userPosition, userSection, dataForGraph } = props;
   const [data, setData] = useState([]);
+  const [section, setSection] = useState("");
 
   useEffect(() => {
+    if (localStorage.getItem("user")) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const { id } = user;
+      axios.get(getUserByUserIdApi(id)).then((response) => {
+        const dataUser = response.data.data;
+        if (dataUser.length > 0) {
+          setSection(dataUser[0].section_id);
+        }
+      });
+    }
+
     const dataFilter = (category, status, data) => {
       if (data.length > 0) {
         let notCryteria = [
@@ -81,13 +97,25 @@ function GraphPieProject(props) {
           "Delay",
         ];
 
-        const category = [
-          "Productivity",
-          "Quality",
-          "Integrated Factory",
-          "New Model",
-          "Profit Improvement",
-        ];
+
+        let category;
+        if (section === 4) {
+          category = [
+            "CO2 Neutral",
+            "Logistic Automation",
+            "Vision System",
+            "DX",
+            "Layout"
+          ];
+        } else {
+          category = [
+            "Productivity",
+            "Quality",
+            "Integrated Factory",
+            "New Model",
+            "Profit Improvement",
+          ];
+        }
 
         const dataAfterFilter = [];
         for (let index1 = 0; index1 < category.length; index1++) {
@@ -138,7 +166,7 @@ function GraphPieProject(props) {
 
         setData(dataGraph);
       } else {
-        setData([])
+        setData([]);
       }
     }
   }, [userId, userPosition, userSection, dataForGraph]);

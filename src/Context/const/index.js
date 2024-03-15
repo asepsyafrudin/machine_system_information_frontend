@@ -6,3 +6,6 @@ export const TODOCHANGECOUNT = "todo_change_data";
 export const SAVETODO = "save_todo";
 export const SETPROJECTEVENT = "setProjectEvent";
 export const SETUSEREVENT = "setUserEvent";
+export const SETPAGE = "pageEvent";
+export const SETFILTER = "filterEvent";
+export const SETFILTERDETAIL = "filterDetailEvent"

@@ -3,6 +3,14 @@
     src: url(../../Asset/Font/Roboto-Medium.ttf);
 }
 
+.box-revise{
+    width: 50px;
+    height: 20px;
+    display: inline-block;
+    background-color: #0caa2f;
+    margin-left: 20px;
+    border-radius: 5px;
+}
 .box-plan{
     width: 50px;
     height: 20px;
@@ -46,4 +54,9 @@
 
 .modalAddActivity{
     font-family: roboto;
+}
+
+.box-model{
+    height: 600px;
+    overflow: scroll;
 }

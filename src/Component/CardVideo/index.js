@@ -12,12 +12,12 @@ function CardVideo(props) {
     <div className="cardVideoContainer">
       <div className="video">
         <video controls className="videoFrame" poster={Poster}>
-          <source src={src} type="video/mp4" />
+          <source src={src} type="video/mp4"/>
         </video>
       </div>
       <div className="videoTitle">
         <span>
-          <Link style={{ textDecoration: "none" }} to={`/video/${id}`}>
+          <Link style={{ textDecoration: "none" }} to={`/video/${id}`} target="_blank">
             {CapitalCaseFirstWord(title)}
           </Link>
         </span>

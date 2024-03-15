@@ -17,6 +17,7 @@ function Header(props) {
   const [username, setUsername] = useState("");
   const [photo, setPhoto] = useState("");
   const [position, setPosition] = useState("");
+  const [section, setSection] = useState("");
 
   useEffect(() => {
     if (localStorage.getItem("user")) {
@@ -28,6 +29,7 @@ function Header(props) {
           setUsername(dataUser[0].username);
           setPhoto(dataUser[0].photo);
           setPosition(dataUser[0].position);
+          setSection(dataUser[0].section_id);
         }
       });
     }
@@ -45,6 +47,10 @@ function Header(props) {
       navigate("/adminmenu");
     } else {
       navigate("/dashboardUsers");
+    }
+
+    if (section === 4) {
+      console.log(section);
     }
   };
 

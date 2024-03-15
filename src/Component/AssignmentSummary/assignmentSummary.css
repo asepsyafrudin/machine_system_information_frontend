@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700");
 
+
 #comment-container {
   padding: 20px !important;
   background: white;
@@ -30,12 +31,4 @@
 
 .cursor:hover {
   color: blue;
-}
-
-.selectBy{
-  width: 300px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 3px solid rgb(230, 230, 230);
-  
 }

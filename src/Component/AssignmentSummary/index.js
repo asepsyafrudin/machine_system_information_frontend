@@ -11,8 +11,8 @@ import {
   Table,
 } from "react-bootstrap";
 import TitleSection from "../TitleSection";
-import { BsListNested } from "react-icons/bs";
-import "./todoSummary.css";
+import { BsListTask } from "react-icons/bs";
+import "./assignmentSummary.css";
 import axios from "axios";
 import {
   createFileApi,
@@ -21,9 +21,10 @@ import {
   getAllUsersApi,
   getCommentBySelectedId,
   getFileByIdApi,
-  getTodoByUserIdApi,
   postCommentApi,
   updateTodoListByIdApi,
+  getAssignmentSummary,
+  getActivityByProjectIdApi,
 } from "../../Config/API";
 import moment from "moment";
 import { MdDoneOutline } from "react-icons/md";
@@ -35,11 +36,11 @@ import CommentCard from "../CommentCard";
 import { fileName } from "../../Config/fileName";
 import { getExtFileName } from "../../Config/fileType";
 import { GoDesktopDownload } from "react-icons/go";
-import { RiDeleteBin2Fill } from "react-icons/ri";
+import { RiCarFill, RiDeleteBin2Fill } from "react-icons/ri";
 
-function ToDoListSummary(props) {
-  const { userId } = props;
-  const [tableTodoList, setTableTodoList] = useState([]);
+function AssignmentSummary(props) {
+  const { userId, id } = props;
+  const [tableAssignmentSummary, setTableAssignmentSummary] = useState([]);
   const [allUser, setAllUser] = useState([]);
   const refAttachment = useRef();
   const [totalPageData, setTotalPageData] = useState(1);
@@ -70,6 +71,27 @@ function ToDoListSummary(props) {
   const [activity, setActivity] = useState("");
 
   useEffect(() => {
+    // get data
+    if (localStorage.getItem("user")) {
+      const assignmentSummary = JSON.parse(localStorage.getItem("user"));
+      const { id } = assignmentSummary;
+      const data = {
+        userId: id,
+        filterType: filterType,
+        page: page,
+      };
+      axios
+        .post(getAssignmentSummary, data)
+        .then((response) => {
+          let filteredData = response.data.data;
+          setTableAssignmentSummary(filteredData);
+          setNumberStart(response.data.numberStart);
+          setTotalPageData(response.data.totalPageData);
+        })
+        .catch((error) => console.log(error));
+    }
+
+    // get project
     axios
       .get(getAllUsersApi)
       .then((response) => {
@@ -80,9 +102,8 @@ function ToDoListSummary(props) {
     axios.get(getAllProjectApi).then((response) => {
       setTableProject(response.data.data);
     });
-  }, [action]);
 
-  useEffect(() => {
+    // edit
     if (idEdit) {
       axios
         .get(getFileByIdApi(idEdit))
@@ -91,38 +112,6 @@ function ToDoListSummary(props) {
         })
         .catch((error) => console.log(error));
     }
-
-    if (localStorage.getItem("user")) {
-      const userTodo = JSON.parse(localStorage.getItem("user"));
-      const { id } = userTodo;
-
-      const data = {
-        userId: id,
-        page,
-        filterType,
-      };
-      axios
-        .post(getTodoByUserIdApi, data)
-        .then((response) => {
-          let filteredData = response.data.data;
-          setTableTodoList(filteredData);
-          setNumberStart(response.data.numberStart);
-          setTotalPageData(response.data.totalPageData);
-          console.log("test update data");
-        })
-        .catch((error) => console.log(error));
-    }
-
-    axios
-      .get(getAllUsersApi)
-      .then((response) => {
-        setAllUser(response.data.data);
-      })
-      .then((error) => console.log(error));
-
-    axios.get(getAllProjectApi).then((response) => {
-      setTableProject(response.data.data);
-    });
 
     if (idEdit) {
       axios.get(getCommentBySelectedId(idEdit)).then((response) => {
@@ -138,6 +127,10 @@ function ToDoListSummary(props) {
     }
 
     return "";
+  };
+
+  const dateParse = (date) => {
+    return moment(date).format("YYYY-MM-DD");
   };
 
   const statusFunction = (status, due_date) => {
@@ -168,14 +161,12 @@ function ToDoListSummary(props) {
         user_id: assignBy,
         pic_id: picId,
         activity_name: activity,
-        actual_finish: status === "Open" ? "" : actual_finish,
+        actual_finish: status === "open" ? "" : actual_finish,
       };
-
-      axios.post(updateTodoListByIdApi, data).then(() => {
+      axios.post(updateTodoListByIdApi, data).then((response) => {
         resetForm();
         setMessage("Data Already Update");
         setShowNotif(true);
-
         setAction((prev) => prev + 1);
       });
     }
@@ -185,7 +176,7 @@ function ToDoListSummary(props) {
     const id = e.target.id;
     let confirm = window.confirm("Do you want to change status?");
     if (confirm) {
-      const findData = tableTodoList.find((value) => value.id === id);
+      const findData = tableAssignmentSummary.find((value) => value.id === id);
       let newStatus = "";
       if (findData.status === "Open") {
         newStatus = "Finish";
@@ -207,9 +198,7 @@ function ToDoListSummary(props) {
       };
 
       axios.post(updateTodoListByIdApi, data).then((response) => {
-        console.log(response.data);
         resetForm();
-        console.log(action);
         setMessage("Data Already Update");
         setShowNotif(true);
         setAction((prev) => prev + 1);
@@ -221,48 +210,13 @@ function ToDoListSummary(props) {
     const id = e.target.id;
     setIdEdit(id);
     setShowModalMarkAsFinish(true);
-
-    // const id = e.target.id;
-    // let confirm = window.confirm("Do you want to change status?");
-    // if (confirm) {
-    //   const findData = todo.find((value) => value.id === id);
-    //   let newStatus = "";
-    //   if (findData.status === "Open") {
-    //     newStatus = "Finish";
-    //   } else {
-    //     newStatus = "Open";
-    //   }
-    //   let newListTodo = [];
-    //   if (todo.length > 0) {
-    //     for (let index = 0; index < todo.length; index++) {
-    //       if (todo[index].id === id) {
-    //         newListTodo.push({
-    //           id: todo[index].id,
-    //           project_id: todo[index].project_id,
-    //           item: todo[index].item,
-    //           due_date: todo[index].due_date,
-    //           pic: todo[index].pic,
-    //           status: newStatus,
-    //           actual_finish: moment().format("YYYY-MM-DD"),
-    //           user_id: todo[index].user_id,
-    //           pic_id: todo[index].pic_id,
-    //         });
-    //       } else {
-    //         newListTodo.push(todo[index]);
-    //       }
-    //     }
-    //   }
-    // setTodo(newListTodo);
-    // }
-  };
-
-  const dateParse = (date) => {
-    return moment(date).format("YYYY-MM-DD");
   };
 
   const handleClickEdit = (e) => {
     const id = e.target.id;
-    const findData = tableTodoList.find((value) => value.id === id);
+
+    const findData = tableAssignmentSummary.find((value) => value.id === id);
+
     if (findData) {
       setItemName(findData.item);
       setDueDate(dateParse(findData.due_date));
@@ -271,13 +225,13 @@ function ToDoListSummary(props) {
       setStatus(findData.status);
       setAssignBy(findData.user_id);
       setPicId(findData.pic_id);
-      setActivity(findData.activity_name);
       setActualFinish(findData.actual_finish);
+      setActivity(findData.activity_name);
     }
     setShow(true);
   };
 
-  const handleEditComment = () => {
+  const handleEditComment = (e) => {
     // const id = e;
   };
 
@@ -291,7 +245,7 @@ function ToDoListSummary(props) {
     if (confirm) {
       axios
         .delete(deleteFileByIdApi(id))
-        .then(() => {
+        .then((response) => {
           setAction((prev) => prev + 1);
         })
         .catch((error) => console.log(error));
@@ -314,7 +268,7 @@ function ToDoListSummary(props) {
       selected_id: idEdit,
       comment: comment,
     };
-    axios.post(postCommentApi, data).then(() => {
+    axios.post(postCommentApi, data).then((response) => {
       setComment("");
       setAction((prev) => prev + 1);
     });
@@ -323,7 +277,9 @@ function ToDoListSummary(props) {
   const optionMember = () => {
     let option = [];
     if (idEdit) {
-      const dataTodoList = tableTodoList.find((value) => value.id === idEdit);
+      const dataTodoList = tableAssignmentSummary.find(
+        (value) => value.id === idEdit
+      );
       if (dataTodoList) {
         if (dataTodoList.user_id === parseInt(userId)) {
           const project = tableProject.find(
@@ -352,20 +308,6 @@ function ToDoListSummary(props) {
     }
     return option;
   };
-
-  // const activityOption = () => {
-  //   let option = [];
-  //   if (tableActivity.length > 0) {
-  //     for (let index = 0; index < tableActivity.length; index++) {
-  //       option.push(
-  //         <option key={index} value={tableActivity[index].name}>
-  //           {tableActivity[index].name}
-  //         </option>
-  //       );
-  //     }
-  //   }
-  //   return option;
-  // };
 
   const loadingPostData = (loadingData) => {
     let loading = [];
@@ -409,7 +351,8 @@ function ToDoListSummary(props) {
           },
           onUploadProgress,
         })
-        .then(() => {
+
+        .then((response) => {
           refAttachment.current.value = "";
           resetForm();
           setPercentProgress(0);
@@ -424,21 +367,20 @@ function ToDoListSummary(props) {
 
   return (
     <div>
-      {console.log(action)}
       <Row>
         <Col lg={12}>
-          <div className="capabilityFormContainer">
+          <div className="capabilityFormContainer test">
             <div className="capabilityForm">
               <TitleSection
-                title="Todo List Item"
-                icon={<BsListNested style={{ marginRight: 5 }} />}
+                title="Assignment List Summary"
+                icon={<BsListTask style={{ marginRight: 5 }} />}
               />
               <div className="filter mb-3 col-2" style={{ textAlign: "left" }}>
                 <Form.Select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
                 >
-                  <option value="">Filter Todo By</option>
+                  <option value="">Filter Assignment By</option>
                   <option value="day">This Day</option>
                   <option value="week2">This Week</option>
                   <option value="month2">This Month</option>
@@ -446,7 +388,6 @@ function ToDoListSummary(props) {
                   <option value="month">Next Month</option>
                 </Form.Select>
               </div>
-
               <Table responsive hover striped bordered>
                 <thead>
                   <tr>
@@ -454,6 +395,7 @@ function ToDoListSummary(props) {
                     <th>Todo List</th>
                     <th>Project</th>
                     <th>Activity</th>
+                    <th>PIC</th>
                     <th>Create date</th>
                     <th>Due Date</th>
                     <th>Actual Finish</th>
@@ -462,13 +404,14 @@ function ToDoListSummary(props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {tableTodoList.map((value, index) => {
+                  {tableAssignmentSummary.map((value, index) => {
                     return (
                       <tr key={index}>
                         <td>{numberStart + index}</td>
                         <td>{value.item}</td>
                         <td>{value.project_name}</td>
                         <td>{value.activity_name}</td>
+                        <td>{functionName(value.pic_id)}</td>
                         <td>{moment(value.create_date).format("LLL")}</td>
                         <td>{value.due_date}</td>
                         <td>
@@ -586,21 +529,6 @@ function ToDoListSummary(props) {
                 </Form.Select>
               </Form.Group>
             </Row>
-            {/* <Row className="mb-3">
-              <Form.Group as={Col}>
-                <Form.Label>Activity</Form.Label>
-                <Form.Select
-                  required
-                  value={activity}
-                  onChange={(e) => setActivity(e.target.value)}
-                >
-                  <option value="" disabled>
-                    Open This
-                  </option>
-                  {activityOption()}
-                </Form.Select>
-              </Form.Group>
-            </Row> */}
             <Row className="mb-3">
               <Form.Group as={Col}>
                 <Form.Label>Status</Form.Label>
@@ -694,7 +622,7 @@ function ToDoListSummary(props) {
           </Row>
           <Row>
             <Col>
-              <Table responsive hover striped bordered>
+              <Table>
                 <thead>
                   <tr>
                     <th>No</th>
@@ -775,7 +703,7 @@ function ToDoListSummary(props) {
             </Button>
           </Row>
           <hr />
-          {tableComment.map((value) => {
+          {tableComment.map((value, index) => {
             return (
               <CommentCard
                 userName={functionName(value.user_id)}
@@ -801,4 +729,4 @@ function ToDoListSummary(props) {
   );
 }
 
-export default ToDoListSummary;
+export default AssignmentSummary;

@@ -10,7 +10,9 @@ import {
   Form,
   Modal,
   Row,
+  Table,
 } from "react-bootstrap";
+
 import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
@@ -20,10 +22,15 @@ import {
   getActivityByProjectIdApi,
   getAllUsersApi,
   getProjectByIdApi,
+  getProjectByUserApi,
   getSettingByProjectIdApi,
   saveSettingProjectApi,
   shareFinishProjectForSMDNewModelApi,
   shareFinishProjectToUserCommonApi,
+  createFileApi,
+  getFileByIdApi,
+  deleteFileByIdApi,
+  updateProjectByDateApi,
 } from "../../Config/API";
 import { SiStarbucks } from "react-icons/si";
 import TitleSection from "../TitleSection";
@@ -34,9 +41,13 @@ import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { CHANGEDATA, SAVECHANGEDATA } from "../../Context/const";
 import { FaBackward } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { MdDeleteForever } from "react-icons/md";
+import { MdDeleteForever, MdLink } from "react-icons/md";
 import TaskListTable from "../TaskListTable";
 import { BiShare } from "react-icons/bi";
+import { fileName } from "../../Config/fileName";
+import { getExtFileName } from "../../Config/fileType";
+import { GoDesktopDownload } from "react-icons/go";
+import { RiDeleteBin2Fill } from "react-icons/ri";
 
 function ProjectActivity(props) {
   const { id, accessMember, dataChangeCount, dispatch, todoChangeCount } =
@@ -77,15 +88,34 @@ function ProjectActivity(props) {
   const [showAlert, setShowAlert] = useState(false);
   const [ccMail, setCcMail] = useState("");
   const [userId, setUserId] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [reviseStartDate, setReviseStartDate] = useState("");
+  const [reviseFinishDate, setReviseFinishDate] = useState("");
+  const [linkToProject, setLinkToProject] = useState("");
+  const [tableProject, setTableProject] = useState("");
+  const [pic, setPic] = useState("");
+  const refAttachment = useRef();
+  const [file, setFile] = useState([]);
+  const [tableFile, setTableFile] = useState([]);
+
   const refDescription = useRef("");
   if (description) {
     refDescription.current.innerText = description;
   }
 
-  const backgroundColorDelay = (endProject, progressBar) => {
+  const backgroundColorDelay = (endProject, progressBar, remark) => {
     let currentDate = new Date();
     currentDate.setDate(currentDate.getDate() - 1);
-    if (parseInt(progressBar) === 100) {
+
+    if (remark === "revise") {
+      return {
+        backgroundColor: "green",
+        backgroundSelectedColor: "green",
+        barProgressColor: "green",
+        barBackgroundColor: "green",
+        barProgressSelectedColor: "green",
+      };
+    } else if (parseInt(progressBar) === 100) {
       return { backgroundColor: "#A3A3FF", backgroundSelectedColor: "#A3A3FF" };
     } else if (currentDate - endProject > 0) {
       return { backgroundColor: "red", backgroundSelectedColor: "red" };
@@ -93,118 +123,146 @@ function ProjectActivity(props) {
   };
 
   useEffect(() => {
-    let isMount = true;
-    const controller = new AbortController();
+    if (idUpdate) {
+      axios
+        .get(getFileByIdApi(idUpdate))
+        .then((response) => {
+          setTableFile(response.data.data);
+        })
+        .catch((error) => console.log(error));
+    }
+  }, [idUpdate, updateValue]);
+
+  useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
 
     if (id) {
-      axios
-        .get(getProjectByIdApi(id), {
-          signal: controller.signal,
-        })
-        .then((response) => {
-          const dataProject = isMount && response.data.data[0];
-          setTitleProject(dataProject.project_name);
-          setProject(dataProject);
-          setDescription(dataProject.description);
-          setCategory(dataProject.category);
-          let memberIdData = [];
-          for (let index = 0; index < dataProject.member.length; index++) {
-            memberIdData.push(dataProject.member[index].user_id);
-          }
-          setMemberListOfProject(memberIdData);
+      axios.get(getProjectByIdApi(id)).then((response) => {
+        const dataProject = response.data.data[0];
+        setTitleProject(dataProject.project_name);
+        setProject(dataProject);
+        setDescription(dataProject.description);
+        setCategory(dataProject.category);
+        let memberIdData = [];
+        for (let index = 0; index < dataProject.member.length; index++) {
+          memberIdData.push(dataProject.member[index].user_id);
+        }
+        setMemberListOfProject(memberIdData);
 
-          const data = {
-            name: "Total Schedule",
-            id: dataProject.id,
-            progress: dataProject.progress,
-            type: "project",
-            start: new Date(dataProject.start),
-            end: new Date(dataProject.finish),
-            hideChildren: false,
-          };
-          let activityData = [];
-          activityData.push(data);
-          if (dataProject.status === "Finish") {
-            setShareStatus(false);
-          }
+        let dataArray = [];
+        const data = {
+          name: "Total Schedule",
+          id: dataProject.id,
+          progress: dataProject.progress,
+          type: "project",
+          start: new Date(dataProject.start),
+          end: new Date(dataProject.finish),
+          hideChildren: false,
+        };
+        dataArray.push(data);
+        if (dataProject.status === "Finish") {
+          setShareStatus(false);
+        }
 
-          axios
-            .get(getActivityByProjectIdApi(dataProject.id))
-            .then((response) => {
-              const dataActivity = isMount && response.data.data;
-              if (dataActivity.length > 0) {
-                for (let index = 0; index < dataActivity.length; index++) {
-                  let pushData = {
-                    id: dataActivity[index].id,
-                    start: new Date(moment(dataActivity[index].start)),
-                    end: new Date(moment(dataActivity[index].end)),
-                    name: dataActivity[index].name,
-                    progress: dataActivity[index].progress,
-                    dependencies: dataActivity[index].dependencies,
-                    type: dataActivity[index].type,
-                    project: dataActivity[index].project,
-                    styles: backgroundColorDelay(
-                      new Date(moment(dataActivity[index].end)),
-                      dataActivity[index].progress
-                    ),
-                    remark: dataActivity[index].remark,
-                  };
-                  activityData.push(pushData);
-                }
+        axios
+          .get(getActivityByProjectIdApi(dataProject.id))
+          .then((response) => {
+            const dataActivity = response.data.data;
+            if (dataActivity.length > 0) {
+              for (let index = 0; index < dataActivity.length; index++) {
+                let pushData = {
+                  id: dataActivity[index].id,
+                  start: new Date(moment(dataActivity[index].start)),
+                  end: new Date(moment(dataActivity[index].end)),
+                  name: dataActivity[index].name,
+                  progress: dataActivity[index].progress,
+                  dependencies: dataActivity[index].dependencies,
+                  type: dataActivity[index].type,
+                  project: dataActivity[index].project,
+                  styles: backgroundColorDelay(
+                    new Date(moment(dataActivity[index].end)),
+                    dataActivity[index].progress,
+                    dataActivity[index].remark
+                  ),
+                  remark: dataActivity[index].remark,
+                  linkToProject: dataActivity[index].linkToProject,
+                  pic: dataActivity[index].pic,
+                };
+                dataArray.push(pushData);
               }
-              setActivity(activityData);
-            });
-        });
-
-      axios
-        .get(getSettingByProjectIdApi(id), {
-          signal: controller.signal,
-        })
-        .then((response) => {
-          const data = isMount && response.data.data[0];
-          if (data) {
-            setColWidth(parseInt(data.column_width));
-            setRowHeight(parseInt(data.row_height));
-            setListCellWidth(parseInt(data.list_cell_width));
-            setMonthFormat(data.month_format);
-            setHiddenPlan(data.hidden_plan);
-            setSwitchMode(() => {
-              if (data.switchMode === 1) {
-                return true;
-              } else {
-                return false;
-              }
-            });
-          }
-        });
-    }
-
-    axios
-      .get(getAllUsersApi, {
-        signal: controller.signal,
-      })
-      .then((response) => {
-        isMount && setTableUser(response.data.data);
+            }
+            setActivity(dataArray);
+          });
       });
 
-    return () => {
-      isMount = false;
-      controller.abort();
-    };
-  }, [id, viewMode, updateValue]);
+      axios.get(getSettingByProjectIdApi(id)).then((response) => {
+        const data = response.data.data[0];
+        if (data) {
+          setColWidth(parseInt(data.column_width));
+          setRowHeight(parseInt(data.row_height));
+          setListCellWidth(parseInt(data.list_cell_width));
+          setMonthFormat(data.month_format);
+          setHiddenPlan(data.hidden_plan);
+          setSwitchMode(() => {
+            if (data.switchMode === 1) {
+              return true;
+            } else {
+              return false;
+            }
+          });
+        }
+      });
+    }
+
+    axios.get(getAllUsersApi).then((response) => {
+      setTableUser(response.data.data);
+    });
+
+    axios
+      .get(getProjectByUserApi(userId))
+      .then((response) => {
+        setTableProject(response.data.data);
+      })
+      .catch((error) => console.log(error));
+  }, [id, viewMode, updateValue, userId]);
+
+  const projectOption = () => {
+    let option = [];
+
+    if (tableProject.length > 0) {
+      for (let index = 0; index < tableProject.length; index++) {
+        option.push(
+          <option
+            key={index}
+            value={tableProject[index].id}
+            id={tableProject[index].id}
+          >
+            {tableProject[index].project_name}
+          </option>
+        );
+      }
+    }
+
+    return <>{option}</>;
+  };
 
   const resetForm = () => {
     setActivityName("");
     setFinishDate("");
     setStartDate("");
+    setReviseStartDate("");
+    setReviseFinishDate("");
     setProgress("0");
     setType("");
     setIdUpdate("");
     setDepedencies("");
     setRemark("");
+    setLinkToProject("");
+    setPic("");
+    setFile([]);
     setShow(false);
+    setShowForm(false);
   };
 
   const colorBgBadge = (value) => {
@@ -350,8 +408,27 @@ function ProjectActivity(props) {
     setCcMail("");
   };
 
+  const handleChangeFile = (e) => {
+    setFile([...e.target.files]);
+  };
+
+  const handleDeleteFile = (e) => {
+    const id = e.target.id;
+    const confirm = window.confirm("Apakah file Akan di Hapus?");
+    if (confirm) {
+      axios
+        .delete(deleteFileByIdApi(id))
+        .then((response) => {
+          setUpdateValue(updateValue + 1);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
   const handleAddActivity = (e) => {
+    setShowForm(false);
     e.preventDefault();
+
     let data = {
       start: new Date(startDate),
       end: new Date(type === "milestone" ? startDate : finishDate),
@@ -361,16 +438,76 @@ function ProjectActivity(props) {
       type: type,
       project: project.id,
       remark: remark,
+      linkToProject: linkToProject,
+      pic: pic,
     };
 
+    let revise = {
+      start: new Date(reviseStartDate),
+      end: new Date(type === "milestone" ? reviseStartDate : reviseFinishDate),
+      name: activityName + " Revise",
+      progress: progress,
+      dependencies: dependencies === "" ? [] : [dependencies],
+      type: type,
+      project: project.id,
+      remark: "",
+      linkToProject: linkToProject,
+      pic: pic,
+    };
+
+    let filterData = [];
     if (idUpdate === "") {
-      data = { ...data, id: `${activityName}-${uuid()}` };
-      setActivity((prev) => [...prev, data]);
+      let newData = { ...data, id: `${activityName}-${uuid()}` };
+      setActivity((prev) => [...prev, newData]);
       resetForm();
       dispatch({ type: CHANGEDATA });
-    } else {
-      let filterData = [];
+    } else if (idUpdate && showForm) {
       if (activity.length > 0) {
+        let oldData = {
+          start: new Date(startDate),
+          end: new Date(type === "milestone" ? startDate : finishDate),
+          name: activityName,
+          progress: 0,
+          dependencies: dependencies === "" ? [] : [dependencies],
+          type: type,
+          project: project.id,
+          remark: "revise",
+          linkToProject: linkToProject,
+          pic: pic,
+        };
+
+        for (let index = 0; index < activity.length; index++) {
+          if (activity[index].id === idUpdate) {
+            filterData.push({
+              ...oldData,
+              id: idUpdate,
+            });
+          } else {
+            filterData.push(activity[index]);
+          }
+        }
+
+        let data = { ...revise, id: `${activityName}-${uuid()}` };
+        filterData.push(data);
+      }
+
+      setActivity(filterData);
+      dispatch({ type: CHANGEDATA });
+      resetForm();
+    } else if (idUpdate) {
+      if (activity.length > 0) {
+        let data = {
+          start: new Date(startDate),
+          end: new Date(type === "milestone" ? startDate : finishDate),
+          name: activityName,
+          progress: progress,
+          dependencies: dependencies === "" ? [] : [dependencies],
+          type: type,
+          project: project.id,
+          remark: remark,
+          linkToProject: linkToProject,
+          pic: pic,
+        };
         for (let index = 0; index < activity.length; index++) {
           if (activity[index].id === idUpdate) {
             filterData.push({
@@ -382,9 +519,36 @@ function ProjectActivity(props) {
           }
         }
       }
+
       setActivity(filterData);
       dispatch({ type: CHANGEDATA });
       resetForm();
+    }
+  };
+
+  const submitFile = () => {
+    if (file.length > 0) {
+      let formData = new FormData();
+      formData.append("id", idUpdate);
+      for (let index = 0; index < file.length; index++) {
+        formData.append("file", file[index]);
+      }
+
+      axios
+        .post(createFileApi, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          refAttachment.current.value = "";
+
+          dispatch({ type: CHANGEDATA });
+          setUpdateValue(updateValue + 1);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
   };
 
@@ -404,6 +568,9 @@ function ProjectActivity(props) {
         setProgress(findData.progress);
         setIdUpdate(findData.id);
         setRemark(findData.remark);
+        setLinkToProject(findData.linkToProject);
+        setPic(findData.pic);
+        setFile(findData.file);
         setShow(true);
       }
     }
@@ -419,6 +586,10 @@ function ProjectActivity(props) {
         dispatch({ type: CHANGEDATA });
       }
     }
+  };
+
+  const revise = () => {
+    setShowForm(true);
   };
 
   const handleDeleteActivity = (id) => {
@@ -440,10 +611,43 @@ function ProjectActivity(props) {
       const dataSave = activity.filter((value) => value.type !== "project");
       axios.post(createActivityApi, dataSave).then(() => {
         setIdUpdate("");
-        setMessage("Data Already SAVE");
-        setShowNotif(true);
-        dispatch({ type: SAVECHANGEDATA });
-        setUpdateValue((prev) => prev + 1);
+
+        if (dataSave.length > 0) {
+          let listDateStart = [];
+          let listDateEnd = [];
+
+          for (let index = 0; index < dataSave.length; index++) {
+            listDateStart.push(dataSave[index].start);
+            listDateEnd.push(dataSave[index].end);
+          }
+
+          const minDateFromListDateStart = new Date(Math.min(...listDateStart));
+          const maxDateFromListDateEnd = new Date(Math.max(...listDateEnd));
+
+          const findData = activity.find((value) => value.type === "project");
+
+          if (findData) {
+            const data = {
+              name: "Total Schedule",
+              id: findData.id,
+              progress: findData.progress,
+              type: "project",
+              start: minDateFromListDateStart,
+              end: maxDateFromListDateEnd,
+              hideChildren: false,
+            };
+
+            axios
+              .put(updateProjectByDateApi, data)
+              .then((response) => {
+                setMessage("Data Already SAVE");
+                setShowNotif(true);
+                dispatch({ type: SAVECHANGEDATA });
+                setUpdateValue((prev) => prev + 1);
+              })
+              .catch((error) => console.log(error));
+          }
+        }
       });
     }
   };
@@ -457,6 +661,14 @@ function ProjectActivity(props) {
   };
 
   const navigate = useNavigate();
+  const handleToProject = (e) => {
+    e.preventDefault();
+    axios.get(getProjectByUserApi(userId)).then(() => {
+      navigate(`/projectActivity/${linkToProject}`);
+      setShow(false);
+    });
+  };
+
   const handleBackPage = () => {
     if ((dataChangeCount === 0) & (todoChangeCount === 0)) {
       navigate("/projectPage");
@@ -499,6 +711,20 @@ function ProjectActivity(props) {
         window.alert("Setting Format Already Save into Database");
       });
     }
+  };
+
+  const memberOption = () => {
+    let option = [];
+    if (memberListOfProject.length > 0) {
+      for (let index = 0; index < memberListOfProject.length; index++) {
+        option.push(
+          <option key={index} value={memberListOfProject[index]}>
+            {userNameFunction(memberListOfProject[index])}
+          </option>
+        );
+      }
+    }
+    return option;
   };
 
   const ganttChartFormat = () => {
@@ -604,6 +830,24 @@ function ProjectActivity(props) {
       return "";
     }
   };
+
+  const handleSetPic = (e) => {
+    setPic(e.target.value);
+  };
+
+  const handleSetLinkToProject = (e) => {
+    setLinkToProject(e.target.value);
+    if (tableProject.length > 0) {
+      const dataProjectBaseOnIdProject = tableProject.find(
+        (value) => value.id === e.target.value
+      );
+
+      if (dataProjectBaseOnIdProject) {
+        setStartDate(dateParse(dataProjectBaseOnIdProject.start));
+        setFinishDate(dateParse(dataProjectBaseOnIdProject.finish));
+      }
+    }
+  };
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -661,6 +905,7 @@ function ProjectActivity(props) {
             <Col sm={2}>Description</Col>
             <Col sm={4} ref={refDescription}></Col>
             <Col sm={6} style={{ textAlign: "right" }}>
+              <div className="box-revise" /> Revise
               <div className="box-plan" /> Plan
               <div className="box-actual" /> Progress
               <div className="box-delay" /> Delay
@@ -695,19 +940,57 @@ function ProjectActivity(props) {
         <Modal show={show} centered className="modalAddActivity">
           <Form onSubmit={handleAddActivity}>
             <Row className="titleModalAddActivity">
-              <Col sm={10}>Add Activity Here</Col>
+              <Col sm={7} className="">
+                Add Activity Here
+              </Col>
               {idUpdate && (
-                <Col sm={2}>
+                <Col sm={5} className="">
+                  {/* {linkToProject && (
+                    <Button
+                      className=""
+                      variant="info"
+                      onClick={handleToProject}
+                    >
+                      <MdLink
+                        style={{
+                          pointerEvents: "none",
+                          color: "white",
+                          fontWeight: "bolder",
+                        }}
+                      />
+                    </Button>
+                  )} */}
+
+                  {linkToProject && (
+                    <Button
+                      className=""
+                      variant="info"
+                      onClick={handleToProject}
+                    >
+                      <MdLink
+                        style={{
+                          pointerEvents: "none",
+                          color: "white",
+                          fontWeight: "bolder",
+                        }}
+                      />
+                    </Button>
+                  )}
+
                   <Button
+                    className="mx-2"
                     variant="danger"
                     onClick={() => handleDeleteActivity(idUpdate)}
                   >
                     <MdDeleteForever style={{ pointerEvents: "none" }} />
                   </Button>
+                  <Button variant="secondary" onClick={revise} className="mr-2">
+                    Revise
+                  </Button>
                 </Col>
               )}
             </Row>
-            <Modal.Body>
+            <Modal.Body className="box-model">
               <Row className="mb-3">
                 <Form.Group as={Col}>
                   <Form.Label>Activity Name</Form.Label>
@@ -736,15 +1019,21 @@ function ProjectActivity(props) {
                   </Form.Select>
                 </Form.Group>
               </Row>
+
               <Row className="mb-3">
                 <Form.Group as={Col}>
                   <Form.Label>Start</Form.Label>
                   <Form.Control
+                    // value={startDate}
+                    // onChange={(e) => setStartDate(e.target.value)}
+                    // type="date"
+
+                    // required
+                    // disabled={linkToProject ? true : false}
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     type="date"
-                    placeholder="Enter Activity Name"
-                    required
+                    disabled={linkToProject ? true : false}
                   />
                 </Form.Group>
               </Row>
@@ -753,15 +1042,49 @@ function ProjectActivity(props) {
                   <Form.Group as={Col}>
                     <Form.Label>Finish</Form.Label>
                     <Form.Control
+                      // type="date"
+                      // value={finishDate}
+                      // onChange={(e) => setFinishDate(e.target.value)}
+                      // required
+                      // disabled={linkToProject ? true : false}
                       type="date"
                       value={finishDate}
                       onChange={(e) => setFinishDate(e.target.value)}
-                      placeholder="Enter Activity Name"
-                      required
+                      disabled={linkToProject ? true : false}
                     />
                   </Form.Group>
                 </Row>
               )}
+              {/* form revise */}
+              {showForm && (
+                <>
+                  <Row className="mb-3">
+                    <Form.Group as={Col}>
+                      <Form.Label>Revise Start</Form.Label>
+                      <Form.Control
+                        type="date"
+                        value={reviseStartDate}
+                        onChange={(e) => setReviseStartDate(e.target.value)}
+                        placeholder="Enter Activity Name"
+                        required
+                      />
+                    </Form.Group>
+                    {type === "task" && (
+                      <Form.Group as={Col}>
+                        <Form.Label>Revise Finish</Form.Label>
+                        <Form.Control
+                          type="date"
+                          value={reviseFinishDate}
+                          onChange={(e) => setReviseFinishDate(e.target.value)}
+                          placeholder="Enter Activity Name"
+                          required
+                        />
+                      </Form.Group>
+                    )}
+                  </Row>
+                </>
+              )}
+
               <Row className="mb-3">
                 <Form.Group as={Col}>
                   <Form.Label>Dependencies</Form.Label>
@@ -781,6 +1104,17 @@ function ProjectActivity(props) {
                   </Form.Select>
                 </Form.Group>
               </Row>
+
+              <Row className="mb-3">
+                <Form.Group as={Col}>
+                  <Form.Label>PIC</Form.Label>
+                  <Form.Select value={pic} onChange={handleSetPic}>
+                    <option value={""}>Open This</option>
+                    {memberOption()}
+                  </Form.Select>
+                </Form.Group>
+              </Row>
+
               <Row className="mb-3">
                 <Form.Group as={Col}>
                   <Form.Label>Progress {progress}%</Form.Label>
@@ -788,6 +1122,18 @@ function ProjectActivity(props) {
                     value={progress}
                     onChange={(e) => setProgress(e.target.value)}
                   />
+                </Form.Group>
+              </Row>
+              <Row className="mb-3">
+                <Form.Group as={Col}>
+                  <Form.Label>Link To Project (Optional)</Form.Label>
+                  <Form.Select
+                    value={linkToProject}
+                    onChange={handleSetLinkToProject}
+                  >
+                    <option value={""}>Open This</option>
+                    {projectOption()}
+                  </Form.Select>
                 </Form.Group>
               </Row>
               <Row className="mb-3">
@@ -800,6 +1146,87 @@ function ProjectActivity(props) {
                   />
                 </Form.Group>
               </Row>
+
+              <Row className="mb-3">
+                <Form.Group>
+                  <Form.Label>Attachment File</Form.Label>
+                  <Row>
+                    <Col sm={8}>
+                      <Form.Control
+                        multiple
+                        type="file"
+                        ref={refAttachment}
+                        onChange={handleChangeFile}
+                      />
+                    </Col>
+                    <Col>
+                      <Button type="button" onClick={submitFile}>
+                        Submit
+                      </Button>
+                    </Col>
+                  </Row>
+                </Form.Group>
+              </Row>
+              <Table>
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>File Name</th>
+                    <th>File Type</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tableFile.length > 0 ? (
+                    tableFile.map((value, index) => {
+                      return (
+                        <tr key={index}>
+                          <td>{index + 1}</td>
+                          <td style={{ textAlign: "left", paddingLeft: 20 }}>
+                            {fileName(value.name)}
+                          </td>
+                          <td>{getExtFileName(value.name)}</td>
+                          <td>
+                            <a
+                              href={value.file}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <Button size="sm" style={{ marginRight: 5 }}>
+                                <GoDesktopDownload
+                                  style={{
+                                    marginRight: 5,
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                                Open
+                              </Button>
+                            </a>
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              id={value.id}
+                              onClick={handleDeleteFile}
+                            >
+                              <RiDeleteBin2Fill
+                                style={{
+                                  marginRight: 5,
+                                  pointerEvents: "none",
+                                }}
+                              />
+                              Delete
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr key={1}>
+                      <td colSpan={4}>No File</td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
             </Modal.Body>
             <Modal.Footer>
               <Button type="submit">Save</Button>

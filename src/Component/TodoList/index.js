@@ -26,6 +26,7 @@ import {
   getFileByIdApi,
   getTodoByProjectIdApi,
   getUserByUserIdApi,
+  getActivityByProjectIdApi,
 } from "../../Config/API";
 import { CgAttachment } from "react-icons/cg";
 import { fileName } from "../../Config/fileName";
@@ -62,17 +63,26 @@ function ToDoList(props) {
   const [numberStart, setNumberStart] = useState("");
   const [allUser, setAllUser] = useState([]);
   const [picId, setPicId] = useState("");
+  const [activity, setActivity] = useState("");
+  const [tableActivity, setTableActivity] = useState([]);
 
   const maxPagesShow = 3;
 
   useEffect(() => {
-    const controller = new AbortController();
-    let isMounted = true;
     if (idTodo) {
       axios
         .get(getFileByIdApi(idTodo))
         .then((response) => {
-          isMounted && setTableFile(response.data.data);
+          setTableFile(response.data.data);
+        })
+        .catch((error) => console.log(error));
+    }
+
+    if (id) {
+      axios
+        .get(getActivityByProjectIdApi(id))
+        .then((response) => {
+          setTableActivity(response.data.data);
         })
         .catch((error) => console.log(error));
     }
@@ -80,9 +90,9 @@ function ToDoList(props) {
     axios
       .get(getTodoByProjectIdApi(id, page))
       .then((response) => {
-        isMounted && setTodo(response.data.data);
-        isMounted && setNumberStart(response.data.numberStart);
-        isMounted && setTotalPageData(response.data.totalPageData);
+        setTodo(response.data.data);
+        setNumberStart(response.data.numberStart);
+        setTotalPageData(response.data.totalPageData);
       })
       .catch((error) => console.log(error));
     const user = JSON.parse(localStorage.getItem("user"));
@@ -90,7 +100,7 @@ function ToDoList(props) {
       axios.get(getUserByUserIdApi(user.id)).then((response) => {
         const dataUser = response.data.data;
         if (dataUser.length > 0) {
-          isMounted && setUserId(dataUser[0].id);
+          setUserId(dataUser[0].id);
         }
       });
     }
@@ -98,14 +108,9 @@ function ToDoList(props) {
     axios
       .get(getAllUsersApi)
       .then((response) => {
-        isMounted && setAllUser(response.data.data);
+        setAllUser(response.data.data);
       })
       .catch((error) => console.log(error));
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
   }, [id, idTodo, actionState, updateValue, page]);
 
   const handleSaveData = () => {
@@ -125,8 +130,13 @@ function ToDoList(props) {
     setDueDate("");
     setStatus("");
     setPic("");
+    setActivity("");
     setShow(false);
   };
+
+  // const resetDueDate = () => {
+  //   setDueDate("");
+  // }
 
   const handleAddActivity = (e) => {
     e.preventDefault();
@@ -138,6 +148,7 @@ function ToDoList(props) {
       pic: pic,
       user_id: userId,
       pic_id: picId,
+      activity_name: activity,
     };
 
     if (idEdit) {
@@ -218,6 +229,7 @@ function ToDoList(props) {
               actual_finish: moment().format("YYYY-MM-DD"),
               user_id: todo[index].user_id,
               pic_id: todo[index].pic_id,
+              activity_name: todo[index].activity_name,
             });
           } else {
             newListTodo.push(todo[index]);
@@ -243,6 +255,7 @@ function ToDoList(props) {
       setStatus(findData.status);
       setPic(findData.pic);
       setPicId(findData.pic_id);
+      setActivity(findData.activity_name);
     }
     setShow(true);
   };
@@ -371,6 +384,22 @@ function ToDoList(props) {
     return option;
   };
 
+  const activityOption = () => {
+    let option = [];
+    if (tableActivity.length > 0) {
+      for (let index = 0; index < tableActivity.length; index++) {
+        option.push(
+          <option key={index} value={tableActivity[index].name}>
+            {tableActivity[index].name}
+          </option>
+        );
+      }
+    }
+    return option;
+  };
+
+  console.log(activityOption);
+
   const functionPic = (pic, picId) => {
     if (picId) {
       return functionName(picId);
@@ -404,6 +433,7 @@ function ToDoList(props) {
               <th>Item</th>
               <th>Due Date</th>
               <th>PIC</th>
+              <th>Activity</th>
               <th>Create By</th>
               <th>Status</th>
               <th>Actual Finish</th>
@@ -419,6 +449,7 @@ function ToDoList(props) {
                     <td>{value.item}</td>
                     <td>{value.due_date}</td>
                     <td>{functionPic(value.pic, value.pic_id)}</td>
+                    <td>{value.activity_name}</td>
                     <td>{functionName(value.user_id)}</td>
                     <td>{statusFunction(value.status, value.due_date)}</td>
                     <td>
@@ -498,6 +529,7 @@ function ToDoList(props) {
         <Form onSubmit={handleAddActivity}>
           <Modal.Header>
             <Modal.Title>Add To Do List</Modal.Title>
+            {/* <Button variant="secondary" onClick={resetDueDate}>Resive</Button> */}
           </Modal.Header>
           <Modal.Body>
             <Row className="mb-3">
@@ -536,6 +568,21 @@ function ToDoList(props) {
                     Open This
                   </option>
                   {optionMember()}
+                </Form.Select>
+              </Form.Group>
+            </Row>
+            <Row className="mb-3">
+              <Form.Group as={Col}>
+                <Form.Label>Activity</Form.Label>
+                <Form.Select
+                  required
+                  value={activity}
+                  onChange={(e) => setActivity(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Open This
+                  </option>
+                  {activityOption()}
                 </Form.Select>
               </Form.Group>
             </Row>

@@ -72,14 +72,13 @@ function DocumentRegister(props) {
   const [project, setProject] = useState("");
 
   useEffect(() => {
-    let isMounted = true;
     const controller = new AbortController();
     axios
       .get(getAllProductApi, {
         signal: controller.signal,
       })
       .then((response) => {
-        isMounted && setTableProduct(response.data.data);
+        setTableProduct(response.data.data);
       })
       .catch((error) => console.log(error));
 
@@ -88,7 +87,7 @@ function DocumentRegister(props) {
         signal: controller.signal,
       })
       .then((response) => {
-        isMounted && setTableLine(response.data.data);
+        setTableLine(response.data.data);
       })
       .catch((error) => console.log(error));
 
@@ -97,7 +96,7 @@ function DocumentRegister(props) {
         signal: controller.signal,
       })
       .then((response) => {
-        isMounted && setTableMachine(response.data.data);
+        setTableMachine(response.data.data);
       });
 
     axios
@@ -105,7 +104,7 @@ function DocumentRegister(props) {
         signal: controller.signal,
       })
       .then((response) => {
-        isMounted && setTableProject(response.data.data);
+        setTableProject(response.data.data);
       })
       .catch((error) => console.log(error));
 
@@ -116,9 +115,9 @@ function DocumentRegister(props) {
             signal: controller.signal,
           })
           .then((response) => {
-            isMounted && setTableDocument(response.data.data);
-            isMounted && setNumberStart(response.data.numberStart);
-            isMounted && setTotalPageData(response.data.totalPageData);
+            setTableDocument(response.data.data);
+            setNumberStart(response.data.numberStart);
+            setTotalPageData(response.data.totalPageData);
           })
           .catch((error) => console.log(error));
       } else {
@@ -128,9 +127,9 @@ function DocumentRegister(props) {
               signal: controller.signal,
             })
             .then((response) => {
-              isMounted && setTableDocument(response.data.data);
-              isMounted && setNumberStart(response.data.numberStart);
-              isMounted && setTotalPageData(response.data.totalPageData);
+              setTableDocument(response.data.data);
+              setNumberStart(response.data.numberStart);
+              setTotalPageData(response.data.totalPageData);
             })
             .catch((error) => console.log(error));
         } else {
@@ -139,9 +138,9 @@ function DocumentRegister(props) {
               signal: controller.signal,
             })
             .then((response) => {
-              isMounted && setTableDocument(response.data.data);
-              isMounted && setNumberStart(response.data.numberStart);
-              isMounted && setTotalPageData(response.data.totalPageData);
+              setTableDocument(response.data.data);
+              setNumberStart(response.data.numberStart);
+              setTotalPageData(response.data.totalPageData);
             })
             .catch((error) => console.log(error));
         }

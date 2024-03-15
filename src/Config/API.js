@@ -263,6 +263,7 @@ export const searchProblemByMachineIdApi = (machineId, page) => {
 //project
 export const createProjectApi = `${port}/api/project/create`;
 export const updateProjectApi = `${port}/api/project/update`;
+export const updateProjectByDateApi = `${port}/api/project/updateDate`;
 export const getAllProjectByPageApi = (page) => {
   return `${port}/api/project/getAllProjectByPage/${page}`;
 };
@@ -306,9 +307,9 @@ export const deleteTodoListByIdApi = (id) => {
   return `${port}/api/todo/delete/${id}`;
 };
 
-export const getTodoByUserIdApi = (userId, page) => {
-  return `${port}/api/todo/get/${userId}/${page}`;
-};
+export const getTodoByUserIdApi = `${port}/api/todo/get`;
+
+export const getAssignmentSummary = `${port}/api/todo/getAssignment`;
 
 export const updateTodoListByIdApi = `${port}/api/todo/update`;
 //token

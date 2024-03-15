@@ -3,6 +3,7 @@ import { Col, Nav, Row, Tab } from "react-bootstrap";
 import TotalProject from "../TotalProject";
 import Project from "../Project";
 import { AiOutlineFundProjectionScreen } from "react-icons/ai";
+import { AiOutlineHistory } from "react-icons/ai";
 import { VscProject } from "react-icons/vsc";
 import { BsBack } from "react-icons/bs";
 import { Link } from "react-router-dom";
@@ -10,6 +11,7 @@ import { GlobalConsumer } from "../../Context/store";
 import { SETPROJECTEVENT } from "../../Context/const";
 import { useEffect } from "react";
 import ToDoListSummary from "../ToDoListSummary";
+import AssignmentSummary from "../AssignmentSummary";
 
 function NavigationProject(props) {
   const { projectEvent, dispatch } = props;
@@ -68,6 +70,16 @@ function NavigationProject(props) {
                 Todo List Summary
               </Nav.Link>
             </Nav.Item>
+            <Nav.Item>
+              <Nav.Link
+                eventKey={"assignmentSummary"}
+                onClick={() => handleEvent("assignmentSummary")}
+                className="tabTitle"
+              >
+                <AiOutlineHistory style={{ marginRight: 5 }} />
+                Assignment List Summary
+              </Nav.Link>
+            </Nav.Item>
             <Nav.Item style={{ marginTop: 30 }}>
               <Link to={"/home"}>
                 <BsBack style={{ marginRight: 5 }} />
@@ -90,14 +102,21 @@ function NavigationProject(props) {
                 actionStateValue={actionState}
               />
             </Tab.Pane>
+            <Tab.Pane eventKey={"myDashboard"}>
+              <ToDoListSummary
+                actionState={(value) => setActionState(actionState + value)}
+                actionStateValue={actionState}
+                userId={userId}
+              />
+            </Tab.Pane>
+            <Tab.Pane eventKey={"assignmentSummary"}>
+              <AssignmentSummary
+                actionState={(value) => setActionState(actionState + value)}
+                actionStateValue={actionState}
+                userId={userId}
+              />
+            </Tab.Pane>
           </Tab.Content>
-          <Tab.Pane eventKey={"myDashboard"}>
-            <ToDoListSummary
-              actionState={(value) => setActionState(actionState + value)}
-              actionStateValue={actionState}
-              userId={userId}
-            />
-          </Tab.Pane>
         </Col>
       </Row>
     </Tab.Container>

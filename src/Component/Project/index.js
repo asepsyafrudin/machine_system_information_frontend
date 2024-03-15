@@ -11,6 +11,7 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
+import PropTypes from "prop-types";
 import { useEffect } from "react";
 import {
   createProjectApi,
@@ -24,6 +25,8 @@ import {
   shareFinishProjectToUserCommonApi,
   updateProjectApi,
   updateStatusProjectApi,
+  getUserByUserIdApi,
+  searchProjectApi,
 } from "../../Config/API";
 import { useState } from "react";
 import axios from "axios";
@@ -50,9 +53,20 @@ import {
 import GraphBarProject from "../GraphBarProject";
 import GraphPieProject from "../GraphPieProject";
 import { useRef } from "react";
+import { GlobalConsumer } from "../../Context/store/index";
+import { SETPAGE } from "../../Context/const/index";
+import { SETFILTER } from "../../Context/const/index";
+import { SETFILTERDETAIL } from "../../Context/const/index";
 
 function Project(props) {
-  const { actionState, actionStateValue } = props;
+  const {
+    actionState,
+    actionStateValue,
+    dispatch,
+    pageEvent,
+    filterEvent,
+    filterDetailEvent,
+  } = props;
   const [description, setDescription] = useState("");
   const [tableProduct, setTableProduct] = useState([]);
   const [tableProject, setTableProject] = useState([]);
@@ -71,7 +85,7 @@ function Project(props) {
   const [userEmail, setUserEmail] = useState("");
   const [show, setShow] = useState(false);
   const [message, setMessage] = useState("");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(pageEvent);
   const [numberStart, setNumberStart] = useState("");
   const [totalPageData, setStotalPageData] = useState(1);
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -90,33 +104,41 @@ function Project(props) {
   const [showModalCreateProject, setShowModalCreateProject] = useState(false);
   const [userPosition, setUserPosition] = useState("");
   const [userSection, setUserSection] = useState("");
-  const [filterBy, setFilterBy] = useState("");
-  const [detailFilterValue, setDetailFilterValue] = useState("");
+  const [filterBy, setFilterBy] = useState(filterEvent);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [detailFilterValue, setDetailFilterValue] = useState(filterDetailEvent);
   const [dataForGraph, setDataForGraph] = useState([]);
+  const [section, setSection] = useState("");
   const refDescription = useRef("");
+  const [fiscalYear, setFiscalYear] = useState("");
 
   const maxPagesShow = 3;
   const dataPerPage = 10;
 
   useEffect(() => {
-    let isMount = true;
-    const controller = new AbortController();
+    if (localStorage.getItem("user")) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const { id } = user;
+      axios.get(getUserByUserIdApi(id)).then((response) => {
+        const dataUser = response.data.data;
+        if (dataUser.length > 0) {
+          setSection(dataUser[0].section_id);
+        }
+      });
+    }
 
     axios
-      .get(getAllProductApi, {
-        signal: controller.signal,
-      })
+      .get(getAllProductApi)
       .then((response) => {
-        isMount && setTableProduct(response.data.data);
+        setTableProduct(response.data.data);
       })
       .catch((error) => console.log(error));
 
     axios
-      .get(getAllUsersApi, {
-        signal: controller.signal,
-      })
+      .get(getAllUsersApi)
       .then((response) => {
-        const tableUserSort = isMount && response.data.data;
+        const tableUserSort = response.data.data;
         setTableUser(
           tableUserSort.sort((nameA, nameB) => {
             let a = nameA.username;
@@ -153,26 +175,86 @@ function Project(props) {
       (value) => value === position
     );
 
-    const filterFunctionLogic = (filterItem, filterDetailItem, data) => {
+    const filterFunctionLogicByDate = (data, fromDate, toDate) => {
+      if (fromDate && toDate && data.length > 0) {
+        let listData = [];
+        const fromDateValue = new Date(fromDate).setDate(
+          new Date(fromDate).getDate() - 1
+        );
+        const filterByDate = data.filter(
+          (value) =>
+            new Date(value.finish) >= new Date(fromDateValue) &&
+            new Date(value.finish) <= new Date(toDate)
+        );
+
+        for (
+          let index = (page - 1) * dataPerPage;
+          index < page * dataPerPage && index < filterByDate.length;
+          index++
+        ) {
+          listData.push(filterByDate[index]);
+        }
+        const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+        const numberStart = (page - 1) * dataPerPage + 1;
+        setDataForGraph(filterByDate);
+        setTableProject(listData);
+        setStotalPageData(totalPageData);
+        setNumberStart(numberStart);
+      }
+    };
+
+    const filterFunctionLogic = (
+      filterItem,
+      filterDetailItem,
+      data,
+      fromDate,
+      toDate
+    ) => {
       if (filterItem === "category") {
         if (data.length > 0) {
           let listData = [];
           const filterData = data.filter(
             (value) => value.category === filterDetailItem
           );
-          for (
-            let index = (page - 1) * dataPerPage;
-            index < page * dataPerPage && index < filterData.length;
-            index++
-          ) {
-            listData.push(filterData[index]);
+
+          if (fromDate && toDate) {
+            const fromDateValue = new Date(fromDate).setDate(
+              new Date(fromDate).getDate() - 1
+            );
+            const filterByDate = filterData.filter(
+              (value) =>
+                new Date(value.finish) >= new Date(fromDateValue) &&
+                new Date(value.finish) <= new Date(toDate)
+            );
+
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < filterByDate.length;
+              index++
+            ) {
+              listData.push(filterByDate[index]);
+            }
+            const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
+            setDataForGraph(filterData);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
+          } else {
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < filterData.length;
+              index++
+            ) {
+              listData.push(filterData[index]);
+            }
+            const totalPageData = Math.ceil(filterData.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
+            setDataForGraph(filterData);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
           }
-          const totalPageData = Math.ceil(filterData.length / dataPerPage);
-          const numberStart = (page - 1) * dataPerPage + 1;
-          setDataForGraph(filterData);
-          setTableProject(listData);
-          setStotalPageData(totalPageData);
-          setNumberStart(numberStart);
         }
       } else if (filterItem === "pic") {
         if (data.length > 0) {
@@ -180,24 +262,51 @@ function Project(props) {
           const filterData = data.filter(
             (value) => value.manager_id === parseInt(filterDetailItem)
           );
-          for (
-            let index = (page - 1) * dataPerPage;
-            index < page * dataPerPage && index < filterData.length;
-            index++
-          ) {
-            listData.push(filterData[index]);
+
+          if (fromDate && toDate) {
+            const fromDateValue = new Date(fromDate).setDate(
+              new Date(fromDate).getDate() - 1
+            );
+            const filterByDate = filterData.filter(
+              (value) =>
+                new Date(value.finish) >= new Date(fromDateValue) &&
+                new Date(value.finish) <= new Date(toDate)
+            );
+
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < filterByDate.length;
+              index++
+            ) {
+              listData.push(filterByDate[index]);
+            }
+            const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
+            setDataForGraph(filterData);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
+          } else {
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < filterData.length;
+              index++
+            ) {
+              listData.push(filterData[index]);
+            }
+            const totalPageData = Math.ceil(filterData.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
+            setDataForGraph(filterData);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
           }
-          const totalPageData = Math.ceil(filterData.length / dataPerPage);
-          const numberStart = (page - 1) * dataPerPage + 1;
-          setDataForGraph(filterData);
-          setTableProject(listData);
-          setStotalPageData(totalPageData);
-          setNumberStart(numberStart);
         }
-      } else if (filterItem === "status") {
+      } else if (filterItem === "status" && data.length > 0) {
         let listData = [];
+        let filterData = [];
         if (filterDetailItem === "Delay") {
-          let notCryteria = [
+          let notCriteria = [
             "Not Yet Started",
             "On Progress",
             "Finish",
@@ -205,35 +314,38 @@ function Project(props) {
             "cancel",
           ];
 
-          let result = [];
-          for (let index = 0; index < data.length; index++) {
-            let checkData = notCryteria.find(
-              (value) => value === data[index].status
-            );
-            if (!checkData) {
-              result.push(data[index]);
-            }
-          }
+          filterData = data.filter(
+            (value) => !notCriteria.includes(value.status)
+          );
+        } else {
+          filterData = data.filter(
+            (value) => value.status === filterDetailItem
+          );
+        }
 
-          if (result.length > 0) {
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < result.length;
-              index++
-            ) {
-              listData.push(result[index]);
-            }
+        if (fromDate && toDate) {
+          const fromDateValue = new Date(fromDate).setDate(
+            new Date(fromDate).getDate() - 1
+          );
+          const filterByDate = filterData.filter(
+            (value) =>
+              new Date(value.finish) >= new Date(fromDateValue) &&
+              new Date(value.finish) <= new Date(toDate)
+          );
+          for (
+            let index = (page - 1) * dataPerPage;
+            index < page * dataPerPage && index < filterByDate.length;
+            index++
+          ) {
+            listData.push(filterByDate[index]);
           }
-          const totalPageData = Math.ceil(result.length / dataPerPage);
+          const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
           const numberStart = (page - 1) * dataPerPage + 1;
-          setDataForGraph(result);
+          setDataForGraph(filterData);
           setTableProject(listData);
           setStotalPageData(totalPageData);
           setNumberStart(numberStart);
         } else {
-          const filterData = data.filter(
-            (value) => value.status === filterDetailItem
-          );
           for (
             let index = (page - 1) * dataPerPage;
             index < page * dataPerPage && index < filterData.length;
@@ -254,30 +366,66 @@ function Project(props) {
           const filterData = data.filter(
             (value) => value.product_id === parseInt(filterDetailItem)
           );
-          for (
-            let index = (page - 1) * dataPerPage;
-            index < page * dataPerPage && index < filterData.length;
-            index++
-          ) {
-            listData.push(filterData[index]);
+          if (fromDate && toDate) {
+            const fromDateValue = new Date(fromDate).setDate(
+              new Date(fromDate).getDate() - 1
+            );
+            const filterByDate = filterData.filter(
+              (value) =>
+                new Date(value.finish) >= new Date(fromDateValue) &&
+                new Date(value.finish) <= new Date(toDate)
+            );
+
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < filterByDate.length;
+              index++
+            ) {
+              listData.push(filterByDate[index]);
+            }
+            const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
+            setDataForGraph(filterData);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
+          } else {
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < filterData.length;
+              index++
+            ) {
+              listData.push(filterData[index]);
+            }
+            const totalPageData = Math.ceil(filterData.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
+            setDataForGraph(filterData);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
           }
-          const totalPageData = Math.ceil(filterData.length / dataPerPage);
-          const numberStart = (page - 1) * dataPerPage + 1;
-          setDataForGraph(filterData);
-          setTableProject(listData);
-          setStotalPageData(totalPageData);
-          setNumberStart(numberStart);
         }
       }
     };
+
+    //filter sampai sini
 
     if (user.position === "Administrator") {
       axios
         .get(getAllProjectApi)
         .then((response) => {
-          const data = isMount && response.data.data;
+          const data = response.data.data;
+
           if (filterBy && detailFilterValue) {
-            filterFunctionLogic(filterBy, detailFilterValue, data);
+            filterFunctionLogic(
+              filterBy,
+              detailFilterValue,
+              data,
+              fromDate,
+              toDate
+            );
+          } else if (fromDate && toDate) {
+            filterFunctionLogicByDate(data, fromDate, toDate);
           } else {
             const totalPageData = Math.ceil(data.length / dataPerPage);
             const numberStart = (page - 1) * dataPerPage + 1;
@@ -300,9 +448,17 @@ function Project(props) {
       axios
         .get(getProjectBySectionIdAndPage(page, section_id))
         .then((response) => {
-          const data = isMount && response.data.data;
+          const data = response.data.data;
           if (filterBy && detailFilterValue) {
-            filterFunctionLogic(filterBy, detailFilterValue, data);
+            filterFunctionLogic(
+              filterBy,
+              detailFilterValue,
+              data,
+              fromDate,
+              toDate
+            );
+          } else if (fromDate && toDate) {
+            filterFunctionLogicByDate(data, fromDate, toDate);
           } else {
             const totalPageData = Math.ceil(data.length / dataPerPage);
             const numberStart = (page - 1) * dataPerPage + 1;
@@ -323,38 +479,55 @@ function Project(props) {
         })
         .catch((error) => console.log(error));
     } else {
-      axios
-        .get(getProjectByUserApi(userId), {
-          signal: controller.signal,
-        })
-        .then((response) => {
-          const data = isMount && response.data.data;
-          if (filterBy && detailFilterValue) {
-            filterFunctionLogic(filterBy, detailFilterValue, data);
-          } else {
-            const totalPageData = Math.ceil(data.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            let listData = [];
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < data.length;
-              index++
-            ) {
-              listData.push(data[index]);
-            }
-            setDataForGraph(data);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          }
-        });
-    }
+      if (userId) {
+        axios
+          .get(getProjectByUserApi(userId))
+          .then((response) => {
+            const responseData = response.data.data;
+            if (filterBy && detailFilterValue) {
+              filterFunctionLogic(
+                filterBy,
+                detailFilterValue,
+                responseData,
+                fromDate,
+                toDate
+              );
+            } else if (fromDate && toDate) {
+              filterFunctionLogicByDate(responseData, fromDate, toDate);
+            } else {
+              const totalPageData = Math.ceil(
+                responseData.length / dataPerPage
+              );
+              const numberStart = (page - 1) * dataPerPage + 1;
+              let listData = [];
+              for (
+                let index = (page - 1) * dataPerPage;
+                index < page * dataPerPage && index < responseData.length;
+                index++
+              ) {
+                listData.push(responseData[index]);
+              }
 
-    return () => {
-      isMount = false;
-      controller.abort();
-    };
-  }, [actionStateValue, page, filterBy, detailFilterValue, userId]);
+              setDataForGraph(responseData);
+              setTableProject(listData);
+              setStotalPageData(totalPageData);
+              setNumberStart(numberStart);
+            }
+          })
+          .catch((error) => {
+            console.error("Error in axios get request:", error);
+          });
+      }
+    }
+  }, [
+    actionStateValue,
+    page,
+    filterBy,
+    detailFilterValue,
+    userId,
+    fromDate,
+    toDate,
+  ]);
 
   const productOption = () => {
     let option = [];
@@ -772,15 +945,27 @@ function Project(props) {
   const filterItemLogic = () => {
     let option = [];
     if (filterBy === "category") {
-      option.push(
-        <>
-          <option value={"New Model"}>New Model</option>
-          <option value={"Quality"}>Quality</option>
-          <option value={"Integrated Factory"}>Integrated Factory</option>
-          <option value={"Productivity"}>Productivity</option>
-          <option value={"Profit Improvement"}>Profit Improvement</option>
-        </>
-      );
+      if (section === 4) {
+        option.push(
+          <>
+            <option value={"CO2 Neutral"}>CO2 Neutral</option>
+            <option value={"Logistik Automation"}>Logistik Automation</option>
+            <option value={"Vision System"}>Vision System</option>
+            <option value={"DX"}>DX</option>
+            <option value={"Layout"}>Layout</option>
+          </>
+        );
+      } else {
+        option.push(
+          <>
+            <option value={"New Model"}>New Model</option>
+            <option value={"Quality"}>Quality</option>
+            <option value={"Integrated Factory"}>Integrated Factory</option>
+            <option value={"Productivity"}>Productivity</option>
+            <option value={"Profit Improvement"}>Profit Improvement</option>
+          </>
+        );
+      }
     } else if (filterBy === "pic") {
       return userOption();
     } else if (filterBy === "status") {
@@ -794,13 +979,31 @@ function Project(props) {
             Waiting Detail Activity
           </option>
           <option value={"cancel"}>cancel</option>
-          <option value={"Delay"}>Delay</option>
         </>
       );
     } else if (filterBy === "product") {
       return productOption();
     }
     return option;
+  };
+
+  const onHandleChangeFiscalYear = (e) => {
+    const fiscalYear = e.target.value;
+    setFiscalYear(fiscalYear);
+
+    if (fiscalYear === "FY 23") {
+      setFromDate("2023-04-01");
+      setToDate("2024-03-31");
+    } else if (fiscalYear === "FY 24") {
+      setFromDate("2024-04-01");
+      setToDate("2025-03-31");
+    } else if (fiscalYear === "FY 25") {
+      setFromDate("2025-04-01");
+      setToDate("2026-03-31");
+    } else {
+      setFromDate("");
+      setToDate("");
+    }
   };
 
   return (
@@ -849,12 +1052,54 @@ function Project(props) {
               <IoMdCreate style={{ pointerEvents: "none" }} /> Create Project
             </Button>
           </div>
+
+          <div style={{ marginBottom: 6 }}>
+            <Row className="test2">
+              <Col className="d-flex col-6">
+                <Form.Select
+                  className="form margin"
+                  value={fiscalYear}
+                  onChange={onHandleChangeFiscalYear}
+                >
+                  <option value={""}>Fiscal Year</option>
+                  <option value={"FY 23"}>FY 23</option>
+                  <option value={"FY 24"}>FY 24</option>
+                  <option value={"FY 25"}>FY 25</option>
+                </Form.Select>
+                <Form.Group className="col-2  margin">
+                  <Form.Label className="label_start">Start Project</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                  />
+                </Form.Group>
+                <Form.Group className="col-2">
+                  <Form.Label className="label_start">
+                    Finish Project
+                  </Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+          </div>
+
           <div style={{ marginBottom: 5 }}>
-            <Row>
+            <Row className="col-12">
               <Col lg={3}>
                 <Form.Select
                   value={filterBy}
-                  onChange={(e) => setFilterBy(e.target.value)}
+                  onChange={(e) => {
+                    setFilterBy(e.target.value);
+                    dispatch({
+                      type: SETFILTER,
+                      payload: e.target.value,
+                    });
+                  }}
                 >
                   <option value="">Filter By</option>
                   <option value="category">Category</option>
@@ -867,7 +1112,13 @@ function Project(props) {
                 {filterBy !== "" && (
                   <Form.Select
                     value={detailFilterValue}
-                    onChange={(e) => setDetailFilterValue(e.target.value)}
+                    onChange={(e) => {
+                      setDetailFilterValue(e.target.value);
+                      dispatch({
+                        type: SETFILTERDETAIL,
+                        payload: e.target.value,
+                      });
+                    }}
                   >
                     <option value="">Select Detail</option>
                     {filterItemLogic()}
@@ -879,6 +1130,14 @@ function Project(props) {
                   <Button
                     onClick={() => {
                       setFilterBy("");
+                      dispatch({
+                        type: SETFILTERDETAIL,
+                        payload: "",
+                      });
+                      dispatch({
+                        type: SETFILTER,
+                        payload: "",
+                      });
                     }}
                   >
                     Reset
@@ -887,6 +1146,7 @@ function Project(props) {
               </Col>
             </Row>
           </div>
+
           <TitleSection
             title="Project List"
             icon={<BsListNested style={{ marginRight: 5 }} />}
@@ -999,7 +1259,13 @@ function Project(props) {
             <PaginationTable
               totalPage={totalPageData}
               maxPagesShow={maxPagesShow}
-              onChangePage={(e) => setPage(e)}
+              onChangePage={(e) => {
+                setPage(e);
+                dispatch({
+                  type: SETPAGE,
+                  payload: e,
+                });
+              }}
               pageActive={page}
             />
           </div>
@@ -1500,18 +1766,35 @@ function Project(props) {
                         onChange={(e) => setCategory(e.target.value)}
                         required
                       >
-                        <option value="" disabled>
-                          Open This
-                        </option>
-                        <option value="New Model">New Model</option>
-                        <option value="Quality">Quality</option>
-                        <option value="Integrated Factory">
-                          Integrated Factory
-                        </option>
-                        <option value="Productivity">Productivity</option>
-                        <option value="Profit Improvement">
-                          Profit Improvement
-                        </option>
+                        {section === 4 ? (
+                          <>
+                            <option value="" disabled>
+                              Open This
+                            </option>
+                            <option value="CO2 Neutral">CO2 Neutral</option>
+                            <option value="Logistik Automation">
+                              Logistik Automation
+                            </option>
+                            <option value="Vision System">Vision System</option>
+                            <option value="DX">DX</option>
+                            <option value="Layout">Layout</option>
+                          </>
+                        ) : (
+                          <>
+                            <option value="" disabled>
+                              Open This
+                            </option>
+                            <option value="New Model">New Model</option>
+                            <option value="Quality">Quality</option>
+                            <option value="Integrated Factory">
+                              Integrated Factory
+                            </option>
+                            <option value="Productivity">Productivity</option>
+                            <option value="Profit Improvement">
+                              Profit Improvement
+                            </option>
+                          </>
+                        )}
                       </Form.Select>
                     </Col>
                   </Row>
@@ -1555,4 +1838,8 @@ function Project(props) {
   );
 }
 
-export default Project;
+export default GlobalConsumer(Project);
+
+Project.propTypes = {
+  action: PropTypes.number,
+};
