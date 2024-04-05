@@ -260,6 +260,13 @@ export const searchProblemByMachineIdApi = (machineId, page) => {
   return `${port}/api/problem/searchProblemByMachineId/${machineId}/${page}`;
 };
 
+// pattern
+export const createPatternApi = `${port}/api/pattern/create`;
+export const updatePatternApi = `${port}/api/pattern/update`;
+export const getAllPatternApi = `${port}/api/pattern/getAllPattern`;
+export const getPatternByIdApi = `${port}/api/pattern/getPatternById`;
+export const deletePatternApi = `${port}/api/pattern/delete`;
+
 //project
 export const createProjectApi = `${port}/api/project/create`;
 export const updateProjectApi = `${port}/api/project/update`;
@@ -289,6 +296,14 @@ export const searchProjectApi = `${port}/api/project/search`;
 export const getProjectByUserApi = (userId) => {
   return `${port}/api/project/getProjectByUser/${userId}`;
 };
+
+// activity pattern
+export const createPatternActivityApi = `${port}/api/patternActivity/create`;
+export const getActivityPatternByIdPatternApi = (id, idProject) => {
+  return `${port}/api/patternActivity/getActivityPatternByPatternId/${id}/${idProject}`;
+};
+export const getAllActivityPatternApi = `${port}/api/patternActivity/getAllActivityPattern`;
+
 //activity api
 export const createActivityApi = `${port}/api/activity/create`;
 export const updateActivityApi = `${port}/api/activity/update`;
@@ -330,6 +345,7 @@ export const getAllSectionApi = `${port}/api/section/getAll`;
 export const sendEmailApi = `${port}/api/email/send`;
 export const shareFinishProjectToUserCommonApi = `${port}/api/email/shareFinishProjectCommon`;
 export const shareFinishProjectForSMDNewModelApi = `${port}/api/email/shareFinishProjectForSMD`;
+export const sendNotificationToPicApi = `${port}/api/email/sendNotificationToPic`;
 
 //fedbackFTA
 export const sendFeedbackFtaApi = `${port}/api/email/sendFeedback`;

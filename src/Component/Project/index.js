@@ -26,7 +26,7 @@ import {
   updateProjectApi,
   updateStatusProjectApi,
   getUserByUserIdApi,
-  searchProjectApi,
+  deleteProjectByProjectId,
 } from "../../Config/API";
 import { useState } from "react";
 import axios from "axios";
@@ -52,11 +52,11 @@ import {
 } from "../../Config/groupingName";
 import GraphBarProject from "../GraphBarProject";
 import GraphPieProject from "../GraphPieProject";
-import { useRef } from "react";
 import { GlobalConsumer } from "../../Context/store/index";
 import { SETPAGE } from "../../Context/const/index";
 import { SETFILTER } from "../../Context/const/index";
 import { SETFILTERDETAIL } from "../../Context/const/index";
+import { RiDeleteBack2Fill } from "react-icons/ri";
 
 function Project(props) {
   const {
@@ -110,8 +110,9 @@ function Project(props) {
   const [detailFilterValue, setDetailFilterValue] = useState(filterDetailEvent);
   const [dataForGraph, setDataForGraph] = useState([]);
   const [section, setSection] = useState("");
-  const refDescription = useRef("");
+  const [rank, setRank] = useState("");
   const [fiscalYear, setFiscalYear] = useState("");
+  const [admin, setAdmin] = useState(false);
 
   const maxPagesShow = 3;
   const dataPerPage = 10;
@@ -124,6 +125,9 @@ function Project(props) {
         const dataUser = response.data.data;
         if (dataUser.length > 0) {
           setSection(dataUser[0].section_id);
+          if (dataUser[0].position === "Administrator") {
+            setAdmin(true);
+          }
         }
       });
     }
@@ -183,7 +187,7 @@ function Project(props) {
         );
         const filterByDate = data.filter(
           (value) =>
-            new Date(value.finish) >= new Date(fromDateValue) &&
+            new Date(value.finish) > new Date(fromDateValue) &&
             new Date(value.finish) <= new Date(toDate)
         );
 
@@ -236,7 +240,53 @@ function Project(props) {
             }
             const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
             const numberStart = (page - 1) * dataPerPage + 1;
+            setDataForGraph(filterByDate);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
+          } else {
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < filterData.length;
+              index++
+            ) {
+              listData.push(filterData[index]);
+            }
+            const totalPageData = Math.ceil(filterData.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
             setDataForGraph(filterData);
+            setTableProject(listData);
+            setStotalPageData(totalPageData);
+            setNumberStart(numberStart);
+          }
+        }
+      } else if (filterItem === "rank") {
+        if (data.length > 0) {
+          let listData = [];
+          const filterData = data.filter(
+            (value) => value.rank === filterDetailItem
+          );
+
+          if (fromDate && toDate) {
+            const fromDateValue = new Date(fromDate).setDate(
+              new Date(fromDate).getDate() - 1
+            );
+            const filterByDate = filterData.filter(
+              (value) =>
+                new Date(value.finish) >= new Date(fromDateValue) &&
+                new Date(value.finish) <= new Date(toDate)
+            );
+
+            for (
+              let index = (page - 1) * dataPerPage;
+              index < page * dataPerPage && index < filterByDate.length;
+              index++
+            ) {
+              listData.push(filterByDate[index]);
+            }
+            const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+            const numberStart = (page - 1) * dataPerPage + 1;
+            setDataForGraph(filterByDate);
             setTableProject(listData);
             setStotalPageData(totalPageData);
             setNumberStart(numberStart);
@@ -282,7 +332,7 @@ function Project(props) {
             }
             const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
             const numberStart = (page - 1) * dataPerPage + 1;
-            setDataForGraph(filterData);
+            setDataForGraph(filterByDate);
             setTableProject(listData);
             setStotalPageData(totalPageData);
             setNumberStart(numberStart);
@@ -341,7 +391,7 @@ function Project(props) {
           }
           const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
           const numberStart = (page - 1) * dataPerPage + 1;
-          setDataForGraph(filterData);
+          setDataForGraph(filterByDate);
           setTableProject(listData);
           setStotalPageData(totalPageData);
           setNumberStart(numberStart);
@@ -385,7 +435,7 @@ function Project(props) {
             }
             const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
             const numberStart = (page - 1) * dataPerPage + 1;
-            setDataForGraph(filterData);
+            setDataForGraph(filterByDate);
             setTableProject(listData);
             setStotalPageData(totalPageData);
             setNumberStart(numberStart);
@@ -629,6 +679,7 @@ function Project(props) {
     setMemberId("");
     setMember([]);
     setProjectIdEdit("");
+    setRank("");
   };
 
   const handleSaveCreateProject = (e) => {
@@ -636,6 +687,7 @@ function Project(props) {
     let data = {
       product_id: product,
       project_name: projectName,
+      rank: rank,
       manager_id: manager,
       budget: budget,
       saving_cost: savingCost,
@@ -649,26 +701,30 @@ function Project(props) {
       description: description,
     };
 
-    if (projectIdEdit) {
-      let newData = { ...data, id: projectIdEdit };
-      axios.put(updateProjectApi, newData);
-      setShowModalCreateProject(false);
-      setMessage("Project already Update");
-      setShow(true);
-      handleReset();
-      actionState(1);
-    } else {
-      let newData = { ...data, id: uuid() };
-      let confirm = window.confirm("Do you want to save?");
-      if (confirm) {
-        axios.post(createProjectApi, newData).then((response) => {
-          setShowModalCreateProject(false);
-          setMessage("Project already created");
-          setShow(true);
-          handleReset();
-          actionState(1);
-        });
+    if (member.length > 0) {
+      if (projectIdEdit) {
+        let newData = { ...data, id: projectIdEdit };
+        axios.put(updateProjectApi, newData);
+        setShowModalCreateProject(false);
+        setMessage("Project already Update");
+        setShow(true);
+        handleReset();
+        actionState(1);
+      } else {
+        let newData = { ...data, id: uuid() };
+        let confirm = window.confirm("Do you want to save?");
+        if (confirm) {
+          axios.post(createProjectApi, newData).then((response) => {
+            setShowModalCreateProject(false);
+            setMessage("Project already created");
+            setShow(true);
+            handleReset();
+            actionState(1);
+          });
+        }
       }
+    } else {
+      window.alert("Please Add Member of This Project ");
     }
   };
 
@@ -715,6 +771,7 @@ function Project(props) {
         setProjectIdEdit(data.id);
         setProduct(data.product_id);
         setProjectName(data.project_name);
+        setRank(data.rank);
         setManager(data.manager_id);
         setBudget(data.budget);
         setSavingCost(data.saving_cost);
@@ -949,7 +1006,7 @@ function Project(props) {
         option.push(
           <>
             <option value={"CO2 Neutral"}>CO2 Neutral</option>
-            <option value={"Logistik Automation"}>Logistik Automation</option>
+            <option value={"Logistic Automation"}>Logistic Automation</option>
             <option value={"Vision System"}>Vision System</option>
             <option value={"DX"}>DX</option>
             <option value={"Layout"}>Layout</option>
@@ -966,6 +1023,20 @@ function Project(props) {
           </>
         );
       }
+    } else if (filterBy === "rank") {
+      option.push(
+        <>
+          <option value={"A1"}>A1</option>
+          <option value={"A2"}>A2</option>
+          <option value={"A3"}>A3</option>
+          <option value={"B1"}>B1</option>
+          <option value={"B2"}>B2</option>
+          <option value={"B3"}>B3</option>
+          <option value={"C1"}>C1</option>
+          <option value={"C2"}>C2</option>
+          <option value={"C3"}>C3</option>
+        </>
+      );
     } else if (filterBy === "pic") {
       return userOption();
     } else if (filterBy === "status") {
@@ -1006,6 +1077,23 @@ function Project(props) {
     }
   };
 
+  const handleDeleteProject = (e) => {
+    const id = e.target.id;
+    const confirm = window.confirm("Do you want to delete this project?");
+    if (confirm) {
+      axios
+        .delete(deleteProjectByProjectId(id))
+        .then((response) => {
+          console.log(response);
+          actionState(1);
+          window.alert("delete project success");
+        })
+        .catch((error) => {
+          console.log(error);
+          window.alert("Failed Delete Project");
+        });
+    }
+  };
   return (
     <>
       <Row>
@@ -1103,6 +1191,7 @@ function Project(props) {
                 >
                   <option value="">Filter By</option>
                   <option value="category">Category</option>
+                  <option value="rank">Rank</option>
                   <option value="pic">PIC</option>
                   <option value="status">Status</option>
                   <option value="product">Product</option>
@@ -1138,6 +1227,9 @@ function Project(props) {
                         type: SETFILTER,
                         payload: "",
                       });
+                      setFiscalYear("");
+                      setFromDate("");
+                      setToDate("");
                     }}
                   >
                     Reset
@@ -1156,6 +1248,7 @@ function Project(props) {
               <tr>
                 <th>NO</th>
                 <th>Project Name</th>
+                <th>Rank</th>
                 <th>Category</th>
                 <th>PIC</th>
                 <th>Created Date</th>
@@ -1174,6 +1267,7 @@ function Project(props) {
                     <tr key={index}>
                       <td>{numberStart + index}</td>
                       <td>{value.project_name}</td>
+                      <td>{value.rank}</td>
                       <td>
                         {value.category} <br />
                         {subCategoryLabel(value.sub_category)}
@@ -1201,6 +1295,20 @@ function Project(props) {
                         )}
                       </td>
                       <td>
+                        {admin && (
+                          <Button
+                            variant="danger"
+                            style={{ marginRight: 2 }}
+                            id={value.id}
+                            size="sm"
+                            title="Delete project"
+                            onClick={handleDeleteProject}
+                          >
+                            <RiDeleteBack2Fill
+                              style={{ pointerEvents: "none" }}
+                            />
+                          </Button>
+                        )}
                         {value.user_id === userId && (
                           <Button
                             title="Cancel Project"
@@ -1754,6 +1862,33 @@ function Project(props) {
                         );
                       })
                     : "Data Is Not Available"}
+                </Col>
+              </Row>
+              <Row>
+                <Col sm={4}>
+                  <Row className="mb-3" style={{ textAlign: "left" }}>
+                    <Col>
+                      <Form.Label>Rank</Form.Label>
+                      <Form.Select
+                        value={rank}
+                        onChange={(e) => setRank(e.target.value)}
+                        required
+                      >
+                        <>
+                          <option value={""}>Open This</option>
+                          <option value={"A1"}>A1</option>
+                          <option value={"A2"}>A2</option>
+                          <option value={"A3"}>A3</option>
+                          <option value={"B1"}>B1</option>
+                          <option value={"B2"}>B2</option>
+                          <option value={"B3"}>B3</option>
+                          <option value={"C1"}>C1</option>
+                          <option value={"C2"}>C2</option>
+                          <option value={"C3"}>C3</option>
+                        </>
+                      </Form.Select>
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
               <Row>

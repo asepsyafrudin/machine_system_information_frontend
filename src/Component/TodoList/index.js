@@ -398,7 +398,7 @@ function ToDoList(props) {
     return option;
   };
 
-  console.log(activityOption);
+ 
 
   const functionPic = (pic, picId) => {
     if (picId) {

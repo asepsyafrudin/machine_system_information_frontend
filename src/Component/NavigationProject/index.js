@@ -3,7 +3,7 @@ import { Col, Nav, Row, Tab } from "react-bootstrap";
 import TotalProject from "../TotalProject";
 import Project from "../Project";
 import { AiOutlineFundProjectionScreen } from "react-icons/ai";
-import { AiOutlineHistory } from "react-icons/ai";
+import { AiOutlineHistory, AiOutlineInbox } from "react-icons/ai";
 import { VscProject } from "react-icons/vsc";
 import { BsBack } from "react-icons/bs";
 import { Link } from "react-router-dom";
@@ -12,6 +12,7 @@ import { SETPROJECTEVENT } from "../../Context/const";
 import { useEffect } from "react";
 import ToDoListSummary from "../ToDoListSummary";
 import AssignmentSummary from "../AssignmentSummary";
+import ScheduleAnalysis from "../ScheduleAnalysis";
 
 function NavigationProject(props) {
   const { projectEvent, dispatch } = props;
@@ -80,6 +81,16 @@ function NavigationProject(props) {
                 Assignment List Summary
               </Nav.Link>
             </Nav.Item>
+            <Nav.Item>
+              <Nav.Link
+                eventKey={"scheduleAnalysis"}
+                onClick={() => handleEvent("scheduleAnalysis")}
+                className="tabTitle"
+              >
+                <AiOutlineInbox style={{ marginRight: 5 }} />
+                Schedule Analysis
+              </Nav.Link>
+            </Nav.Item>
             <Nav.Item style={{ marginTop: 30 }}>
               <Link to={"/home"}>
                 <BsBack style={{ marginRight: 5 }} />
@@ -115,6 +126,9 @@ function NavigationProject(props) {
                 actionStateValue={actionState}
                 userId={userId}
               />
+            </Tab.Pane>
+            <Tab.Pane eventKey={"scheduleAnalysis"}>
+              <ScheduleAnalysis />
             </Tab.Pane>
           </Tab.Content>
         </Col>

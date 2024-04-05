@@ -209,7 +209,6 @@ function ToDoListSummary(props) {
       axios.post(updateTodoListByIdApi, data).then((response) => {
         console.log(response.data);
         resetForm();
-        console.log(action);
         setMessage("Data Already Update");
         setShowNotif(true);
         setAction((prev) => prev + 1);
@@ -424,7 +423,7 @@ function ToDoListSummary(props) {
 
   return (
     <div>
-      {console.log(action)}
+      
       <Row>
         <Col lg={12}>
           <div className="capabilityFormContainer">

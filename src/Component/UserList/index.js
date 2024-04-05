@@ -182,7 +182,7 @@ function UserList(props) {
           });
       }
     } else {
-      setMessage(`Password & Re Passoword doesnt Match!!`);
+      setMessage(`Password & Re Password doesnt Match!!`);
       setAlert(true);
     }
   };
@@ -244,7 +244,6 @@ function UserList(props) {
     return <>{option}</>;
   };
 
-  
   const productOption = () => {
     let option = [];
     if (section) {

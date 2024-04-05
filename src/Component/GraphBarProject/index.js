@@ -41,8 +41,6 @@ function GraphBarProject(props) {
           "cancel",
         ];
 
-      
-
         const check = notCryteria.find((value) => value === status);
         if (!check) {
           let dataDelay = [];
@@ -74,8 +72,6 @@ function GraphBarProject(props) {
           "Delay",
         ];
 
-        
-
         let category;
         if (section === 4) {
           category = [
@@ -83,7 +79,7 @@ function GraphBarProject(props) {
             "Logistic Automation",
             "Vision System",
             "DX",
-            "Layout"
+            "Layout",
           ];
         } else {
           category = [
@@ -100,7 +96,7 @@ function GraphBarProject(props) {
           for (let index2 = 0; index2 < status.length; index2++) {
             const filter = dataFilter(
               category[index1],
-              status[index2],            
+              status[index2],
               dataForGraph
             );
             dataAfterFilter.push({

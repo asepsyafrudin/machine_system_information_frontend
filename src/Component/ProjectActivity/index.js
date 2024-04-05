@@ -31,16 +31,25 @@ import {
   getFileByIdApi,
   deleteFileByIdApi,
   updateProjectByDateApi,
+  sendNotificationToPicApi,
+  createPatternApi,
+  getAllPatternApi,
+  getActivityPatternByIdPatternApi,
 } from "../../Config/API";
 import { SiStarbucks } from "react-icons/si";
 import TitleSection from "../TitleSection";
-import { BsPlusCircleFill, BsSave } from "react-icons/bs";
+import {
+  BsPlusCircleFill,
+  BsSave,
+  BsBookmarkCheckFill,
+  BsBookmarkCheck,
+} from "react-icons/bs";
 import moment from "moment";
 import { v4 as uuid } from "uuid";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { CHANGEDATA, SAVECHANGEDATA } from "../../Context/const";
 import { FaBackward } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { json, useNavigate } from "react-router-dom";
 import { MdDeleteForever, MdLink } from "react-icons/md";
 import TaskListTable from "../TaskListTable";
 import { BiShare } from "react-icons/bi";
@@ -97,6 +106,12 @@ function ProjectActivity(props) {
   const refAttachment = useRef();
   const [file, setFile] = useState([]);
   const [tableFile, setTableFile] = useState([]);
+  const [patternName, setPatternName] = useState("");
+  const [showExport, setShowExport] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [tablePattern, setTablePattern] = useState("");
+  const [tableActivityPattern, setTableActivityPattern] = useState("");
+  const [patternImportId, setPatternImportId] = useState("");
 
   const refDescription = useRef("");
   if (description) {
@@ -219,6 +234,18 @@ function ProjectActivity(props) {
       setTableUser(response.data.data);
     });
 
+    const data = {
+      userId: userId,
+    };
+
+    axios.post(getAllPatternApi, data).then((response) => {
+      setTablePattern(response.data.data);
+    });
+
+    axios.get(getActivityPatternByIdPatternApi).then((response) => {
+      setTableActivityPattern(response.data.data);
+    });
+
     axios
       .get(getProjectByUserApi(userId))
       .then((response) => {
@@ -247,6 +274,25 @@ function ProjectActivity(props) {
     return <>{option}</>;
   };
 
+  const patternOption = () => {
+    let option = [];
+    if (tablePattern.length > 0) {
+      for (let index = 0; index < tablePattern.length; index++) {
+        option.push(
+          <option
+            key={index}
+            value={tablePattern[index].id}
+            id={tablePattern[index].id}
+          >
+            {tablePattern[index].pattern_name}
+          </option>
+        );
+      }
+    }
+
+    return <>{option}</>;
+  };
+
   const resetForm = () => {
     setActivityName("");
     setFinishDate("");
@@ -263,6 +309,8 @@ function ProjectActivity(props) {
     setFile([]);
     setShow(false);
     setShowForm(false);
+    setShowExport(false);
+    setShowImport(false);
   };
 
   const colorBgBadge = (value) => {
@@ -349,6 +397,29 @@ function ProjectActivity(props) {
     }
   };
 
+  const notifAssign = () => {
+    const checkProject = tableProject.find((value) => value.manager_id);
+    const picId = checkProject.manager_id;
+    const pic = userEmailFunction(picId);
+
+    let data = {
+      user_id: userId,
+      picEmail: pic,
+      project_id: project.id,
+      activity_id: activity[1].id,
+    };
+
+    let confirm = window.confirm("Do You Want to Send Email?");
+    if (confirm) {
+      axios.post(sendNotificationToPicApi, data).then(() => {
+        alert("Email has been sent to PIC");
+        handleAddActivity();
+      });
+    } else {
+      setShowAlert(true);
+    }
+  };
+
   const handleDeleteCcEmail = (e) => {
     const id = e.target.id;
     let filter = ccMailList.filter((value) => parseInt(value) !== parseInt(id));
@@ -367,6 +438,7 @@ function ProjectActivity(props) {
     }
   };
 
+  // send email
   const handleShareProjectFinishToUser = (e) => {
     e.preventDefault();
     if (totalMemberToEmail.length > 0) {
@@ -423,6 +495,66 @@ function ProjectActivity(props) {
         })
         .catch((error) => console.log(error));
     }
+  };
+
+  const handleImportPattern = (e) => {
+    e.preventDefault();
+    let dataResult = [];
+    if (patternImportId) {
+      axios
+        .get(getActivityPatternByIdPatternApi(patternImportId, id))
+        .then((response) => {
+          const activityResult = response.data.data;
+          console.log(activityResult, "result activity");
+          if (activityResult.length > 0) {
+            for (let index = 0; index < activityResult.length; index++) {
+              const dependencies = activityResult[index].dependencies;
+              let data = {
+                id: activityResult[index].id,
+                start: new Date(activityResult[index].start),
+                end: new Date(activityResult[index].end),
+                name: activityResult[index].name,
+                progress: "",
+                dependencies: dependencies === "" ? [] : [dependencies],
+                type: activityResult[index].type,
+                project: id,
+                styles: backgroundColorDelay(
+                  new Date(moment(activityResult[index].end)),
+                  activityResult[index].progress,
+                  activityResult[index].remark
+                ),
+                remark: "",
+                linkToProject: "",
+                pic: "",
+              };
+              dataResult.push(data);
+            }
+          }
+          setActivity((prev) => [...prev, ...dataResult]);
+          dispatch({ type: CHANGEDATA });
+          resetForm();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  const handleAddPattern = (e) => {
+    e.preventDefault();
+
+    let dataSend = {
+      pattern_name: patternName,
+      activity: activity.filter((value) => value.type !== "project"),
+      user: userId,
+    };
+
+    axios.post(createPatternApi, dataSend).then((response) => {
+      setUpdateValue(updateValue + 1);
+    });
+
+    window.alert("Data Already Save");
+    setShowExport(false);
   };
 
   const handleAddActivity = (e) => {
@@ -640,7 +772,7 @@ function ProjectActivity(props) {
             axios
               .put(updateProjectByDateApi, data)
               .then((response) => {
-                setMessage("Data Already SAVE");
+                setMessage("Data Already Save");
                 setShowNotif(true);
                 dispatch({ type: SAVECHANGEDATA });
                 setUpdateValue((prev) => prev + 1);
@@ -656,6 +788,14 @@ function ProjectActivity(props) {
     const findUser = tableUser.find((value) => value.id === parseInt(id));
     if (findUser) {
       return CapitalCaseFirstWord(findUser.username);
+    }
+    return "";
+  };
+
+  const userEmailFunction = (id) => {
+    const findUser = tableUser.find((value) => value.id === parseInt(id));
+    if (findUser) {
+      return findUser.email;
     }
     return "";
   };
@@ -870,9 +1010,23 @@ function ProjectActivity(props) {
                 <Button style={{ marginRight: 5 }} onClick={handleSaveData}>
                   <BsSave pointerEvents={"none"} /> Save
                 </Button>
-                <Button onClick={() => setShow(true)}>
+                <Button
+                  onClick={() => setShow(true)}
+                  style={{ marginRight: 5 }}
+                >
                   <BsPlusCircleFill pointerEvents={"none"} />
                   Add
+                </Button>
+                <Button
+                  style={{ marginRight: 5 }}
+                  onClick={() => setShowExport(true)}
+                >
+                  <BsBookmarkCheck pointerEvents={"none"} />
+                  Export Template
+                </Button>
+                <Button onClick={() => setShowImport(true)}>
+                  <BsBookmarkCheckFill pointerEvents={"none"} />
+                  Import Template
                 </Button>
               </Col>
             </Row>
@@ -937,6 +1091,62 @@ function ProjectActivity(props) {
             <Button onClick={() => setOpenSetting(true)}>Setting</Button>
           )}
         </div>
+        <Modal show={showExport} centered className="modalAddActivity">
+          <Form onSubmit={handleAddPattern}>
+            <Row className="titleModalAddActivity">
+              <Col>Save Pattern Activity Here</Col>
+            </Row>
+            <Modal.Body>
+              <Row className="mb-3">
+                <Form.Group as={Col}>
+                  <Form.Label>Pattern Name</Form.Label>
+                  <Form.Control
+                    value={patternName}
+                    onChange={(e) => setPatternName(e.target.value)}
+                    type="text"
+                    placeholder="Enter Pattern Name"
+                    required
+                  />
+                </Form.Group>
+              </Row>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button type="submit">Save</Button>
+              <Button variant="secondary" onClick={resetForm}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Modal>
+
+        <Modal show={showImport} centered className="modalAddActivity">
+          <Form onSubmit={handleImportPattern}>
+            <Row className="titleModalAddActivity">
+              <Col>Select Pattern Activity Here</Col>
+            </Row>
+            <Modal.Body>
+              <Row className="mb-3">
+                <Form.Group as={Col}>
+                  <Form.Label>Pattern Name</Form.Label>
+                  <Form.Select
+                    value={patternImportId}
+                    onChange={(e) => setPatternImportId(e.target.value)}
+                  >
+                    <option value={""}>Open This</option>
+                    {patternOption()}
+                  </Form.Select>
+                </Form.Group>
+              </Row>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button type="submit">Add</Button>
+              <Button variant="secondary" onClick={resetForm}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Modal>
+
         <Modal show={show} centered className="modalAddActivity">
           <Form onSubmit={handleAddActivity}>
             <Row className="titleModalAddActivity">
@@ -945,22 +1155,6 @@ function ProjectActivity(props) {
               </Col>
               {idUpdate && (
                 <Col sm={5} className="">
-                  {/* {linkToProject && (
-                    <Button
-                      className=""
-                      variant="info"
-                      onClick={handleToProject}
-                    >
-                      <MdLink
-                        style={{
-                          pointerEvents: "none",
-                          color: "white",
-                          fontWeight: "bolder",
-                        }}
-                      />
-                    </Button>
-                  )} */}
-
                   {linkToProject && (
                     <Button
                       className=""
@@ -1022,7 +1216,9 @@ function ProjectActivity(props) {
 
               <Row className="mb-3">
                 <Form.Group as={Col}>
-                  <Form.Label>Start</Form.Label>
+                  <Form.Label>
+                    {type === "milestone" ? "Time" : "Start"}
+                  </Form.Label>
                   <Form.Control
                     // value={startDate}
                     // onChange={(e) => setStartDate(e.target.value)}
@@ -1033,7 +1229,8 @@ function ProjectActivity(props) {
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     type="date"
-                    disabled={linkToProject ? true : false}
+                    disabled={linkToProject || showForm ? true : false}
+                    required
                   />
                 </Form.Group>
               </Row>
@@ -1050,7 +1247,8 @@ function ProjectActivity(props) {
                       type="date"
                       value={finishDate}
                       onChange={(e) => setFinishDate(e.target.value)}
-                      disabled={linkToProject ? true : false}
+                      disabled={linkToProject || showForm ? true : false}
+                      required
                     />
                   </Form.Group>
                 </Row>
@@ -1108,7 +1306,7 @@ function ProjectActivity(props) {
               <Row className="mb-3">
                 <Form.Group as={Col}>
                   <Form.Label>PIC</Form.Label>
-                  <Form.Select value={pic} onChange={handleSetPic}>
+                  <Form.Select value={pic} onChange={handleSetPic} required>
                     <option value={""}>Open This</option>
                     {memberOption()}
                   </Form.Select>
@@ -1229,8 +1427,15 @@ function ProjectActivity(props) {
               </Table>
             </Modal.Body>
             <Modal.Footer>
+              <Button
+                variant="success"
+                className="text-white"
+                onClick={notifAssign}
+              >
+                Save & Send Notification To PIC
+              </Button>
               <Button type="submit">Save</Button>
-              <Button variant="success" onClick={resetForm}>
+              <Button variant="secondary" onClick={resetForm}>
                 Close
               </Button>
             </Modal.Footer>

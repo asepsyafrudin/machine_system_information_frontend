@@ -433,7 +433,17 @@ function TotalProject(props) {
   };
 
   const categoryOption = () => {
-    if (productFilter && sectionFilter) {
+    if (productFilter && sectionFilter === "4") {
+      return (
+        <>
+          <option value={"CO2 Neutral"}>CO2 Neutral</option>
+          <option value={"Logistic Automation"}>Logistic Automation</option>
+          <option value={"Vision System"}>Vision System</option>
+          <option value={"DX"}>DX</option>
+          <option value={"Layout"}>Layout</option>
+        </>
+      );
+    } else {
       return (
         <>
           <option value={"New Model"}>New Model</option>
