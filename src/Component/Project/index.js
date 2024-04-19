@@ -609,6 +609,7 @@ function Project(props) {
 
   const handleMember = () => {
     let grouppingName = memberId.replace(/^\[\'|\'\]$/g, "").split(",");
+
     if (grouppingName.length > 1) {
       for (let index = 0; index < grouppingName.length; index++) {
         if (grouppingName[index] !== userEmail) {
@@ -620,6 +621,7 @@ function Project(props) {
             const check = member.find((value) => value === parseInt(user.id));
             if (!check) {
               setMember((prev) => [...prev, parseInt(user.id)]);
+            } else {
             }
           }
         }
@@ -1843,6 +1845,7 @@ function Project(props) {
                 <Col>
                   {member.length > 0
                     ? member.map((value, index) => {
+                        console.log(member, "cekkk");
                         return (
                           <Badge
                             key={index}

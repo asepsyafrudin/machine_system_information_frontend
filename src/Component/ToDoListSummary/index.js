@@ -108,7 +108,6 @@ function ToDoListSummary(props) {
           setTableTodoList(filteredData);
           setNumberStart(response.data.numberStart);
           setTotalPageData(response.data.totalPageData);
-          console.log("test update data");
         })
         .catch((error) => console.log(error));
     }
@@ -423,7 +422,6 @@ function ToDoListSummary(props) {
 
   return (
     <div>
-      
       <Row>
         <Col lg={12}>
           <div className="capabilityFormContainer">

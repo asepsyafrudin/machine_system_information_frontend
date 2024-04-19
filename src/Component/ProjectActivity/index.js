@@ -505,7 +505,6 @@ function ProjectActivity(props) {
         .get(getActivityPatternByIdPatternApi(patternImportId, id))
         .then((response) => {
           const activityResult = response.data.data;
-          console.log(activityResult, "result activity");
           if (activityResult.length > 0) {
             for (let index = 0; index < activityResult.length; index++) {
               const dependencies = activityResult[index].dependencies;
