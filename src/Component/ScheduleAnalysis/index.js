@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Modal, Row, Col } from "react-bootstrap";
+import {
+  Form,
+  Button,
+  Modal,
+  Row,
+  Col,
+  Badge,
+  CloseButton,
+} from "react-bootstrap";
 import axios from "axios";
 import moment from "moment";
 import TitleSection from "../TitleSection";
@@ -9,14 +17,33 @@ import {
   getProjectByUserApi,
   getUserByUserIdApi,
   getProjectByIdApi,
+  getProblemByIdApi,
+  getSettingByProjectIdApi,
+  saveSettingProjectApi,
+  getAllUsersApi,
+  getAllProductApi,
+  getAllProjectApi,
+  getProjectBySectionIdAndPage,
 } from "../../Config/API";
 import GanttChart from "../GanttChart";
 import { ViewMode } from "gantt-task-react";
 import TaskListTable from "../TaskListTable";
 import { SiStarbucks } from "react-icons/si";
+import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
+import { SETFILTER } from "../../Context/const/index";
+import { SETFILTERDETAIL } from "../../Context/const/index";
+import { GlobalConsumer } from "../../Context/store/index";
+import { SETPAGE } from "../../Context/const/index";
 
 function ScheduleReview(props) {
-  const { id } = props;
+  const {
+    id,
+    accessMember,
+    filterEvent,
+    filterDetailEvent,
+    dispatch,
+    pageEvent,
+  } = props;
   const [showModal, setShowModal] = useState(false);
   const [tableProject, setTableProject] = useState([]);
   const [activity, setActivity] = useState([]);
@@ -31,6 +58,21 @@ function ScheduleReview(props) {
   const [rowHeight, setRowHeight] = useState(35);
   const [projectListWillReview, setProjectListWillReview] = useState([]);
   const [titleProject, setTitleProject] = useState("");
+  const [hiddenPlan, setHiddenPlan] = useState("Yes");
+  const [switchMode, setSwitchMode] = useState(false);
+  const [openSetting, setOpenSetting] = useState(false);
+  const [showNotif, setShowNotif] = useState(false);
+  const [filterBy, setFilterBy] = useState(filterEvent);
+  const [detailFilterValue, setDetailFilterValue] = useState(filterDetailEvent);
+  const [tableUser, setTableUser] = useState([]);
+  const [tableProduct, setTableProduct] = useState([]);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [fiscalYear, setFiscalYear] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userPosition, setUserPosition] = useState("");
+  const [userSection, setUserSection] = useState("");
+  const [page, setPage] = useState(pageEvent);
 
   const backgroundColorDelay = (endProject, progressBar, remark) => {
     let currentDate = new Date();
@@ -52,38 +94,52 @@ function ScheduleReview(props) {
   };
 
   useEffect(() => {
-    if (localStorage.getItem("user")) {
-      const user = JSON.parse(localStorage.getItem("user"));
-      const { id } = user;
-      axios.get(getUserByUserIdApi(id)).then((response) => {
-        const dataUser = response.data.data;
-        if (dataUser.length > 0) {
-          setSection(dataUser[0].section_id);
-        }
-      });
-    }
-
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
+    setUserEmail(user.email);
+    const position = user.position;
+    setUserPosition(position);
+    const section_id = user.section_id;
+    setUserSection(section_id);
+    const positionThatCanOpenProject = [
+      "Departement Manager",
+      "Assistant General Manager",
+      "General Manager",
+      "Director",
+      "President",
+    ];
 
-    // if (id) {
-    //   axios.get(getProjectByIdApi(id)).then((response) => {
-    //     const dataProject = response.data.data[0];
-    //     setTitleProject(dataProject.project_name);
-    //     console.log(titleProject);
-    //     let dataArray = [];
-    //     const data = {
-    //       name: dataProject.project_name,
-    //       id: dataProject.id,
-    //       progress: dataProject.progress,
-    //       type: "project",
-    //       start: new Date(dataProject.start),
-    //       end: new Date(dataProject.finish),
-    //       hideChildren: false,
-    //     };
-    //     dataArray.push(data);
-    //   });
-    // }
+    const checkPosition = positionThatCanOpenProject.find(
+      (value) => value === position
+    );
+
+    axios
+      .get(getAllUsersApi)
+      .then((response) => {
+        const tableUserSort = response.data.data;
+        setTableUser(
+          tableUserSort.sort((nameA, nameB) => {
+            let a = nameA.username;
+            let b = nameB.username;
+
+            if (a < b) {
+              return -1;
+            }
+            if (a > b) {
+              return 1;
+            }
+            return 0;
+          })
+        );
+      })
+      .catch((error) => console.log(error));
+
+    axios
+      .get(getAllProductApi)
+      .then((response) => {
+        setTableProduct(response.data.data);
+      })
+      .catch((error) => console.log(error));
 
     if (userId) {
       axios.get(getProjectByUserApi(userId)).then((response) => {
@@ -92,75 +148,450 @@ function ScheduleReview(props) {
         setTableProject(data);
       });
     }
+
+    const filterFunctionLogicByDate = (data, fromDate, toDate) => {
+      if (fromDate && toDate && data.length > 0) {
+        const fromDateValue = new Date(fromDate).setDate(
+          new Date(fromDate).getDate() - 1
+        );
+        const filterByDate = data.filter(
+          (value) =>
+            new Date(value.finish) > new Date(fromDateValue) &&
+            new Date(value.finish) <= new Date(toDate)
+        );
+        setTableProject(filterByDate);
+      }
+    };
+
+    const filterFunctionLogic = (
+      filterItem,
+      filterDetailItem,
+      data,
+      fromDate,
+      toDate
+    ) => {
+      if (filterItem === "category") {
+        if (data.length > 0) {
+          const filterData = data.filter(
+            (value) => value.category === filterDetailItem
+          );
+
+          if (fromDate && toDate) {
+            const fromDateValue = new Date(fromDate).setDate(
+              new Date(fromDate).getDate() - 1
+            );
+            const filterByDate = filterData.filter(
+              (value) =>
+                new Date(value.finish) >= new Date(fromDateValue) &&
+                new Date(value.finish) <= new Date(toDate)
+            );
+            setTableProject(filterByDate);
+          } else {
+            setTableProject(filterData);
+          }
+        }
+      } else if (filterItem === "rank") {
+        if (data.length > 0) {
+          const filterData = data.filter(
+            (value) => value.rank === filterDetailItem
+          );
+
+          if (fromDate && toDate) {
+            const fromDateValue = new Date(fromDate).setDate(
+              new Date(fromDate).getDate() - 1
+            );
+            const filterByDate = filterData.filter(
+              (value) =>
+                new Date(value.finish) >= new Date(fromDateValue) &&
+                new Date(value.finish) <= new Date(toDate)
+            );
+
+            setTableProject(filterByDate);
+          } else {
+            setTableProject(filterData);
+          }
+        }
+      } else if (filterItem === "pic") {
+        if (data.length > 0) {
+          const filterData = data.filter(
+            (value) => value.manager_id === parseInt(filterDetailItem)
+          );
+
+          if (fromDate && toDate) {
+            const fromDateValue = new Date(fromDate).setDate(
+              new Date(fromDate).getDate() - 1
+            );
+            const filterByDate = filterData.filter(
+              (value) =>
+                new Date(value.finish) >= new Date(fromDateValue) &&
+                new Date(value.finish) <= new Date(toDate)
+            );
+
+            setTableProject(filterByDate);
+          } else {
+            setTableProject(filterData);
+          }
+        }
+      } else if (filterItem === "status" && data.length > 0) {
+        let filterData = [];
+        if (filterDetailItem === "Delay") {
+          let notCriteria = [
+            "Not Yet Started",
+            "On Progress",
+            "Finish",
+            "Waiting Detail Activity",
+            "cancel",
+          ];
+
+          filterData = data.filter(
+            (value) => !notCriteria.includes(value.status)
+          );
+        } else {
+          filterData = data.filter(
+            (value) => value.status === filterDetailItem
+          );
+        }
+
+        if (fromDate && toDate) {
+          const fromDateValue = new Date(fromDate).setDate(
+            new Date(fromDate).getDate() - 1
+          );
+          const filterByDate = filterData.filter(
+            (value) =>
+              new Date(value.finish) >= new Date(fromDateValue) &&
+              new Date(value.finish) <= new Date(toDate)
+          );
+
+          setTableProject(filterByDate);
+        } else {
+          setTableProject(filterData);
+        }
+      } else if (filterItem === "product") {
+        if (data.length > 0) {
+          const filterData = data.filter(
+            (value) => value.product_id === parseInt(filterDetailItem)
+          );
+          if (fromDate && toDate) {
+            const fromDateValue = new Date(fromDate).setDate(
+              new Date(fromDate).getDate() - 1
+            );
+            const filterByDate = filterData.filter(
+              (value) =>
+                new Date(value.finish) >= new Date(fromDateValue) &&
+                new Date(value.finish) <= new Date(toDate)
+            );
+
+            setTableProject(filterByDate);
+          } else {
+            setTableProject(filterData);
+          }
+        }
+      }
+    };
+
+    //filter sampai sini
+
+    if (user.position === "Administrator") {
+      axios
+        .get(getAllProjectApi)
+        .then((response) => {
+          const data = response.data.data;
+
+          if (filterBy && detailFilterValue) {
+            filterFunctionLogic(
+              filterBy,
+              detailFilterValue,
+              data,
+              fromDate,
+              toDate
+            );
+          } else if (fromDate && toDate) {
+            filterFunctionLogicByDate(data, fromDate, toDate);
+          } else {
+            setTableProject(data);
+          }
+        })
+        .then((error) => console.log(error));
+    } else if (checkPosition) {
+      axios
+        .get(getProjectBySectionIdAndPage(page, section_id))
+        .then((response) => {
+          const data = response.data.data;
+          if (filterBy && detailFilterValue) {
+            filterFunctionLogic(
+              filterBy,
+              detailFilterValue,
+              data,
+              fromDate,
+              toDate
+            );
+          } else if (fromDate && toDate) {
+            filterFunctionLogicByDate(data, fromDate, toDate);
+          } else {
+            setTableProject(data);
+          }
+        })
+        .catch((error) => console.log(error));
+    } else {
+      if (userId) {
+        axios
+          .get(getProjectByUserApi(userId))
+          .then((response) => {
+            const responseData = response.data.data;
+            if (filterBy && detailFilterValue) {
+              filterFunctionLogic(
+                filterBy,
+                detailFilterValue,
+                responseData,
+                fromDate,
+                toDate
+              );
+            } else if (fromDate && toDate) {
+              filterFunctionLogicByDate(responseData, fromDate, toDate);
+            } else {
+              setTableProject(responseData);
+            }
+          })
+          .catch((error) => {
+            console.error("Error in axios get request:", error);
+          });
+      }
+    }
   }, [userId, viewMode, id]);
 
-  const handleImportActivity = (e) => {
+  const saveSettingProjectActivity = () => {
+    if (accessMember) {
+      const data = {
+        projectId: id,
+        columnWidth: colWidth,
+        rowHeight: rowHeight,
+        listCellWidth: listCellWidth,
+        monthFormat: monthFormat,
+        hiddenPlan: hiddenPlan,
+        switchMode: switchMode,
+      };
+
+      axios.post(saveSettingProjectApi, data).then(() => {
+        setOpenSetting(false);
+        window.alert("Setting Format Already Save into Database");
+      });
+    }
+  };
+
+  const handleImportActivity = async (e) => {
     e.preventDefault();
+
     if (projectListWillReview.length > 0) {
       let dataArray = [];
       for (let index = 0; index < projectListWillReview.length; index++) {
-        axios
-          .get(getProjectByIdApi(projectListWillReview[index]))
-          .then((response) => {
-            const dataProject = response.data.data[0];
-            // setTitleProject(dataProject.project_name);
-            // setProject(dataProject);
-            // setDescription(dataProject.description);
-            // setCategory(dataProject.category);
-            // let memberIdData = [];
-            // for (let index = 0; index < dataProject.member.length; index++) {
-            //   memberIdData.push(dataProject.member[index].user_id);
-            // }
-            // setMemberListOfProject(memberIdData);
+        const project = await axios.get(
+          getProjectByIdApi(projectListWillReview[index])
+        );
+        const dataProject = project.data.data[0];
+        const data = {
+          no: dataArray.length + 1,
+          name: dataProject.project_name,
+          id: dataProject.id,
+          progress: dataProject.progress,
+          type: "project",
+          start: new Date(dataProject.start),
+          end: new Date(dataProject.finish),
+          hideChildren: true,
+        };
+        dataArray.push(data);
 
-            const data = {
-              name: dataProject.project_name,
-              id: dataProject.id,
-              progress: dataProject.progress,
-              type: "project",
-              start: new Date(dataProject.start),
-              end: new Date(dataProject.finish),
-              hideChildren: false,
+        const activity = await axios.get(
+          getActivityByProjectIdApi(dataProject.id)
+        );
+        const dataActivity = activity.data.data;
+        if (dataActivity.length > 0) {
+          for (let index2 = 0; index2 < dataActivity.length; index2++) {
+            let pushData = {
+              no: dataArray.length + 1,
+              id: dataActivity[index2].id,
+              start: new Date(moment(dataActivity[index2].start)),
+              end: new Date(moment(dataActivity[index2].end)),
+              name: dataActivity[index2].name,
+              progress: dataActivity[index2].progress,
+              dependencies: dataActivity[index2].dependencies,
+              type: dataActivity[index2].type,
+              project: dataActivity[index2].project,
+              styles: backgroundColorDelay(
+                new Date(moment(dataActivity[index2].end)),
+                dataActivity[index2].progress,
+                dataActivity[index2].remark
+              ),
+              remark: dataActivity[index2].remark,
+              linkToProject: dataActivity[index2].linkToProject,
+              pic: dataActivity[index2].pic,
             };
-            dataArray.push(data);
-
-            axios
-              .get(getActivityByProjectIdApi(dataProject.id))
-              .then((response) => {
-                const dataActivity = response.data.data;
-                if (dataActivity.length > 0) {
-                  for (let index = 0; index < dataActivity.length; index++) {
-                    let pushData = {
-                      id: dataActivity[index].id,
-                      start: new Date(moment(dataActivity[index].start)),
-                      end: new Date(moment(dataActivity[index].end)),
-                      name: dataActivity[index].name,
-                      progress: dataActivity[index].progress,
-                      dependencies: dataActivity[index].dependencies,
-                      type: dataActivity[index].type,
-                      project: dataActivity[index].project,
-                      styles: backgroundColorDelay(
-                        new Date(moment(dataActivity[index].end)),
-                        dataActivity[index].progress,
-                        dataActivity[index].remark
-                      ),
-                      remark: dataActivity[index].remark,
-                      linkToProject: dataActivity[index].linkToProject,
-                      pic: dataActivity[index].pic,
-                    };
-                    dataArray.push(pushData);
-                  }
-                }
-              });
-          });
+            dataArray.push(pushData);
+          }
+        }
       }
+      console.log("data Array", dataArray);
       setActivity(dataArray);
     }
+
+    axios.get(getSettingByProjectIdApi(id)).then((response) => {
+      const data = response.data.data[0];
+      if (data) {
+        setColWidth(parseInt(data.column_width));
+        setRowHeight(parseInt(data.row_height));
+        setListCellWidth(parseInt(data.list_cell_width));
+        setMonthFormat(data.month_format);
+        setHiddenPlan(data.hidden_plan);
+        setSwitchMode(() => {
+          if (data.switchMode === 1) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+      }
+    });
     setShowModal(false);
+  };
+
+  const deleteProject = (projectId) => {
+    setProjectListWillReview(
+      projectListWillReview.filter((id) => id !== projectId)
+    );
+  };
+
+  const userOption = () => {
+    let option = [];
+    if (tableUser.length > 0) {
+      for (let index = 0; index < tableUser.length; index++) {
+        option.push(
+          <option key={index} value={tableUser[index].id}>
+            {CapitalCaseFirstWord(tableUser[index].username)}
+          </option>
+        );
+      }
+    }
+    return <>{option}</>;
+  };
+
+  const productOption = () => {
+    let option = [];
+    if (tableProduct.length > 0) {
+      for (let index = 0; index < tableProduct.length; index++) {
+        option.push(
+          <option key={index} value={tableProduct[index].id}>
+            {tableProduct[index].product_name}
+          </option>
+        );
+      }
+    }
+    return <>{option}</>;
+  };
+
+  const colorBgBadge = (value) => {
+    switch (value) {
+      case 1:
+        return "primary";
+      case 2:
+        return "secondary";
+      case 3:
+        return "success";
+      case 4:
+        return "danger";
+      case 5:
+        return "warning";
+      case 6:
+        return "info";
+      case 7:
+        return "dark";
+      default:
+        break;
+    }
   };
 
   const reset = () => {
     setShowModal(false);
+  };
+
+  const filterItemLogic = () => {
+    let option = [];
+    if (filterBy === "category") {
+      if (section === 4) {
+        option.push(
+          <>
+            <option value={"CO2 Neutral"}>CO2 Neutral</option>
+            <option value={"Logistic Automation"}>Logistic Automation</option>
+            <option value={"Vision System"}>Vision System</option>
+            <option value={"DX"}>DX</option>
+            <option value={"Layout"}>Layout</option>
+          </>
+        );
+      } else {
+        option.push(
+          <>
+            <option value={"New Model"}>New Model</option>
+            <option value={"Quality"}>Quality</option>
+            <option value={"Integrated Factory"}>Integrated Factory</option>
+            <option value={"Productivity"}>Productivity</option>
+            <option value={"Profit Improvement"}>Profit Improvement</option>
+          </>
+        );
+      }
+    } else if (filterBy === "rank") {
+      option.push(
+        <>
+          <option value={"A1"}>A1</option>
+          <option value={"A2"}>A2</option>
+          <option value={"A3"}>A3</option>
+          <option value={"B1"}>B1</option>
+          <option value={"B2"}>B2</option>
+          <option value={"B3"}>B3</option>
+          <option value={"C1"}>C1</option>
+          <option value={"C2"}>C2</option>
+          <option value={"C3"}>C3</option>
+        </>
+      );
+    } else if (filterBy === "pic") {
+      return userOption();
+    } else if (filterBy === "status") {
+      option.push(
+        <>
+          <option value={"Not Yet Started"}>Not Yet Started</option>
+          <option value={"On Progress"}>On Progress</option>
+          <option value={"Delay"}>Delay</option>
+          <option value={"Finish"}>Finish</option>
+          <option value={"Waiting Detail Activity"}>
+            Waiting Detail Activity
+          </option>
+          <option value={"cancel"}>cancel</option>
+        </>
+      );
+    } else if (filterBy === "product") {
+      return productOption();
+    }
+    return option;
+  };
+
+  const onHandleChangeFiscalYear = (e) => {
+    const fiscalYear = e.target.value;
+    setFiscalYear(fiscalYear);
+
+    if (fiscalYear === "FY 23") {
+      setFromDate("2023-04-01");
+      setToDate("2024-03-31");
+    } else if (fiscalYear === "FY 24") {
+      setFromDate("2024-04-01");
+      setToDate("2025-03-31");
+    } else if (fiscalYear === "FY 25") {
+      setFromDate("2025-04-01");
+      setToDate("2026-03-31");
+    } else {
+      setFromDate("");
+      setToDate("");
+    }
+  };
+
+  const handleExpanderClick = (task) => {
+    setActivity(activity.map((t) => (t.id === task.id ? task : t)));
   };
 
   const ganttChartFormat = () => {
@@ -173,10 +604,7 @@ function ScheduleReview(props) {
           listCellWidth={listCellWidth}
           columnWidth={colWidth}
           rowHeight={rowHeight}
-          // onExpanderClick={(task) => handleExpanderClick(task)}
-          // onDoubleClick={(task) => handleDoubleClick(task)}
-          // onDelete={(task) => handleDeleteTask(task)}
-          // onDateChange={(task) => handleTaskChange(task)}
+          onExpanderClick={(task) => handleExpanderClick(task)}
           TaskListHeader={({ headerHeight }) => (
             <div
               style={{
@@ -198,6 +626,65 @@ function ScheduleReview(props) {
       );
     }
   };
+
+  // const filterItemLogic = () => {
+  //   let option = [];
+  //   if (filterBy === "category") {
+  //     if (section === 4) {
+  //       option.push(
+  //         <>
+  //           <option value={"CO2 Neutral"}>CO2 Neutral</option>
+  //           <option value={"Logistic Automation"}>Logistic Automation</option>
+  //           <option value={"Vision System"}>Vision System</option>
+  //           <option value={"DX"}>DX</option>
+  //           <option value={"Layout"}>Layout</option>
+  //         </>
+  //       );
+  //     } else {
+  //       option.push(
+  //         <>
+  //           <option value={"New Model"}>New Model</option>
+  //           <option value={"Quality"}>Quality</option>
+  //           <option value={"Integrated Factory"}>Integrated Factory</option>
+  //           <option value={"Productivity"}>Productivity</option>
+  //           <option value={"Profit Improvement"}>Profit Improvement</option>
+  //         </>
+  //       );
+  //     }
+  //   } else if (filterBy === "rank") {
+  //     option.push(
+  //       <>
+  //         <option value={"A1"}>A1</option>
+  //         <option value={"A2"}>A2</option>
+  //         <option value={"A3"}>A3</option>
+  //         <option value={"B1"}>B1</option>
+  //         <option value={"B2"}>B2</option>
+  //         <option value={"B3"}>B3</option>
+  //         <option value={"C1"}>C1</option>
+  //         <option value={"C2"}>C2</option>
+  //         <option value={"C3"}>C3</option>
+  //       </>
+  //     );
+  //   } else if (filterBy === "pic") {
+  //     return userOption();
+  //   } else if (filterBy === "status") {
+  //     option.push(
+  //       <>
+  //         <option value={"Not Yet Started"}>Not Yet Started</option>
+  //         <option value={"On Progress"}>On Progress</option>
+  //         <option value={"Delay"}>Delay</option>
+  //         <option value={"Finish"}>Finish</option>
+  //         <option value={"Waiting Detail Activity"}>
+  //           Waiting Detail Activity
+  //         </option>
+  //         <option value={"cancel"}>cancel</option>
+  //       </>
+  //     );
+  //   } else if (filterBy === "product") {
+  //     return productOption();
+  //   }
+  //   return option;
+  // };
 
   const handleAddProject = () => {
     if (selectedProjectId) {
@@ -225,10 +712,147 @@ function ScheduleReview(props) {
         </Row>
 
         <Row>{ganttChartFormat()}</Row>
-
-        <Modal show={showModal} centered>
+        <div style={{ textAlign: "left" }}>
+          <Button
+            style={{ marginRight: 5 }}
+            onClick={() => setViewMode(ViewMode.Day)}
+          >
+            Day
+          </Button>
+          <Button
+            style={{ marginRight: 5 }}
+            onClick={() => setViewMode(ViewMode.Week)}
+          >
+            Week
+          </Button>
+          <Button
+            style={{ marginRight: 5 }}
+            onClick={() => setViewMode(ViewMode.Month)}
+          >
+            Month
+          </Button>
+          {accessMember && (
+            <Button onClick={() => setOpenSetting(true)}>Setting</Button>
+          )}
+        </div>
+        <Modal show={showModal} centered size="lg">
           <Form onSubmit={handleImportActivity}>
-            <Row>
+            <Modal.Body>
+              <div style={{ marginBottom: 6 }}>
+                <Row className="test2 mb-3">
+                  <Form.Group as={Col}>
+                    <Form.Select
+                      className="form margin"
+                      value={fiscalYear}
+                      onChange={onHandleChangeFiscalYear}
+                    >
+                      <option value={""}>Fiscal Year</option>
+                      <option value={"FY 23"}>FY 23</option>
+                      <option value={"FY 24"}>FY 24</option>
+                      <option value={"FY 25"}>FY 25</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group as={Col}>
+                    <Form.Label className="label_start">
+                      Start Project
+                    </Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                    />
+                  </Form.Group>
+                  <Form.Group as={Col}>
+                    <Form.Label className="label_start">
+                      Finish Project
+                    </Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                    />
+                  </Form.Group>
+                </Row>
+              </div>
+              <div style={{ marginBottom: 5 }}>
+                <Row className="col-12">
+                  <Col lg={3}>
+                    <Form.Select
+                      value={filterBy}
+                      onChange={(e) => {
+                        setFilterBy(e.target.value);
+                        dispatch({
+                          type: SETFILTER,
+                          payload: e.target.value,
+                        });
+                      }}
+                    >
+                      <option value="">Filter By</option>
+                      <option value="category">Category</option>
+                      <option value="rank">Rank</option>
+                      <option value="pic">PIC</option>
+                      <option value="status">Status</option>
+                      <option value="product">Product</option>
+                    </Form.Select>
+                  </Col>
+                  <Col lg={3}>
+                    {filterBy !== "" && (
+                      <Form.Select
+                        value={detailFilterValue}
+                        onChange={(e) => {
+                          setDetailFilterValue(e.target.value);
+                          dispatch({
+                            type: SETFILTERDETAIL,
+                            payload: e.target.value,
+                          });
+                        }}
+                      >
+                        <option value="">Select Detail</option>
+                        {filterItemLogic()}
+                      </Form.Select>
+                    )}
+                  </Col>
+                  <Col lg={3}>
+                    {filterBy !== "" && (
+                      <Form.Select
+                        value={detailFilterValue}
+                        onChange={(e) => {
+                          setDetailFilterValue(e.target.value);
+                          dispatch({
+                            type: SETFILTERDETAIL,
+                            payload: e.target.value,
+                          });
+                        }}
+                      >
+                        <option value="">Select Detail</option>
+                      </Form.Select>
+                    )}
+                  </Col>
+                  <Col lg={3}>
+                    {filterBy !== "" && (
+                      <Button
+                        onClick={() => {
+                          setFilterBy("");
+                          dispatch({
+                            type: SETFILTERDETAIL,
+                            payload: "",
+                          });
+                          dispatch({
+                            type: SETFILTER,
+                            payload: "",
+                          });
+                          setFiscalYear("");
+                          setFromDate("");
+                          setToDate("");
+                        }}
+                      >
+                        Reset
+                      </Button>
+                    )}
+                  </Col>
+                </Row>
+              </div>
+              {/* <Row>
               <Modal.Title style={{ paddingLeft: 25, paddingTop: 25 }}>
                 Select Your Project
               </Modal.Title>
@@ -236,58 +860,135 @@ function ScheduleReview(props) {
             <Modal.Body>
               <Row className="mb-3">
                 <Form.Group as={Col}>
-                  <Form.Label>Category</Form.Label>
+                  <Form.Label>Filter By</Form.Label>
                   <Form.Select
                     className="mb-3"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    value={filterBy}
+                    onChange={(e) => {
+                      setFilterBy(e.target.value);
+                      dispatch({
+                        type: SETFILTER,
+                        payload: e.target.value,
+                      });
+                    }}
                   >
-                    {section === 4 ? (
-                      <>
-                        <option value={""}>Open This</option>
-                        <option value={"CO2 Neutral"}>CO2 Neutral</option>
-                        <option value={"Logistic Automation"}>
-                          Logistic Automation
-                        </option>
-                        <option value={"Vision System"}>Vision System</option>
-                        <option value={"DX"}>DX</option>
-                        <option value={"Layout"}>Layout</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value={""}>Open This</option>
-                        <option value={"New Model"}>New Model</option>
-                        <option value={"Quality"}>Quality</option>
-                        <option value={"Integrated Factory"}>
-                          Integrated Factory
-                        </option>
-                        <option value={"Productivity"}>Productivity</option>
-                        <option value={"Profit Improvement"}>
-                          Profit Improvement
-                        </option>
-                      </>
-                    )}
+                    <option value="">Filter By</option>
+                    <option value="category">Category</option>
+                    <option value="rank">Rank</option>
+                    <option value="pic">PIC</option>
+                    <option value="status">Status</option>
+                    <option value="product">Product</option>
                   </Form.Select>
+                  <Form.Label>Select Detail</Form.Label>
+
+                  <Form.Select
+                    className="mb-3"
+                    value={detailFilterValue}
+                    onChange={(e) => {
+                      setDetailFilterValue(e.target.value);
+                      dispatch({
+                        type: SETFILTERDETAIL,
+                        payload: e.target.value,
+                      });
+                    }}
+                  >
+                    <option value="">Select Detail</option>
+                    {filterItemLogic()}
+                  </Form.Select>
+
                   <Form.Label>Select Project</Form.Label>
                   <Form.Select
                     value={selectedProjectId}
                     onChange={(e) => setSelectedProjectId(e.target.value)}
                   >
                     <option value={""}>Open This</option>
-                    {tableProject.map(
-                      (project) =>
-                        project.category === category && (
+                    {tableProject.map((project) => {
+                      if (
+                        filterBy === "category" &&
+                        project.category === detailFilterValue
+                      ) {
+                        return (
                           <option key={project.id} value={project.id}>
                             {project.project_name}
                           </option>
-                        )
-                    )}
+                        );
+                      } else if (
+                        filterBy === "rank" &&
+                        project.rank === detailFilterValue
+                      ) {
+                        return (
+                          <option key={project.id} value={project.id}>
+                            {project.project_name}
+                          </option>
+                        );
+                      } else if (
+                        filterBy === "pic" &&
+                        project.manager_id === detailFilterValue
+                      ) {
+                        return (
+                          <option key={project.id} value={project.id}>
+                            {project.project_name}
+                          </option>
+                        );
+                      } else if (
+                        filterBy === "status" &&
+                        project.status === detailFilterValue
+                      ) {
+                        return (
+                          <option key={project.id} value={project.id}>
+                            {project.project_name}
+                          </option>
+                        );
+                      } else if (
+                        filterBy === "product" &&
+                        project.product_id === detailFilterValue
+                      ) {
+                        return (
+                          <option key={project.id} value={project.id}>
+                            {project.project_name}
+                          </option>
+                        );
+                      }
+
+                      return null;
+                    })}
                   </Form.Select>
                 </Form.Group>
+              </Row>
+              <Row>
                 <Col>
-                  <Button onClick={handleAddProject}>Add Project</Button>
+                  <Button onClick={handleAddProject} className="mb-3">
+                    Add Project
+                  </Button>
                 </Col>
               </Row>
+              <Row className="mb-3" style={{ textAlign: "left" }}>
+                <Col>
+                  {projectListWillReview.length > 0
+                    ? projectListWillReview.map((projectId, index) => {
+                        const projects = tableProject.find(
+                          (value) => value.id === projectId
+                        );
+                        return (
+                          <Badge
+                            key={index}
+                            style={{ marginRight: 2 }}
+                            bg={colorBgBadge(index + 1)}
+                          >
+                            <h6>
+                              {projects
+                                ? projects.project_name
+                                : "Project Not Found"}
+                              <CloseButton
+                                onClick={() => deleteProject(projectId)}
+                              />
+                            </h6>
+                          </Badge>
+                        );
+                      })
+                    : "Data Is Not Available"}
+                </Col>
+              </Row> */}
             </Modal.Body>
             <Modal.Footer>
               <Button type="submit">Review</Button>
@@ -297,9 +998,116 @@ function ScheduleReview(props) {
             </Modal.Footer>
           </Form>
         </Modal>
+        <Modal
+          show={openSetting}
+          onHide={() => {
+            setOpenSetting(false);
+          }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Setting</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>Column Width</Form.Label>
+              </Col>
+              <Col>
+                <Form.Control
+                  type={"number"}
+                  placeholder="Enter Column Width"
+                  value={colWidth}
+                  onChange={(e) => setColWidth(e.target.value)}
+                />
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>Row Height</Form.Label>
+              </Col>
+              <Col>
+                <Form.Control
+                  type={"number"}
+                  placeholder="Enter Row Height"
+                  value={rowHeight}
+                  onChange={(e) => setRowHeight(parseInt(e.target.value))}
+                />
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>List Cell Width</Form.Label>
+              </Col>
+              <Col>
+                <Form.Control
+                  type={"number"}
+                  placeholder="Enter List Cell Width"
+                  value={listCellWidth}
+                  onChange={(e) => setListCellWidth(parseInt(e.target.value))}
+                />
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>Month Format</Form.Label>
+              </Col>
+              <Col>
+                <Form.Select
+                  value={monthFormat}
+                  style={{ width: 150, display: "inline-block" }}
+                  onChange={(e) => setMonthFormat(e.target.value)}
+                >
+                  <option value={"ja-JP"}>Japan</option>
+                  <option value={"en-US"}>English</option>
+                </Form.Select>
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>Hidden Plan</Form.Label>
+              </Col>
+              <Col>
+                <Form.Select
+                  value={hiddenPlan}
+                  style={{ width: 100, display: "inline-block" }}
+                  onChange={(e) => setHiddenPlan(e.target.value)}
+                >
+                  <option value={"Yes"}>Yes</option>
+                  <option value={"No"}>No</option>
+                </Form.Select>
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Label>Drag Mode</Form.Label>
+              </Col>
+              <Col>
+                <Form.Check
+                  type="switch"
+                  label="Drag Mode"
+                  checked={switchMode}
+                  onChange={() => setSwitchMode(!switchMode)}
+                />
+              </Col>
+            </Row>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button type="button" onClick={saveSettingProjectActivity}>
+              Save
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setOpenSetting(false);
+              }}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </div>
   );
 }
 
-export default ScheduleReview;
+export default GlobalConsumer(ScheduleReview);
