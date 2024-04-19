@@ -15,10 +15,10 @@ import { ViewMode } from "gantt-task-react";
 import TaskListTable from "../TaskListTable";
 import { SiStarbucks } from "react-icons/si";
 
-function ScheduleAnalysis(props) {
+function ScheduleReview(props) {
   const { id } = props;
   const [showModal, setShowModal] = useState(false);
-  const [tableProject, settableProject] = useState([]);
+  const [tableProject, setTableProject] = useState([]);
   const [activity, setActivity] = useState([]);
   const [section, setSection] = useState("");
   const [userId, setUserId] = useState("");
@@ -29,6 +29,7 @@ function ScheduleAnalysis(props) {
   const [listCellWidth, setListCellWidth] = useState(300);
   const [colWidth, setColWidth] = useState(120);
   const [rowHeight, setRowHeight] = useState(35);
+  const [projectListWillReview, setProjectListWillReview] = useState([]);
   const [titleProject, setTitleProject] = useState("");
 
   const backgroundColorDelay = (endProject, progressBar, remark) => {
@@ -88,46 +89,72 @@ function ScheduleAnalysis(props) {
       axios.get(getProjectByUserApi(userId)).then((response) => {
         const data = response.data.data;
         console.log(data, "data project");
-        settableProject(data);
+        setTableProject(data);
       });
     }
   }, [userId, viewMode, id]);
 
   const handleImportActivity = (e) => {
     e.preventDefault();
-    if (selectedProjectId) {
-      axios
-        .get(getActivityByProjectIdApi(selectedProjectId))
-        .then((response) => {
-          let dataActivity = [];
-          const data = response.data.data;
-          if (data.length > 0) {
-            for (let index = 0; index < data.length; index++) {
-              let dataArray = {
-                id: data[index].id,
-                start: new Date(moment(data[index].start)),
-                end: new Date(moment(data[index].end)),
-                name: data[index].name,
-                progress: data[index].progress,
-                dependencies: data[index].dependencies,
-                type: data[index].type,
-                project: data[index].project,
-                styles: backgroundColorDelay(
-                  new Date(moment(data[index].end)),
-                  data[index].progress,
-                  data[index].remark
-                ),
-                remark: data[index].remark,
-                linkToProject: data[index].linkToProject,
-                pic: data[index].pic,
-              };
-              dataActivity.push(dataArray);
-            }
-          }
-          setActivity(dataActivity);
-          console.log(activity, "activity");
-        })
-        .catch((error) => console.log(error));
+    if (projectListWillReview.length > 0) {
+      let dataArray = [];
+      for (let index = 0; index < projectListWillReview.length; index++) {
+        axios
+          .get(getProjectByIdApi(projectListWillReview[index]))
+          .then((response) => {
+            const dataProject = response.data.data[0];
+            // setTitleProject(dataProject.project_name);
+            // setProject(dataProject);
+            // setDescription(dataProject.description);
+            // setCategory(dataProject.category);
+            // let memberIdData = [];
+            // for (let index = 0; index < dataProject.member.length; index++) {
+            //   memberIdData.push(dataProject.member[index].user_id);
+            // }
+            // setMemberListOfProject(memberIdData);
+
+            const data = {
+              name: dataProject.project_name,
+              id: dataProject.id,
+              progress: dataProject.progress,
+              type: "project",
+              start: new Date(dataProject.start),
+              end: new Date(dataProject.finish),
+              hideChildren: false,
+            };
+            dataArray.push(data);
+
+            axios
+              .get(getActivityByProjectIdApi(dataProject.id))
+              .then((response) => {
+                const dataActivity = response.data.data;
+                if (dataActivity.length > 0) {
+                  for (let index = 0; index < dataActivity.length; index++) {
+                    let pushData = {
+                      id: dataActivity[index].id,
+                      start: new Date(moment(dataActivity[index].start)),
+                      end: new Date(moment(dataActivity[index].end)),
+                      name: dataActivity[index].name,
+                      progress: dataActivity[index].progress,
+                      dependencies: dataActivity[index].dependencies,
+                      type: dataActivity[index].type,
+                      project: dataActivity[index].project,
+                      styles: backgroundColorDelay(
+                        new Date(moment(dataActivity[index].end)),
+                        dataActivity[index].progress,
+                        dataActivity[index].remark
+                      ),
+                      remark: dataActivity[index].remark,
+                      linkToProject: dataActivity[index].linkToProject,
+                      pic: dataActivity[index].pic,
+                    };
+                    dataArray.push(pushData);
+                  }
+                }
+              });
+          });
+      }
+      setActivity(dataArray);
     }
     setShowModal(false);
   };
@@ -172,6 +199,18 @@ function ScheduleAnalysis(props) {
     }
   };
 
+  const handleAddProject = () => {
+    if (selectedProjectId) {
+      const checkData = projectListWillReview.find(
+        (value) => value === selectedProjectId
+      );
+      if (!checkData) {
+        setProjectListWillReview((prev) => [...prev, selectedProjectId]);
+      } else {
+        window.alert("Data Already Add");
+      }
+    }
+  };
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -245,10 +284,13 @@ function ScheduleAnalysis(props) {
                     )}
                   </Form.Select>
                 </Form.Group>
+                <Col>
+                  <Button onClick={handleAddProject}>Add Project</Button>
+                </Col>
               </Row>
             </Modal.Body>
             <Modal.Footer>
-              <Button type="submit">Add</Button>
+              <Button type="submit">Review</Button>
               <Button variant="secondary" onClick={reset}>
                 Close
               </Button>
@@ -260,4 +302,4 @@ function ScheduleAnalysis(props) {
   );
 }
 
-export default ScheduleAnalysis;
+export default ScheduleReview;

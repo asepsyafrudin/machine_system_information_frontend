@@ -12,7 +12,7 @@ import { SETPROJECTEVENT } from "../../Context/const";
 import { useEffect } from "react";
 import ToDoListSummary from "../ToDoListSummary";
 import AssignmentSummary from "../AssignmentSummary";
-import ScheduleAnalysis from "../ScheduleAnalysis";
+import ScheduleReview from "../ScheduleAnalysis";
 
 function NavigationProject(props) {
   const { projectEvent, dispatch } = props;
@@ -88,7 +88,7 @@ function NavigationProject(props) {
                 className="tabTitle"
               >
                 <AiOutlineInbox style={{ marginRight: 5 }} />
-                Schedule Analysis
+                Schedule Review
               </Nav.Link>
             </Nav.Item>
             <Nav.Item style={{ marginTop: 30 }}>
@@ -128,7 +128,7 @@ function NavigationProject(props) {
               />
             </Tab.Pane>
             <Tab.Pane eventKey={"scheduleAnalysis"}>
-              <ScheduleAnalysis />
+              <ScheduleReview />
             </Tab.Pane>
           </Tab.Content>
         </Col>
