@@ -17,7 +17,6 @@ import {
   getProjectByUserApi,
   getUserByUserIdApi,
   getProjectByIdApi,
-  getProblemByIdApi,
   getSettingByProjectIdApi,
   saveSettingProjectApi,
   getAllUsersApi,
@@ -28,17 +27,15 @@ import {
 import GanttChart from "../GanttChart";
 import { ViewMode } from "gantt-task-react";
 import TaskListTable from "../TaskListTable";
-import { SiStarbucks } from "react-icons/si";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { SETFILTER } from "../../Context/const/index";
 import { SETFILTERDETAIL } from "../../Context/const/index";
 import { GlobalConsumer } from "../../Context/store/index";
-import { SETPAGE } from "../../Context/const/index";
 
 function ScheduleReview(props) {
   const {
     id,
-    accessMember,
+
     filterEvent,
     filterDetailEvent,
     dispatch,
@@ -49,7 +46,6 @@ function ScheduleReview(props) {
   const [activity, setActivity] = useState([]);
   const [section, setSection] = useState("");
   const [userId, setUserId] = useState("");
-  const [category, setCategory] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [monthFormat, setMonthFormat] = useState("en-US");
   const [viewMode, setViewMode] = useState(ViewMode.Month);
@@ -57,11 +53,9 @@ function ScheduleReview(props) {
   const [colWidth, setColWidth] = useState(120);
   const [rowHeight, setRowHeight] = useState(35);
   const [projectListWillReview, setProjectListWillReview] = useState([]);
-  const [titleProject, setTitleProject] = useState("");
   const [hiddenPlan, setHiddenPlan] = useState("Yes");
   const [switchMode, setSwitchMode] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
-  const [showNotif, setShowNotif] = useState(false);
   const [filterBy, setFilterBy] = useState(filterEvent);
   const [detailFilterValue, setDetailFilterValue] = useState(filterDetailEvent);
   const [tableUser, setTableUser] = useState([]);
@@ -69,10 +63,11 @@ function ScheduleReview(props) {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [fiscalYear, setFiscalYear] = useState("");
-  const [userEmail, setUserEmail] = useState("");
   const [userPosition, setUserPosition] = useState("");
   const [userSection, setUserSection] = useState("");
   const [page, setPage] = useState(pageEvent);
+  const [admin, setAdmin] = useState(false);
+  const [totalProject, setTotalProject] = useState([]);
 
   const backgroundColorDelay = (endProject, progressBar, remark) => {
     let currentDate = new Date();
@@ -94,9 +89,22 @@ function ScheduleReview(props) {
   };
 
   useEffect(() => {
+    if (localStorage.getItem("user")) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const { id } = user;
+      axios.get(getUserByUserIdApi(id)).then((response) => {
+        const dataUser = response.data.data;
+        if (dataUser.length > 0) {
+          setSection(dataUser[0].section_id);
+          if (dataUser[0].position === "Administrator") {
+            setAdmin(true);
+          }
+        }
+      });
+    }
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
-    setUserEmail(user.email);
+
     const position = user.position;
     setUserPosition(position);
     const section_id = user.section_id;
@@ -144,7 +152,6 @@ function ScheduleReview(props) {
     if (userId) {
       axios.get(getProjectByUserApi(userId)).then((response) => {
         const data = response.data.data;
-        console.log(data, "data project");
         setTableProject(data);
       });
     }
@@ -357,26 +364,22 @@ function ScheduleReview(props) {
           });
       }
     }
-  }, [userId, viewMode, id]);
+  }, [
+    viewMode,
+    id,
+    filterBy,
+    detailFilterValue,
+    userId,
+    fromDate,
+    toDate,
+    page,
+  ]);
 
-  const saveSettingProjectActivity = () => {
-    if (accessMember) {
-      const data = {
-        projectId: id,
-        columnWidth: colWidth,
-        rowHeight: rowHeight,
-        listCellWidth: listCellWidth,
-        monthFormat: monthFormat,
-        hiddenPlan: hiddenPlan,
-        switchMode: switchMode,
-      };
-
-      axios.post(saveSettingProjectApi, data).then(() => {
-        setOpenSetting(false);
-        window.alert("Setting Format Already Save into Database");
-      });
-    }
-  };
+  useEffect(() => {
+    axios.get(getAllProjectApi).then((response) => {
+      setTotalProject(response.data.data);
+    });
+  }, []);
 
   const handleImportActivity = async (e) => {
     e.preventDefault();
@@ -518,36 +521,74 @@ function ScheduleReview(props) {
       if (section === 4) {
         option.push(
           <>
-            <option value={"CO2 Neutral"}>CO2 Neutral</option>
-            <option value={"Logistic Automation"}>Logistic Automation</option>
-            <option value={"Vision System"}>Vision System</option>
-            <option value={"DX"}>DX</option>
-            <option value={"Layout"}>Layout</option>
+            <option key={1} value={"CO2 Neutral"}>
+              CO2 Neutral
+            </option>
+            <option key={2} value={"Logistic Automation"}>
+              Logistic Automation
+            </option>
+            <option key={3} value={"Vision System"}>
+              Vision System
+            </option>
+            <option key={4} value={"DX"}>
+              DX
+            </option>
+            <option key={5} value={"Layout"}>
+              Layout
+            </option>
           </>
         );
       } else {
         option.push(
           <>
-            <option value={"New Model"}>New Model</option>
-            <option value={"Quality"}>Quality</option>
-            <option value={"Integrated Factory"}>Integrated Factory</option>
-            <option value={"Productivity"}>Productivity</option>
-            <option value={"Profit Improvement"}>Profit Improvement</option>
+            <option key={6} value={"New Model"}>
+              New Model
+            </option>
+            <option key={7} value={"Quality"}>
+              Quality
+            </option>
+            <option key={8} value={"Integrated Factory"}>
+              Integrated Factory
+            </option>
+            <option key={9} value={"Productivity"}>
+              Productivity
+            </option>
+            <option key={10} value={"Profit Improvement"}>
+              Profit Improvement
+            </option>
           </>
         );
       }
     } else if (filterBy === "rank") {
       option.push(
         <>
-          <option value={"A1"}>A1</option>
-          <option value={"A2"}>A2</option>
-          <option value={"A3"}>A3</option>
-          <option value={"B1"}>B1</option>
-          <option value={"B2"}>B2</option>
-          <option value={"B3"}>B3</option>
-          <option value={"C1"}>C1</option>
-          <option value={"C2"}>C2</option>
-          <option value={"C3"}>C3</option>
+          <option key={11} value={"A1"}>
+            A1
+          </option>
+          <option key={12} value={"A2"}>
+            A2
+          </option>
+          <option key={13} value={"A3"}>
+            A3
+          </option>
+          <option key={14} value={"B1"}>
+            B1
+          </option>
+          <option key={15} value={"B2"}>
+            B2
+          </option>
+          <option key={16} value={"B3"}>
+            B3
+          </option>
+          <option key={17} value={"C1"}>
+            C1
+          </option>
+          <option key={18} value={"C2"}>
+            C2
+          </option>
+          <option key={19} value={"C3"}>
+            C3
+          </option>
         </>
       );
     } else if (filterBy === "pic") {
@@ -555,14 +596,24 @@ function ScheduleReview(props) {
     } else if (filterBy === "status") {
       option.push(
         <>
-          <option value={"Not Yet Started"}>Not Yet Started</option>
-          <option value={"On Progress"}>On Progress</option>
-          <option value={"Delay"}>Delay</option>
-          <option value={"Finish"}>Finish</option>
-          <option value={"Waiting Detail Activity"}>
+          <option key={20} value={"Not Yet Started"}>
+            Not Yet Started
+          </option>
+          <option key={21} value={"On Progress"}>
+            On Progress
+          </option>
+          <option key={22} value={"Delay"}>
+            Delay
+          </option>
+          <option key={23} value={"Finish"}>
+            Finish
+          </option>
+          <option key={24} value={"Waiting Detail Activity"}>
             Waiting Detail Activity
           </option>
-          <option value={"cancel"}>cancel</option>
+          <option key={25} value={"cancel"}>
+            cancel
+          </option>
         </>
       );
     } else if (filterBy === "product") {
@@ -627,65 +678,6 @@ function ScheduleReview(props) {
     }
   };
 
-  // const filterItemLogic = () => {
-  //   let option = [];
-  //   if (filterBy === "category") {
-  //     if (section === 4) {
-  //       option.push(
-  //         <>
-  //           <option value={"CO2 Neutral"}>CO2 Neutral</option>
-  //           <option value={"Logistic Automation"}>Logistic Automation</option>
-  //           <option value={"Vision System"}>Vision System</option>
-  //           <option value={"DX"}>DX</option>
-  //           <option value={"Layout"}>Layout</option>
-  //         </>
-  //       );
-  //     } else {
-  //       option.push(
-  //         <>
-  //           <option value={"New Model"}>New Model</option>
-  //           <option value={"Quality"}>Quality</option>
-  //           <option value={"Integrated Factory"}>Integrated Factory</option>
-  //           <option value={"Productivity"}>Productivity</option>
-  //           <option value={"Profit Improvement"}>Profit Improvement</option>
-  //         </>
-  //       );
-  //     }
-  //   } else if (filterBy === "rank") {
-  //     option.push(
-  //       <>
-  //         <option value={"A1"}>A1</option>
-  //         <option value={"A2"}>A2</option>
-  //         <option value={"A3"}>A3</option>
-  //         <option value={"B1"}>B1</option>
-  //         <option value={"B2"}>B2</option>
-  //         <option value={"B3"}>B3</option>
-  //         <option value={"C1"}>C1</option>
-  //         <option value={"C2"}>C2</option>
-  //         <option value={"C3"}>C3</option>
-  //       </>
-  //     );
-  //   } else if (filterBy === "pic") {
-  //     return userOption();
-  //   } else if (filterBy === "status") {
-  //     option.push(
-  //       <>
-  //         <option value={"Not Yet Started"}>Not Yet Started</option>
-  //         <option value={"On Progress"}>On Progress</option>
-  //         <option value={"Delay"}>Delay</option>
-  //         <option value={"Finish"}>Finish</option>
-  //         <option value={"Waiting Detail Activity"}>
-  //           Waiting Detail Activity
-  //         </option>
-  //         <option value={"cancel"}>cancel</option>
-  //       </>
-  //     );
-  //   } else if (filterBy === "product") {
-  //     return productOption();
-  //   }
-  //   return option;
-  // };
-
   const handleAddProject = () => {
     if (selectedProjectId) {
       const checkData = projectListWillReview.find(
@@ -698,6 +690,27 @@ function ScheduleReview(props) {
       }
     }
   };
+
+  const handleAddAllProject = () => {
+    if (tableProject.length > 0) {
+      for (let index = 0; index < tableProject.length; index++) {
+        if (projectListWillReview.length > 0) {
+          const checkData = projectListWillReview.find(
+            (value) => value === tableProject[index].id
+          );
+          if (!checkData) {
+            setProjectListWillReview((prev) => [
+              ...prev,
+              tableProject[index].id,
+            ]);
+          }
+        } else {
+          setProjectListWillReview((prev) => [...prev, tableProject[index].id]);
+        }
+      }
+    }
+  };
+
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -731,9 +744,8 @@ function ScheduleReview(props) {
           >
             Month
           </Button>
-          {accessMember && (
-            <Button onClick={() => setOpenSetting(true)}>Setting</Button>
-          )}
+
+          <Button onClick={() => setOpenSetting(true)}>Setting</Button>
         </div>
         <Modal show={showModal} centered size="lg">
           <Form onSubmit={handleImportActivity}>
@@ -775,7 +787,7 @@ function ScheduleReview(props) {
                 </Row>
               </div>
               <div style={{ marginBottom: 5 }}>
-                <Row className="col-12">
+                <Row className="col-12 mb-3">
                   <Col lg={3}>
                     <Form.Select
                       value={filterBy}
@@ -796,37 +808,41 @@ function ScheduleReview(props) {
                     </Form.Select>
                   </Col>
                   <Col lg={3}>
-                    {filterBy !== "" && (
-                      <Form.Select
-                        value={detailFilterValue}
-                        onChange={(e) => {
-                          setDetailFilterValue(e.target.value);
-                          dispatch({
-                            type: SETFILTERDETAIL,
-                            payload: e.target.value,
-                          });
-                        }}
-                      >
-                        <option value="">Select Detail</option>
-                        {filterItemLogic()}
-                      </Form.Select>
-                    )}
+                    <Form.Select
+                      value={detailFilterValue}
+                      onChange={(e) => {
+                        setDetailFilterValue(e.target.value);
+                        dispatch({
+                          type: SETFILTERDETAIL,
+                          payload: e.target.value,
+                        });
+                      }}
+                    >
+                      <option value="">Select Detail</option>
+                      {filterItemLogic()}
+                    </Form.Select>
                   </Col>
                   <Col lg={3}>
-                    {filterBy !== "" && (
-                      <Form.Select
-                        value={detailFilterValue}
-                        onChange={(e) => {
-                          setDetailFilterValue(e.target.value);
-                          dispatch({
-                            type: SETFILTERDETAIL,
-                            payload: e.target.value,
-                          });
-                        }}
-                      >
-                        <option value="">Select Detail</option>
-                      </Form.Select>
-                    )}
+                    <Form.Select
+                      value={selectedProjectId}
+                      onChange={(e) => {
+                        setSelectedProjectId(e.target.value);
+                        dispatch({
+                          type: SETFILTERDETAIL,
+                          payload: e.target.value,
+                        });
+                      }}
+                    >
+                      <option value="">Select Detail</option>
+                      {tableProject.map((value, index) => {
+                        return (
+                          <option key={index} value={value.id}>
+                            {" "}
+                            {value.project_name}
+                          </option>
+                        );
+                      })}
+                    </Form.Select>
                   </Col>
                   <Col lg={3}>
                     {filterBy !== "" && (
@@ -852,113 +868,18 @@ function ScheduleReview(props) {
                   </Col>
                 </Row>
               </div>
-              {/* <Row>
-              <Modal.Title style={{ paddingLeft: 25, paddingTop: 25 }}>
-                Select Your Project
-              </Modal.Title>
-            </Row>
-            <Modal.Body>
-              <Row className="mb-3">
-                <Form.Group as={Col}>
-                  <Form.Label>Filter By</Form.Label>
-                  <Form.Select
-                    className="mb-3"
-                    value={filterBy}
-                    onChange={(e) => {
-                      setFilterBy(e.target.value);
-                      dispatch({
-                        type: SETFILTER,
-                        payload: e.target.value,
-                      });
-                    }}
-                  >
-                    <option value="">Filter By</option>
-                    <option value="category">Category</option>
-                    <option value="rank">Rank</option>
-                    <option value="pic">PIC</option>
-                    <option value="status">Status</option>
-                    <option value="product">Product</option>
-                  </Form.Select>
-                  <Form.Label>Select Detail</Form.Label>
 
-                  <Form.Select
-                    className="mb-3"
-                    value={detailFilterValue}
-                    onChange={(e) => {
-                      setDetailFilterValue(e.target.value);
-                      dispatch({
-                        type: SETFILTERDETAIL,
-                        payload: e.target.value,
-                      });
-                    }}
-                  >
-                    <option value="">Select Detail</option>
-                    {filterItemLogic()}
-                  </Form.Select>
-
-                  <Form.Label>Select Project</Form.Label>
-                  <Form.Select
-                    value={selectedProjectId}
-                    onChange={(e) => setSelectedProjectId(e.target.value)}
-                  >
-                    <option value={""}>Open This</option>
-                    {tableProject.map((project) => {
-                      if (
-                        filterBy === "category" &&
-                        project.category === detailFilterValue
-                      ) {
-                        return (
-                          <option key={project.id} value={project.id}>
-                            {project.project_name}
-                          </option>
-                        );
-                      } else if (
-                        filterBy === "rank" &&
-                        project.rank === detailFilterValue
-                      ) {
-                        return (
-                          <option key={project.id} value={project.id}>
-                            {project.project_name}
-                          </option>
-                        );
-                      } else if (
-                        filterBy === "pic" &&
-                        project.manager_id === detailFilterValue
-                      ) {
-                        return (
-                          <option key={project.id} value={project.id}>
-                            {project.project_name}
-                          </option>
-                        );
-                      } else if (
-                        filterBy === "status" &&
-                        project.status === detailFilterValue
-                      ) {
-                        return (
-                          <option key={project.id} value={project.id}>
-                            {project.project_name}
-                          </option>
-                        );
-                      } else if (
-                        filterBy === "product" &&
-                        project.product_id === detailFilterValue
-                      ) {
-                        return (
-                          <option key={project.id} value={project.id}>
-                            {project.project_name}
-                          </option>
-                        );
-                      }
-
-                      return null;
-                    })}
-                  </Form.Select>
-                </Form.Group>
-              </Row>
               <Row>
                 <Col>
-                  <Button onClick={handleAddProject} className="mb-3">
+                  <Button onClick={handleAddProject} className="mb-3 me-2">
                     Add Project
+                  </Button>
+                  <Button
+                    onClick={handleAddAllProject}
+                    className="mb-3"
+                    variant="success"
+                  >
+                    Add All
                   </Button>
                 </Col>
               </Row>
@@ -966,7 +887,7 @@ function ScheduleReview(props) {
                 <Col>
                   {projectListWillReview.length > 0
                     ? projectListWillReview.map((projectId, index) => {
-                        const projects = tableProject.find(
+                        const projects = totalProject.find(
                           (value) => value.id === projectId
                         );
                         return (
@@ -988,7 +909,7 @@ function ScheduleReview(props) {
                       })
                     : "Data Is Not Available"}
                 </Col>
-              </Row> */}
+              </Row>
             </Modal.Body>
             <Modal.Footer>
               <Button type="submit">Review</Button>
@@ -1078,7 +999,7 @@ function ScheduleReview(props) {
               </Col>
             </Row>
             <Row className="mb-3">
-              <Col>
+              {/* <Col>
                 <Form.Label>Drag Mode</Form.Label>
               </Col>
               <Col>
@@ -1088,13 +1009,10 @@ function ScheduleReview(props) {
                   checked={switchMode}
                   onChange={() => setSwitchMode(!switchMode)}
                 />
-              </Col>
+              </Col> */}
             </Row>
           </Modal.Body>
           <Modal.Footer>
-            <Button type="button" onClick={saveSettingProjectActivity}>
-              Save
-            </Button>
             <Button
               variant="secondary"
               onClick={() => {

@@ -21,9 +21,11 @@ import { IoMdRainy } from "react-icons/io";
 import { TfiShine } from "react-icons/tfi";
 import { Link } from "react-router-dom";
 import { MdVideoLibrary } from "react-icons/md";
+import { GlobalConsumer } from "../../Context/store/index";
+import { SETPAGE } from "../../Context/const/index";
 
 function TotalProject(props) {
-  const { actionStateValue } = props;
+  const { actionStateValue, dispatch, pageEvent } = props;
   const [productFilter, setProductFilter] = useState("");
   const [startFilter, setStartFilter] = useState("");
   const [endFilter, setEndFilter] = useState("");
@@ -33,7 +35,7 @@ function TotalProject(props) {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [totalSavingCost, setTotalSavingCost] = useState("");
   const [tableProduct, setTableProduct] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(pageEvent);
   const [totalPageData, setStotalPageData] = useState(1);
   const [tableProject, setTableProject] = useState([]);
   const [projectLaunch, setProjectLaunch] = useState("");
@@ -623,7 +625,13 @@ function TotalProject(props) {
               <PaginationTable
                 totalPage={totalPageData}
                 maxPagesShow={maxPagesShow}
-                onChangePage={(e) => setPage(e)}
+                onChangePage={(e) => {
+                  setPage(e);
+                  dispatch({
+                    type: SETPAGE,
+                    payload: e,
+                  });
+                }}
                 pageActive={page}
               />
             </div>
@@ -694,4 +702,4 @@ function TotalProject(props) {
   );
 }
 
-export default TotalProject;
+export default GlobalConsumer(TotalProject);
