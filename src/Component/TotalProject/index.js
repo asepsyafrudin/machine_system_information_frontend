@@ -23,16 +23,30 @@ import { Link } from "react-router-dom";
 import { MdVideoLibrary } from "react-icons/md";
 import { GlobalConsumer } from "../../Context/store/index";
 import { SETPAGE } from "../../Context/const/index";
+import { SETFILTER } from "../../Context/const/index";
+import { SETFILTERDETAIL } from "../../Context/const/index";
+import { SETFILTERDETAIL1 } from "../../Context/const/index";
+import { SETFILTERDETAIL2 } from "../../Context/const/index";
+import { SETFILTERDETAIL3 } from "../../Context/const/index";
 
 function TotalProject(props) {
-  const { actionStateValue, dispatch, pageEvent } = props;
-  const [productFilter, setProductFilter] = useState("");
-  const [startFilter, setStartFilter] = useState("");
-  const [endFilter, setEndFilter] = useState("");
+  const {
+    actionStateValue,
+    dispatch,
+    pageEvent,
+    filterEvent,
+    filterDetailEvent,
+    filterDetailEvent1,
+    filterDetailEvent2,
+    filterDetailEvent3,
+  } = props;
+  const [productFilter, setProductFilter] = useState(filterDetailEvent);
+  const [startFilter, setStartFilter] = useState(filterDetailEvent2);
+  const [endFilter, setEndFilter] = useState(filterDetailEvent3);
   const [tableUser, setTableUser] = useState([]);
   const [totalItem, setTotalItem] = useState("");
   const [totalBudget, setTotalBudget] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(filterDetailEvent1);
   const [totalSavingCost, setTotalSavingCost] = useState("");
   const [tableProduct, setTableProduct] = useState([]);
   const [page, setPage] = useState(pageEvent);
@@ -41,7 +55,7 @@ function TotalProject(props) {
   const [projectLaunch, setProjectLaunch] = useState("");
   const [show, setShow] = useState(false);
   const [tableSection, setTableSection] = useState([]);
-  const [sectionFilter, setSectionFilter] = useState("");
+  const [sectionFilter, setSectionFilter] = useState(filterEvent);
   const [buttonFilter, setButtonFilter] = useState("");
   const [userId, setUserId] = useState("");
 
@@ -432,6 +446,10 @@ function TotalProject(props) {
     const filter = e.target.value;
     setSectionFilter(filter);
     setProductFilter("");
+    dispatch({
+      type: SETFILTER,
+      payload: e.target.value,
+    });
   };
 
   const categoryOption = () => {
@@ -481,7 +499,13 @@ function TotalProject(props) {
                   <Form.Label>Select Product</Form.Label>
                   <Form.Select
                     value={productFilter}
-                    onChange={(e) => setProductFilter(e.target.value)}
+                    onChange={(e) => {
+                      setProductFilter(e.target.value);
+                      dispatch({
+                        type: SETFILTERDETAIL,
+                        payload: e.target.value,
+                      });
+                    }}
                   >
                     <option value={""} disabled>
                       open this to product filter
@@ -493,7 +517,13 @@ function TotalProject(props) {
                   <Form.Label>Select Category</Form.Label>
                   <Form.Select
                     value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    onChange={(e) => {
+                      setCategoryFilter(e.target.value);
+                      dispatch({
+                        type: SETFILTERDETAIL1,
+                        payload: e.target.value,
+                      });
+                    }}
                   >
                     <option value={""} disabled>
                       open this to product filter
@@ -506,7 +536,13 @@ function TotalProject(props) {
                   <Form.Control
                     type="date"
                     value={startFilter}
-                    onChange={(e) => setStartFilter(e.target.value)}
+                    onChange={(e) => {
+                      setStartFilter(e.target.value);
+                      dispatch({
+                        type: SETFILTERDETAIL2,
+                        payload: e.target.value,
+                      });
+                    }}
                   />
                 </Form.Group>
                 <Form.Group as={Col}>
@@ -514,7 +550,13 @@ function TotalProject(props) {
                   <Form.Control
                     type="date"
                     value={endFilter}
-                    onChange={(e) => setEndFilter(e.target.value)}
+                    onChange={(e) => {
+                      setEndFilter(e.target.value);
+                      dispatch({
+                        type: SETFILTERDETAIL3,
+                        payload: e.target.value,
+                      });
+                    }}
                   />
                 </Form.Group>
               </Row>

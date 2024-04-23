@@ -15,6 +15,7 @@ import {
 } from "react-bootstrap";
 import axios from "axios";
 import {
+  approvalManagerFileReportApi,
   changeStatusDocumentApi,
   deleteDocumentApi,
   deleteFileByIdApi,
@@ -450,6 +451,12 @@ function DocumentRegister(props) {
         .catch((error) => console.log(error));
     }
   };
+
+  if (fileType === "Engineering Report") {
+    axios.post(approvalManagerFileReportApi).then(() => {
+      alert("email has sent");
+    });
+  }
 
   return (
     <div className="userListContainer">

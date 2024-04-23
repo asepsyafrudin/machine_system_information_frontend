@@ -346,6 +346,7 @@ export const sendEmailApi = `${port}/api/email/send`;
 export const shareFinishProjectToUserCommonApi = `${port}/api/email/shareFinishProjectCommon`;
 export const shareFinishProjectForSMDNewModelApi = `${port}/api/email/shareFinishProjectForSMD`;
 export const sendNotificationToPicApi = `${port}/api/email/sendNotificationToPic`;
+export const approvalManagerFileReportApi = `${port}/api/email/approvalManagerFileReport`;
 
 //fedbackFTA
 export const sendFeedbackFtaApi = `${port}/api/email/sendFeedback`;

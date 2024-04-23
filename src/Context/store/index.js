@@ -10,7 +10,10 @@ import {
   TODOCHANGECOUNT,
   SETPAGE,
   SETFILTER,
-  SETFILTERDETAIL
+  SETFILTERDETAIL,
+  SETFILTERDETAIL1,
+  SETFILTERDETAIL2,
+  SETFILTERDETAIL3,
 } from "../const";
 
 const Context = createContext();
@@ -33,7 +36,10 @@ export const GlobalProvider = (Children) => {
       userEvent: "userDashboard",
       pageEvent: 1,
       filterEvent: "",
-      filterDetailEvent: ""
+      filterDetailEvent: "",
+      filterDetailEvent1: "",
+      filterDetailEvent2: "",
+      filterDetailEvent3: "",
     };
 
     dipatch = (action) => {
@@ -87,14 +93,21 @@ export const GlobalProvider = (Children) => {
         this.setState({ pageEvent: action.payload });
       }
 
-      if (action.type === SETFILTER){
-        this.setState({ filterEvent: action.payload})
-        
+      if (action.type === SETFILTER) {
+        this.setState({ filterEvent: action.payload });
       }
 
-      if(action.type === SETFILTERDETAIL){
-        this.setState({ filterDetailEvent: action.payload })
-        
+      if (action.type === SETFILTERDETAIL) {
+        this.setState({ filterDetailEvent: action.payload });
+      }
+      if (action.type === SETFILTERDETAIL1) {
+        this.setState({ filterDetailEvent1: action.payload });
+      }
+      if (action.type === SETFILTERDETAIL2) {
+        this.setState({ filterDetailEvent2: action.payload });
+      }
+      if (action.type === SETFILTERDETAIL3) {
+        this.setState({ filterDetailEvent3: action.payload });
       }
     };
 
@@ -117,6 +130,9 @@ export const GlobalProvider = (Children) => {
             pageEvent: this.state.pageEvent,
             filterEvent: this.state.filterEvent,
             filterDetailEvent: this.state.filterDetailEvent,
+            filterDetailEvent1: this.state.filterDetailEvent1,
+            filterDetailEvent2: this.state.filterDetailEvent2,
+            filterDetailEvent3: this.state.filterDetailEvent3,
             dispatch: this.dipatch,
           }}
         >

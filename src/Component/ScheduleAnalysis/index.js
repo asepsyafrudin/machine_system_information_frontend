@@ -33,14 +33,7 @@ import { SETFILTERDETAIL } from "../../Context/const/index";
 import { GlobalConsumer } from "../../Context/store/index";
 
 function ScheduleReview(props) {
-  const {
-    id,
-
-    filterEvent,
-    filterDetailEvent,
-    dispatch,
-    pageEvent,
-  } = props;
+  const { id, filterEvent, filterDetailEvent, dispatch, pageEvent } = props;
   const [showModal, setShowModal] = useState(false);
   const [tableProject, setTableProject] = useState([]);
   const [activity, setActivity] = useState([]);
@@ -436,23 +429,6 @@ function ScheduleReview(props) {
       setActivity(dataArray);
     }
 
-    axios.get(getSettingByProjectIdApi(id)).then((response) => {
-      const data = response.data.data[0];
-      if (data) {
-        setColWidth(parseInt(data.column_width));
-        setRowHeight(parseInt(data.row_height));
-        setListCellWidth(parseInt(data.list_cell_width));
-        setMonthFormat(data.month_format);
-        setHiddenPlan(data.hidden_plan);
-        setSwitchMode(() => {
-          if (data.switchMode === 1) {
-            return true;
-          } else {
-            return false;
-          }
-        });
-      }
-    });
     setShowModal(false);
   };
 
