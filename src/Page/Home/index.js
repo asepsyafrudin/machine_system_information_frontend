@@ -4,9 +4,9 @@ import Header from "../../Component/Header";
 import "./home.css";
 import ProjectImage from "../../Asset/ImageGeneral/Project.jpg";
 import { useEffect } from "react";
-import { getUserByUserIdApi } from "../../Config/API";
+
 import { useState } from "react";
-import axios from "axios";
+
 import { Link } from "react-router-dom";
 import SearchImage from "../../Asset/ImageGeneral/file search.jpg";
 import DocumentUploadImage from "../../Asset/ImageGeneral/document.JPG";
@@ -16,13 +16,9 @@ function Home() {
   useEffect(() => {
     if (localStorage.getItem("user")) {
       const user = JSON.parse(localStorage.getItem("user"));
-      const { id } = user;
-      axios.get(getUserByUserIdApi(id)).then((response) => {
-        const dataUser = response.data.data;
-        if (dataUser.length > 0) {
-          setPosition(dataUser[0].position);
-        }
-      });
+      if (user) {
+        setPosition(user.position);
+      }
     }
   }, []);
 

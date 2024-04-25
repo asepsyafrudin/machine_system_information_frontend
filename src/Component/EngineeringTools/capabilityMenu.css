@@ -6,7 +6,7 @@
   .cardCapability {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-around;
+    justify-content: space-between;
   }
   
   .ag-courses_box {

@@ -28,6 +28,7 @@ import { SETFILTERDETAIL } from "../../Context/const/index";
 import { SETFILTERDETAIL1 } from "../../Context/const/index";
 import { SETFILTERDETAIL2 } from "../../Context/const/index";
 import { SETFILTERDETAIL3 } from "../../Context/const/index";
+import { BeatLoader } from "react-spinners";
 
 function TotalProject(props) {
   const {
@@ -353,15 +354,8 @@ function TotalProject(props) {
           </tr>
         );
       }
-    } else {
-      listTable.push(
-        <tr key={1}>
-          <td colSpan={9}>Data is Not Available</td>
-        </tr>
-      );
+      return listTable;
     }
-
-    return listTable;
   };
 
   const buttonView = (projectId) => {
@@ -457,8 +451,8 @@ function TotalProject(props) {
       return (
         <>
           <option value={"CO2 Neutral"}>CO2 Neutral</option>
-          <option value={"Logistic Automation"}>Logistic Automation</option>
-          <option value={"Vision System"}>Vision System</option>
+          <option value={"Log Auto"}>Log Auto</option>
+          <option value={"Vision"}>Vision</option>
           <option value={"DX"}>DX</option>
           <option value={"Layout"}>Layout</option>
         </>
@@ -569,73 +563,105 @@ function TotalProject(props) {
           <div className="totalProjectCard">
             <span className="titleTotalProject">Total Project</span>
             <br />
-            <span className="valueTotalProject">{totalItem} Items</span>
+            {totalItem ? (
+              <>
+                <span className="valueTotalProject">{totalItem} Items</span>
 
-            <Row className="progressSummary">
-              <Col sm={3} style={{ textAlign: "center" }}>
-                <BiLoader
-                  title="Waiting Detail Activity"
-                  onClick={() => handleButtonFilter("Waiting Detail Activity")}
-                  style={{ color: "orange", fontSize: 25, cursor: "pointer" }}
-                />
-                <br />
-                {totalWaitingDetailActivity(tableProject)}
-              </Col>
-              <Col sm={3} style={{ textAlign: "center" }}>
-                <BsFlag
-                  title="Not Yet Started"
-                  onClick={() => handleButtonFilter("Not Yet Started")}
-                  style={{ color: "orange", fontSize: 25, cursor: "pointer" }}
-                />
-                <br />
-                {totalNotYetStartedBaseOnStatusProject(tableProject)}
-              </Col>
-              <Col sm={3}>
-                <FaSmile
-                  title="Project On Progress"
-                  onClick={() => handleButtonFilter("On Progress")}
-                  style={{ color: "green", fontSize: 25, cursor: "pointer" }}
-                />
-                <br /> {totalOnProgressBaseOnStatusProject(tableProject)}
-              </Col>
-              <Col sm={3}>
-                <TfiShine
-                  title="Project Finish"
-                  onClick={() => handleButtonFilter("Finish")}
-                  style={{ color: "blue", fontSize: 25, cursor: "pointer" }}
-                />
-                <br />
-                {totalFinishBaseOnStatusProject(tableProject)}
-              </Col>
-              <Col sm={3}>
-                <IoMdRainy
-                  title="Project Delay"
-                  onClick={() => handleButtonFilter("Delay")}
-                  style={{ color: "red", fontSize: 25, cursor: "pointer" }}
-                />
-                <br /> {totalDelayBaseOnStatusProject(tableProject)}
-              </Col>
-            </Row>
+                <Row className="progressSummary">
+                  <Col sm={3} style={{ textAlign: "center" }}>
+                    <BiLoader
+                      title="Waiting Detail Activity"
+                      onClick={() =>
+                        handleButtonFilter("Waiting Detail Activity")
+                      }
+                      style={{
+                        color: "orange",
+                        fontSize: 25,
+                        cursor: "pointer",
+                      }}
+                    />
+                    <br />
+                    {totalWaitingDetailActivity(tableProject)}
+                  </Col>
+                  <Col sm={3} style={{ textAlign: "center" }}>
+                    <BsFlag
+                      title="Not Yet Started"
+                      onClick={() => handleButtonFilter("Not Yet Started")}
+                      style={{
+                        color: "orange",
+                        fontSize: 25,
+                        cursor: "pointer",
+                      }}
+                    />
+                    <br />
+                    {totalNotYetStartedBaseOnStatusProject(tableProject)}
+                  </Col>
+                  <Col sm={3}>
+                    <FaSmile
+                      title="Project On Progress"
+                      onClick={() => handleButtonFilter("On Progress")}
+                      style={{
+                        color: "green",
+                        fontSize: 25,
+                        cursor: "pointer",
+                      }}
+                    />
+                    <br /> {totalOnProgressBaseOnStatusProject(tableProject)}
+                  </Col>
+                  <Col sm={3}>
+                    <TfiShine
+                      title="Project Finish"
+                      onClick={() => handleButtonFilter("Finish")}
+                      style={{ color: "blue", fontSize: 25, cursor: "pointer" }}
+                    />
+                    <br />
+                    {totalFinishBaseOnStatusProject(tableProject)}
+                  </Col>
+                  <Col sm={3}>
+                    <IoMdRainy
+                      title="Project Delay"
+                      onClick={() => handleButtonFilter("Delay")}
+                      style={{ color: "red", fontSize: 25, cursor: "pointer" }}
+                    />
+                    <br /> {totalDelayBaseOnStatusProject(tableProject)}
+                  </Col>
+                </Row>
+              </>
+            ) : (
+              <BeatLoader color="#00ADEB" />
+            )}
           </div>
         </Col>
         <Col sm={4}>
           <div className="totalProjectCard">
             <span className="titleTotalProject">Total Saving Est</span>
             <br />
-            <span className="valueTotalProject">
-              <FaMoneyBillWaveAlt /> Rp{" "}
-              {convertToInternationalCurrencySystem(totalSavingCost)}
-            </span>
+            {totalSavingCost ? (
+              <>
+                <span className="valueTotalProject">
+                  <FaMoneyBillWaveAlt /> Rp{" "}
+                  {convertToInternationalCurrencySystem(totalSavingCost)}
+                </span>
+              </>
+            ) : (
+              <BeatLoader color="#00ADEB" />
+            )}
           </div>
         </Col>
         <Col sm={4}>
           <div className="totalProjectCard">
             <span className="titleTotalProject">Total Budget Est</span>
             <br />
-            <span className="valueTotalProject">
-              <BiWallet />
-              Rp {convertToInternationalCurrencySystem(totalBudget)}
-            </span>
+            {totalBudget ? (
+              <>
+                <span className="valueTotalProject">
+                  <BiWallet />
+                  Rp {convertToInternationalCurrencySystem(totalBudget)}
+                </span>
+              </>
+            ) : (
+              <BeatLoader color="#00ADEB" />
+            )}
           </div>
         </Col>
       </Row>
@@ -646,23 +672,30 @@ function TotalProject(props) {
               <BsListTask style={{ marginRight: 5 }} />
               Project List
             </span>
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>NO</th>
-                  <th>Project Name</th>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>PIC</th>
-                  <th>Created Date</th>
-                  <th>Created By</th>
-                  <th>Start Date</th>
-                  <th>SOP Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>{tableListProject(page)}</tbody>
-            </Table>
+            {tableListProject(page) ? (
+              <>
+                <Table striped bordered hover>
+                  <thead>
+                    <tr>
+                      <th>NO</th>
+                      <th>Project Name</th>
+                      <th>Product</th>
+                      <th>Category</th>
+                      <th>PIC</th>
+                      <th>Created Date</th>
+                      <th>Created By</th>
+                      <th>Start Date</th>
+                      <th>SOP Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>{tableListProject(page)}</tbody>
+                </Table>
+              </>
+            ) : (
+              <BeatLoader color="#00ADEB" />
+            )}
+
             <div className="paginationTableProduct">
               <PaginationTable
                 totalPage={totalPageData}
@@ -684,17 +717,23 @@ function TotalProject(props) {
           <div className="projectLaunch">
             <span className="titleTotalProject">Closest SOP Projects</span>
             <br />
-            <span className="valueTotalProject">
-              <RiStarLine />
-              {projectLaunch.project_name}
-            </span>
-            <div>
-              <div>Countdown</div>
-              <div>
-                {projectLaunch !== "" &&
-                  moment(projectLaunch.finish).startOf("day").fromNow()}
-              </div>
-            </div>
+            {projectLaunch ? (
+              <>
+                <span className="valueTotalProject">
+                  <RiStarLine />
+                  {projectLaunch.project_name}
+                </span>
+                <div>
+                  <div>Countdown</div>
+                  <div>
+                    {projectLaunch !== "" &&
+                      moment(projectLaunch.finish).startOf("day").fromNow()}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <BeatLoader color="#00ADEB" />
+            )}
           </div>
         </Col>
       </Row>

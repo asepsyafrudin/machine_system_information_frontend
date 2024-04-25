@@ -43,6 +43,18 @@ function EngineeringTools() {
         <Link to={"/FTAList"} className="link">
           <CardMenuEngineering image={FTAListImage} title="FTA List" />
         </Link>
+        <Link to={"/DocumentUpload"} className="link">
+          <CardMenuEngineering
+            image={FTAListImage}
+            title="Upload Document Engineering"
+          />
+        </Link>
+        <Link to={"/ListDocumentEngineering"} className="link">
+          <CardMenuEngineering
+            image={FTAListImage}
+            title="View Document Engineering"
+          />
+        </Link>
       </div>
     </div>
   );

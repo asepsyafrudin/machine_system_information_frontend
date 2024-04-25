@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TitleSection from "../TitleSection";
 import moment from "moment";
 
@@ -15,7 +15,6 @@ import {
 } from "react-bootstrap";
 import axios from "axios";
 import {
-  approvalManagerFileReportApi,
   changeStatusDocumentApi,
   deleteDocumentApi,
   deleteFileByIdApi,
@@ -269,6 +268,7 @@ function DocumentRegister(props) {
       let formData = new FormData();
       formData.append("title", documentTitle);
       formData.append("machine_id", machine);
+      formData.append("product_id", product);
       formData.append("user_id", userId);
       formData.append("file_type", fileType);
       formData.append("description", description);
@@ -451,12 +451,6 @@ function DocumentRegister(props) {
         .catch((error) => console.log(error));
     }
   };
-
-  if (fileType === "Engineering Report") {
-    axios.post(approvalManagerFileReportApi).then(() => {
-      alert("email has sent");
-    });
-  }
 
   return (
     <div className="userListContainer">

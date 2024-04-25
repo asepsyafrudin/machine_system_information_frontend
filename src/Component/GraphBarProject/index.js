@@ -74,13 +74,7 @@ function GraphBarProject(props) {
 
         let category;
         if (section === 4) {
-          category = [
-            "CO2 Neutral",
-            "Logistic Automation",
-            "Vision System",
-            "DX",
-            "Layout",
-          ];
+          category = ["CO2 Neutral", "Log Auto", "Vision", "DX", "Layout"];
         } else {
           category = [
             "Productivity",
@@ -120,7 +114,7 @@ function GraphBarProject(props) {
                 delay: dataAfterFilter[5].data.length,
               },
               {
-                category: "Logistic Automation",
+                category: "Log Auto",
                 notYetStarted: dataAfterFilter[6].data.length,
                 onProgress: dataAfterFilter[7].data.length,
                 finish: dataAfterFilter[8].data.length,
@@ -129,7 +123,7 @@ function GraphBarProject(props) {
                 delay: dataAfterFilter[11].data.length,
               },
               {
-                category: "Vision System",
+                category: "Vision",
                 notYetStarted: dataAfterFilter[12].data.length,
                 onProgress: dataAfterFilter[13].data.length,
                 finish: dataAfterFilter[14].data.length,

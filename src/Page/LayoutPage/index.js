@@ -22,6 +22,7 @@ import Home from "../Home";
 import RedirectPage from "../RedirectPage";
 import RedirectActivityPage from "../RediectActivityPage";
 import ForbiddenPage from "../ForbiddenPage";
+import DocumentEngineeringPage from "../DocumentEngineeringPage";
 
 function LayoutPage() {
   return (
@@ -59,6 +60,7 @@ function LayoutPage() {
           <Route path="/FTA" element={<FTAFormPage />} />
           <Route path="/FTA/:id" element={<FTAFormPage />} />
           <Route path="/FTAList" element={<FTAListPage />} />
+          <Route path="/DocumentUpload" element={<DocumentEngineeringPage />} />
           <Route path="/capabilityForm/:id" element={<CapabilityFormPage />} />
           <Route path="/capabilityList" element={<ListCapabilityPage />} />
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />

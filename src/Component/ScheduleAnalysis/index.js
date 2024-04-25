@@ -7,6 +7,7 @@ import {
   Col,
   Badge,
   CloseButton,
+  Spinner,
 } from "react-bootstrap";
 import axios from "axios";
 import moment from "moment";
@@ -15,10 +16,7 @@ import { BsListNested } from "react-icons/bs";
 import {
   getActivityByProjectIdApi,
   getProjectByUserApi,
-  getUserByUserIdApi,
   getProjectByIdApi,
-  getSettingByProjectIdApi,
-  saveSettingProjectApi,
   getAllUsersApi,
   getAllProductApi,
   getAllProjectApi,
@@ -47,7 +45,6 @@ function ScheduleReview(props) {
   const [rowHeight, setRowHeight] = useState(35);
   const [projectListWillReview, setProjectListWillReview] = useState([]);
   const [hiddenPlan, setHiddenPlan] = useState("Yes");
-  const [switchMode, setSwitchMode] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [filterBy, setFilterBy] = useState(filterEvent);
   const [detailFilterValue, setDetailFilterValue] = useState(filterDetailEvent);
@@ -56,11 +53,9 @@ function ScheduleReview(props) {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [fiscalYear, setFiscalYear] = useState("");
-  const [userPosition, setUserPosition] = useState("");
-  const [userSection, setUserSection] = useState("");
   const [page, setPage] = useState(pageEvent);
-  const [admin, setAdmin] = useState(false);
   const [totalProject, setTotalProject] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const backgroundColorDelay = (endProject, progressBar, remark) => {
     let currentDate = new Date();
@@ -84,24 +79,15 @@ function ScheduleReview(props) {
   useEffect(() => {
     if (localStorage.getItem("user")) {
       const user = JSON.parse(localStorage.getItem("user"));
-      const { id } = user;
-      axios.get(getUserByUserIdApi(id)).then((response) => {
-        const dataUser = response.data.data;
-        if (dataUser.length > 0) {
-          setSection(dataUser[0].section_id);
-          if (dataUser[0].position === "Administrator") {
-            setAdmin(true);
-          }
-        }
-      });
+      if (user) {
+        setSection(user.section_id);
+        setUserId(user.id);
+      }
     }
     const user = JSON.parse(localStorage.getItem("user"));
-    setUserId(user.id);
 
     const position = user.position;
-    setUserPosition(position);
     const section_id = user.section_id;
-    setUserSection(section_id);
     const positionThatCanOpenProject = [
       "Departement Manager",
       "Assistant General Manager",
@@ -376,7 +362,7 @@ function ScheduleReview(props) {
 
   const handleImportActivity = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     if (projectListWillReview.length > 0) {
       let dataArray = [];
       for (let index = 0; index < projectListWillReview.length; index++) {
@@ -396,10 +382,10 @@ function ScheduleReview(props) {
         };
         dataArray.push(data);
 
-        const activity = await axios.get(
+        const activityData = await axios.get(
           getActivityByProjectIdApi(dataProject.id)
         );
-        const dataActivity = activity.data.data;
+        const dataActivity = activityData.data.data;
         if (dataActivity.length > 0) {
           for (let index2 = 0; index2 < dataActivity.length; index2++) {
             let pushData = {
@@ -425,11 +411,12 @@ function ScheduleReview(props) {
           }
         }
       }
-      console.log("data Array", dataArray);
       setActivity(dataArray);
+      setShowModal(false);
+      setLoading(false);
+    } else {
+      window.alert("No Data In List");
     }
-
-    setShowModal(false);
   };
 
   const deleteProject = (projectId) => {
@@ -500,11 +487,11 @@ function ScheduleReview(props) {
             <option key={1} value={"CO2 Neutral"}>
               CO2 Neutral
             </option>
-            <option key={2} value={"Logistic Automation"}>
-              Logistic Automation
+            <option key={2} value={"Log Auto"}>
+              Log Auto
             </option>
-            <option key={3} value={"Vision System"}>
-              Vision System
+            <option key={3} value={"Vision"}>
+              Vision
             </option>
             <option key={4} value={"DX"}>
               DX
@@ -888,7 +875,23 @@ function ScheduleReview(props) {
               </Row>
             </Modal.Body>
             <Modal.Footer>
-              <Button type="submit">Review</Button>
+              <Button type="submit">
+                {loading ? (
+                  <>
+                    <Spinner
+                      as="span"
+                      animation="grow"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      key={new Date()}
+                    />{" "}
+                    Review
+                  </>
+                ) : (
+                  "Review"
+                )}
+              </Button>
               <Button variant="secondary" onClick={reset}>
                 Close
               </Button>

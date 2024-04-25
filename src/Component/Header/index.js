@@ -8,8 +8,6 @@ import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import photoBluePrint from "../../Asset/ImageGeneral/profile.jpg";
 import { Nav, NavDropdown } from "react-bootstrap";
 import { RESETUSERLOGIN } from "../../Context/const";
-import axios from "axios";
-import { getUserByUserIdApi } from "../../Config/API";
 import { GlobalConsumer } from "../../Context/store";
 
 function Header(props) {
@@ -22,16 +20,12 @@ function Header(props) {
   useEffect(() => {
     if (localStorage.getItem("user")) {
       const user = JSON.parse(localStorage.getItem("user"));
-      const { id } = user;
-      axios.get(getUserByUserIdApi(id)).then((response) => {
-        const dataUser = response.data.data;
-        if (dataUser.length > 0) {
-          setUsername(dataUser[0].username);
-          setPhoto(dataUser[0].photo);
-          setPosition(dataUser[0].position);
-          setSection(dataUser[0].section_id);
-        }
-      });
+      if (user) {
+        setUsername(user.username);
+        setPhoto(user.photo);
+        setPosition(user.position);
+        setSection(user.section_id);
+      }
     }
   }, []);
   const photoProfile = () => {

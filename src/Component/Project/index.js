@@ -57,6 +57,7 @@ import { SETPAGE } from "../../Context/const/index";
 import { SETFILTER } from "../../Context/const/index";
 import { SETFILTERDETAIL } from "../../Context/const/index";
 import { RiDeleteBack2Fill } from "react-icons/ri";
+import { BeatLoader } from "react-spinners";
 
 function Project(props) {
   const {
@@ -1008,8 +1009,8 @@ function Project(props) {
         option.push(
           <>
             <option value={"CO2 Neutral"}>CO2 Neutral</option>
-            <option value={"Logistic Automation"}>Logistic Automation</option>
-            <option value={"Vision System"}>Vision System</option>
+            <option value={"Log Auto"}>Log Auto</option>
+            <option value={"Vision"}>Vision</option>
             <option value={"DX"}>DX</option>
             <option value={"Layout"}>Layout</option>
           </>
@@ -1104,12 +1105,18 @@ function Project(props) {
             <div className="capabilityForm">
               {" "}
               Project Monitoring
-              <GraphBarProject
-                userId={userId}
-                userPosition={userPosition}
-                userSection={userSection}
-                dataForGraph={dataForGraph}
-              />
+              {dataForGraph ? (
+                <>
+                  <GraphBarProject
+                    userId={userId}
+                    userPosition={userPosition}
+                    userSection={userSection}
+                    dataForGraph={dataForGraph}
+                  />
+                </>
+              ) : (
+                <BeatLoader color="#00ADEB" />
+              )}
             </div>
           </div>
         </Col>
@@ -1118,12 +1125,18 @@ function Project(props) {
             <div className="capabilityForm">
               {" "}
               Project Status
-              <GraphPieProject
-                userId={userId}
-                userPosition={userPosition}
-                userSection={userSection}
-                dataForGraph={dataForGraph}
-              />
+              {dataForGraph ? (
+                <>
+                  <GraphPieProject
+                    userId={userId}
+                    userPosition={userPosition}
+                    userSection={userSection}
+                    dataForGraph={dataForGraph}
+                  />
+                </>
+              ) : (
+                <BeatLoader color="#00ADEB" />
+              )}
             </div>
           </div>
         </Col>
@@ -1245,126 +1258,138 @@ function Project(props) {
             title="Project List"
             icon={<BsListNested style={{ marginRight: 5 }} />}
           />
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>NO</th>
-                <th>Project Name</th>
-                <th>Rank</th>
-                <th>Category</th>
-                <th>PIC</th>
-                <th>Created Date</th>
-                <th>Created By</th>
-                <th>Start Date</th>
-                <th>SOP Date</th>
-                {/* <th>Last Update</th> */}
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tableProject.length > 0 ? (
-                tableProject.map((value, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{numberStart + index}</td>
-                      <td>{value.project_name}</td>
-                      <td>{value.rank}</td>
-                      <td>
-                        {value.category} <br />
-                        {subCategoryLabel(value.sub_category)}
-                      </td>
-                      <td>{userNameFunction(value.manager_id)}</td>
-                      {/* <td>{parseFloat(value.budget).toLocaleString()}</td>
+          {tableProject ? (
+            <>
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>NO</th>
+                    <th>Project Name</th>
+                    <th>Rank</th>
+                    <th>Category</th>
+                    <th>PIC</th>
+                    <th>Created Date</th>
+                    <th>Created By</th>
+                    <th>Start Date</th>
+                    <th>SOP Date</th>
+                    {/* <th>Last Update</th> */}
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tableProject.length > 0 ? (
+                    tableProject.map((value, index) => {
+                      return (
+                        <tr key={index}>
+                          <td>{numberStart + index}</td>
+                          <td>{value.project_name}</td>
+                          <td>{value.rank}</td>
+                          <td>
+                            {value.category} <br />
+                            {subCategoryLabel(value.sub_category)}
+                          </td>
+                          <td>{userNameFunction(value.manager_id)}</td>
+                          {/* <td>{parseFloat(value.budget).toLocaleString()}</td>
                     <td>{parseFloat(value.saving_cost).toLocaleString()}</td> */}
-                      <td>{moment(value.create_date).format("LL")}</td>
-                      <td>{userNameFunction(value.user_id)}</td>
-                      <td>{moment(value.start).format("LL")}</td>
-                      <td>{moment(value.finish).format("LL")}</td>
-                      {/* <td>{moment(value.create_date).format("LL")}</td> */}
-                      <td>
-                        {statusFunction(value.status, value.id)}
-                        <br />
-                        {value.status === "Finish" && (
-                          <Button
-                            id={value.id}
-                            size="sm"
-                            variant="primary"
-                            onClick={handleShowModalShare}
-                          >
-                            <GrShareOption style={{ pointerEvents: "none" }} />
-                          </Button>
-                        )}
-                      </td>
-                      <td>
-                        {admin && (
-                          <Button
-                            variant="danger"
-                            style={{ marginRight: 2 }}
-                            id={value.id}
-                            size="sm"
-                            title="Delete project"
-                            onClick={handleDeleteProject}
-                          >
-                            <RiDeleteBack2Fill
-                              style={{ pointerEvents: "none" }}
-                            />
-                          </Button>
-                        )}
-                        {value.user_id === userId && (
-                          <Button
-                            title="Cancel Project"
-                            size="sm"
-                            variant="danger"
-                            style={{ marginRight: 2 }}
-                            id={value.id}
-                            onClick={handleChangeStatus}
-                          >
-                            <GoGitCompare style={{ pointerEvents: "none" }} />
-                          </Button>
-                        )}
-                        <Button
-                          title="Edit"
-                          size="sm"
-                          style={{ marginRight: 2 }}
-                          variant="success"
-                          id={value.id}
-                          onClick={handleEdit}
-                        >
-                          <GrEdit style={{ pointerEvents: "none" }} />
-                        </Button>
-                        <Link to={`/projectActivity/${value.id}`}>
-                          <Button
-                            title="View"
-                            size="sm"
-                            style={{ marginRight: 2 }}
-                            id={value.id}
-                            variant="dark"
-                          >
-                            <MdVideoLibrary style={{ pointerEvents: "none" }} />
-                          </Button>
-                        </Link>
-                        <Button
-                          title="SendEmail"
-                          size="sm"
-                          style={{ marginRight: 2 }}
-                          id={value.id}
-                          variant="warning"
-                          onClick={handleSendEmail}
-                        >
-                          <MdEmail style={{ pointerEvents: "none" }} />
-                        </Button>
-                      </td>
+                          <td>{moment(value.create_date).format("LL")}</td>
+                          <td>{userNameFunction(value.user_id)}</td>
+                          <td>{moment(value.start).format("LL")}</td>
+                          <td>{moment(value.finish).format("LL")}</td>
+                          {/* <td>{moment(value.create_date).format("LL")}</td> */}
+                          <td>
+                            {statusFunction(value.status, value.id)}
+                            <br />
+                            {value.status === "Finish" && (
+                              <Button
+                                id={value.id}
+                                size="sm"
+                                variant="primary"
+                                onClick={handleShowModalShare}
+                              >
+                                <GrShareOption
+                                  style={{ pointerEvents: "none" }}
+                                />
+                              </Button>
+                            )}
+                          </td>
+                          <td>
+                            {admin && (
+                              <Button
+                                variant="danger"
+                                style={{ marginRight: 2 }}
+                                id={value.id}
+                                size="sm"
+                                title="Delete project"
+                                onClick={handleDeleteProject}
+                              >
+                                <RiDeleteBack2Fill
+                                  style={{ pointerEvents: "none" }}
+                                />
+                              </Button>
+                            )}
+                            {value.user_id === userId && (
+                              <Button
+                                title="Cancel Project"
+                                size="sm"
+                                variant="danger"
+                                style={{ marginRight: 2 }}
+                                id={value.id}
+                                onClick={handleChangeStatus}
+                              >
+                                <GoGitCompare
+                                  style={{ pointerEvents: "none" }}
+                                />
+                              </Button>
+                            )}
+                            <Button
+                              title="Edit"
+                              size="sm"
+                              style={{ marginRight: 2 }}
+                              variant="success"
+                              id={value.id}
+                              onClick={handleEdit}
+                            >
+                              <GrEdit style={{ pointerEvents: "none" }} />
+                            </Button>
+                            <Link to={`/projectActivity/${value.id}`}>
+                              <Button
+                                title="View"
+                                size="sm"
+                                style={{ marginRight: 2 }}
+                                id={value.id}
+                                variant="dark"
+                              >
+                                <MdVideoLibrary
+                                  style={{ pointerEvents: "none" }}
+                                />
+                              </Button>
+                            </Link>
+                            <Button
+                              title="SendEmail"
+                              size="sm"
+                              style={{ marginRight: 2 }}
+                              id={value.id}
+                              variant="warning"
+                              onClick={handleSendEmail}
+                            >
+                              <MdEmail style={{ pointerEvents: "none" }} />
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={11}>Data is Not Available</td>
                     </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={11}>Data is Not Available</td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+                  )}
+                </tbody>
+              </Table>
+            </>
+          ) : (
+            <BeatLoader color="#00ADEB" />
+          )}
           <div className="paginationTableProduct">
             <PaginationTable
               totalPage={totalPageData}
@@ -1910,10 +1935,8 @@ function Project(props) {
                               Open This
                             </option>
                             <option value="CO2 Neutral">CO2 Neutral</option>
-                            <option value="Logistik Automation">
-                              Logistik Automation
-                            </option>
-                            <option value="Vision System">Vision System</option>
+                            <option value="Log Auto">Log Auto</option>
+                            <option value="Vision">Vision</option>
                             <option value="DX">DX</option>
                             <option value="Layout">Layout</option>
                           </>

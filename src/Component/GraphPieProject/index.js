@@ -97,16 +97,9 @@ function GraphPieProject(props) {
           "Delay",
         ];
 
-
         let category;
         if (section === 4) {
-          category = [
-            "CO2 Neutral",
-            "Logistic Automation",
-            "Vision System",
-            "DX",
-            "Layout"
-          ];
+          category = ["CO2 Neutral", "Log Auto", "Vision", "DX", "Layout"];
         } else {
           category = [
             "Productivity",
