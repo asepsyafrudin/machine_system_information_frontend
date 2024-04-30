@@ -266,6 +266,7 @@ function DocumentEngineeringComponent(props) {
       formData.append("file_type", fileType);
       formData.append("description", description);
       formData.append("project_id", project);
+      formData.append("approval_status", 1);
       for (let i = 0; i < file.length; i++) {
         formData.append("file", file[i]);
       }

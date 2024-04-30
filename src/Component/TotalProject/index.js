@@ -457,6 +457,16 @@ function TotalProject(props) {
           <option value={"Layout"}>Layout</option>
         </>
       );
+    } else if (productFilter && sectionFilter === "10") {
+      return (
+        <>
+          <option value={"CO2 Neutral"}>CO2 Neutral</option>
+          <option value={"Log Auto"}>Log Auto</option>
+          <option value={"Vision"}>Vision</option>
+          <option value={"DX"}>DX</option>
+          <option value={"Layout"}>Layout</option>
+        </>
+      );
     } else {
       return (
         <>

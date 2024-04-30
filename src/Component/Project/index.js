@@ -1015,6 +1015,16 @@ function Project(props) {
             <option value={"Layout"}>Layout</option>
           </>
         );
+      } else if (section === 10) {
+        option.push(
+          <>
+            <option value={"CO2 Neutral"}>CO2 Neutral</option>
+            <option value={"Log Auto"}>Log Auto</option>
+            <option value={"Vision"}>Vision</option>
+            <option value={"DX"}>DX</option>
+            <option value={"Layout"}>Layout</option>
+          </>
+        );
       } else {
         option.push(
           <>
@@ -1929,7 +1939,7 @@ function Project(props) {
                         onChange={(e) => setCategory(e.target.value)}
                         required
                       >
-                        {section === 4 ? (
+                        {/* {section === 4 ? (
                           <>
                             <option value="" disabled>
                               Open This
@@ -1955,7 +1965,9 @@ function Project(props) {
                               Profit Improvement
                             </option>
                           </>
-                        )}
+                        )} */}
+                        <option value={""}>Open This</option>
+                        {filterItemLogic()}
                       </Form.Select>
                     </Col>
                   </Row>

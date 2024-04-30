@@ -1,4 +1,4 @@
-const port = "http://172.31.71.2:8080";
+const port = "http://172.31.71.2:8081";
 
 //users Api
 export const registerUserApi = `${port}/api/users/create_users`;
@@ -162,6 +162,9 @@ export const getDocumentByIdApi = (id) => {
 
 export const getDocumentGeneralBypageApi = (page) => {
   return `${port}/api/document/getDocumentForGeneralByPage/${page}`;
+};
+export const getDocumentApprovalApi = (page) => {
+  return `${port}/api/document/getDocumentApproval/${page}`;
 };
 
 export const getDocumentByProjectIdApi = (projectId) => {

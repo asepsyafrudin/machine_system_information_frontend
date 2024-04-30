@@ -23,6 +23,7 @@ import RedirectPage from "../RedirectPage";
 import RedirectActivityPage from "../RediectActivityPage";
 import ForbiddenPage from "../ForbiddenPage";
 import DocumentEngineeringPage from "../DocumentEngineeringPage";
+import ListDocumentEngineeringPage from "../ListDocumentEngineeringPage";
 
 function LayoutPage() {
   return (
@@ -32,6 +33,10 @@ function LayoutPage() {
         <Route path="/:token" element={<Login />} />
         <Route
           path="/redirectPage/projectActivity/:activityId/:userId"
+          element={<RedirectPage />}
+        />
+        <Route
+          path="/redirectPage/document/:documentId/:userId"
           element={<RedirectPage />}
         />
         <Route path="/forbidden" element={<ForbiddenPage />} />
@@ -61,6 +66,10 @@ function LayoutPage() {
           <Route path="/FTA/:id" element={<FTAFormPage />} />
           <Route path="/FTAList" element={<FTAListPage />} />
           <Route path="/DocumentUpload" element={<DocumentEngineeringPage />} />
+          <Route
+            path="/ListDocumentEngineering"
+            element={<ListDocumentEngineeringPage />}
+          />
           <Route path="/capabilityForm/:id" element={<CapabilityFormPage />} />
           <Route path="/capabilityList" element={<ListCapabilityPage />} />
           <Route path="/dashboardUsers" element={<UserDashboardPage />} />
