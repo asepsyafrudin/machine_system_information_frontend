@@ -152,6 +152,54 @@ function GraphBarProject(props) {
                 delay: dataAfterFilter[29].data.length,
               },
             ];
+          } else if (section === 10) {
+            return [
+              {
+                category: "CO2 Neutral",
+                notYetStarted: dataAfterFilter[0].data.length,
+                onProgress: dataAfterFilter[1].data.length,
+                finish: dataAfterFilter[2].data.length,
+                waitingDetailActivity: dataAfterFilter[3].data.length,
+                cancel: dataAfterFilter[4].data.length,
+                delay: dataAfterFilter[5].data.length,
+              },
+              {
+                category: "Log Auto",
+                notYetStarted: dataAfterFilter[6].data.length,
+                onProgress: dataAfterFilter[7].data.length,
+                finish: dataAfterFilter[8].data.length,
+                waitingDetailActivity: dataAfterFilter[9].data.length,
+                cancel: dataAfterFilter[10].data.length,
+                delay: dataAfterFilter[11].data.length,
+              },
+              {
+                category: "Vision",
+                notYetStarted: dataAfterFilter[12].data.length,
+                onProgress: dataAfterFilter[13].data.length,
+                finish: dataAfterFilter[14].data.length,
+                waitingDetailActivity: dataAfterFilter[15].data.length,
+                cancel: dataAfterFilter[16].data.length,
+                delay: dataAfterFilter[17].data.length,
+              },
+              {
+                category: "DX",
+                notYetStarted: dataAfterFilter[18].data.length,
+                onProgress: dataAfterFilter[19].data.length,
+                finish: dataAfterFilter[20].data.length,
+                waitingDetailActivity: dataAfterFilter[21].data.length,
+                cancel: dataAfterFilter[22].data.length,
+                delay: dataAfterFilter[23].data.length,
+              },
+              {
+                category: "Layout",
+                notYetStarted: dataAfterFilter[24].data.length,
+                onProgress: dataAfterFilter[25].data.length,
+                finish: dataAfterFilter[26].data.length,
+                waitingDetailActivity: dataAfterFilter[27].data.length,
+                cancel: dataAfterFilter[28].data.length,
+                delay: dataAfterFilter[29].data.length,
+              },
+            ];
           } else {
             return [
               {
