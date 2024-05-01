@@ -143,7 +143,7 @@ function TotalProject(props) {
         startFilter &&
         endFilter
       ) {
-        const filterData = tableProduct.filter(
+        const filterData = tableProject.filter(
           (value) =>
             value.section_id === sectionFilter &&
             value.product_id === productFilter &&
@@ -158,7 +158,7 @@ function TotalProject(props) {
           setTableProject([]);
         }
       } else if (sectionFilter && productFilter && categoryFilter) {
-        const filterData = tableProduct.filter(
+        const filterData = tableProject.filter(
           (value) =>
             value.section_id === sectionFilter &&
             value.product_id === productFilter &&
@@ -171,7 +171,7 @@ function TotalProject(props) {
           setTableProject([]);
         }
       } else if (sectionFilter && productFilter) {
-        const filterData = tableProduct.filter(
+        const filterData = tableProject.filter(
           (value) =>
             value.section_id === sectionFilter &&
             value.product_id === productFilter
@@ -183,7 +183,7 @@ function TotalProject(props) {
           setTableProject([]);
         }
       } else if (sectionFilter) {
-        const filterData = tableProduct.filter(
+        const filterData = tableProject.filter(
           (value) => value.section_id === sectionFilter
         );
         if (filterData.length > 0) {

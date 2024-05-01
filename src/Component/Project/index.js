@@ -25,7 +25,6 @@ import {
   shareFinishProjectToUserCommonApi,
   updateProjectApi,
   updateStatusProjectApi,
-  getUserByUserIdApi,
   deleteProjectByProjectId,
 } from "../../Config/API";
 import { useState } from "react";
@@ -110,7 +109,6 @@ function Project(props) {
   const [toDate, setToDate] = useState("");
   const [detailFilterValue, setDetailFilterValue] = useState(filterDetailEvent);
   const [dataForGraph, setDataForGraph] = useState([]);
-  const [section, setSection] = useState("");
   const [rank, setRank] = useState("");
   const [fiscalYear, setFiscalYear] = useState("");
   const [admin, setAdmin] = useState(false);
@@ -119,20 +117,6 @@ function Project(props) {
   const dataPerPage = 10;
 
   useEffect(() => {
-    if (localStorage.getItem("user")) {
-      const user = JSON.parse(localStorage.getItem("user"));
-      const { id } = user;
-      axios.get(getUserByUserIdApi(id)).then((response) => {
-        const dataUser = response.data.data;
-        if (dataUser.length > 0) {
-          setSection(dataUser[0].section_id);
-          if (dataUser[0].position === "Administrator") {
-            setAdmin(true);
-          }
-        }
-      });
-    }
-
     axios
       .get(getAllProductApi)
       .then((response) => {
@@ -180,6 +164,39 @@ function Project(props) {
       (value) => value === position
     );
 
+    if (user.position === "Administrator") {
+      setAdmin(true);
+      axios
+        .get(getAllProjectApi)
+        .then((response) => {
+          const data = response.data.data;
+          setTableProject(data);
+        })
+        .then((error) => console.log(error));
+    } else if (checkPosition) {
+      axios
+        .get(getProjectBySectionIdAndPage(page, section_id))
+        .then((response) => {
+          const data = response.data.data;
+          setTableProject(data);
+        })
+        .catch((error) => console.log(error));
+    } else {
+      if (userId) {
+        axios
+          .get(getProjectByUserApi(userId))
+          .then((response) => {
+            const responseData = response.data.data;
+            setTableProject(responseData);
+          })
+          .catch((error) => {
+            console.error("Error in axios get request:", error);
+          });
+      }
+    }
+  }, [userId, page]);
+
+  useEffect(() => {
     const filterFunctionLogicByDate = (data, fromDate, toDate) => {
       if (fromDate && toDate && data.length > 0) {
         let listData = [];
@@ -459,117 +476,17 @@ function Project(props) {
       }
     };
 
-    //filter sampai sini
-
-    if (user.position === "Administrator") {
-      axios
-        .get(getAllProjectApi)
-        .then((response) => {
-          const data = response.data.data;
-
-          if (filterBy && detailFilterValue) {
-            filterFunctionLogic(
-              filterBy,
-              detailFilterValue,
-              data,
-              fromDate,
-              toDate
-            );
-          } else if (fromDate && toDate) {
-            filterFunctionLogicByDate(data, fromDate, toDate);
-          } else {
-            const totalPageData = Math.ceil(data.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            let listData = [];
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < data.length;
-              index++
-            ) {
-              listData.push(data[index]);
-            }
-            setDataForGraph(data);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          }
-        })
-        .then((error) => console.log(error));
-    } else if (checkPosition) {
-      axios
-        .get(getProjectBySectionIdAndPage(page, section_id))
-        .then((response) => {
-          const data = response.data.data;
-          if (filterBy && detailFilterValue) {
-            filterFunctionLogic(
-              filterBy,
-              detailFilterValue,
-              data,
-              fromDate,
-              toDate
-            );
-          } else if (fromDate && toDate) {
-            filterFunctionLogicByDate(data, fromDate, toDate);
-          } else {
-            const totalPageData = Math.ceil(data.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            let listData = [];
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < data.length;
-              index++
-            ) {
-              listData.push(data[index]);
-            }
-
-            setDataForGraph(data);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          }
-        })
-        .catch((error) => console.log(error));
-    } else {
-      if (userId) {
-        axios
-          .get(getProjectByUserApi(userId))
-          .then((response) => {
-            const responseData = response.data.data;
-            if (filterBy && detailFilterValue) {
-              filterFunctionLogic(
-                filterBy,
-                detailFilterValue,
-                responseData,
-                fromDate,
-                toDate
-              );
-            } else if (fromDate && toDate) {
-              filterFunctionLogicByDate(responseData, fromDate, toDate);
-            } else {
-              const totalPageData = Math.ceil(
-                responseData.length / dataPerPage
-              );
-              const numberStart = (page - 1) * dataPerPage + 1;
-              let listData = [];
-              for (
-                let index = (page - 1) * dataPerPage;
-                index < page * dataPerPage && index < responseData.length;
-                index++
-              ) {
-                listData.push(responseData[index]);
-              }
-
-              setDataForGraph(responseData);
-              setTableProject(listData);
-              setStotalPageData(totalPageData);
-              setNumberStart(numberStart);
-            }
-          })
-          .catch((error) => {
-            console.error("Error in axios get request:", error);
-          });
-      }
+    if (tableProject.length > 0) {
+      filterFunctionLogic(
+        filterBy,
+        detailFilterValue,
+        tableProject,
+        fromDate,
+        toDate
+      );
+      filterFunctionLogicByDate(tableProject, fromDate, toDate);
     }
+    //filter sampai sini
   }, [
     actionStateValue,
     page,
@@ -1005,7 +922,7 @@ function Project(props) {
   const filterItemLogic = () => {
     let option = [];
     if (filterBy === "category") {
-      if (section === 4) {
+      if (userSection === 4) {
         option.push(
           <>
             <option value={"CO2 Neutral"}>CO2 Neutral</option>
@@ -1015,7 +932,7 @@ function Project(props) {
             <option value={"Layout"}>Layout</option>
           </>
         );
-      } else if (section === 10) {
+      } else if (userSection === 10) {
         option.push(
           <>
             <option value={"CO2 Neutral"}>CO2 Neutral</option>
@@ -1939,7 +1856,7 @@ function Project(props) {
                         onChange={(e) => setCategory(e.target.value)}
                         required
                       >
-                        {/* {section === 4 ? (
+                        {/* {userSection === 4 ? (
                           <>
                             <option value="" disabled>
                               Open This
