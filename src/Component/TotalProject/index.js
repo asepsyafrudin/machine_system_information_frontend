@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import {
   getAllProductApi,
+  getAllProjectApi,
   getAllSectionApi,
   getAllUsersApi,
   searchProjectApi,
@@ -64,6 +65,39 @@ function TotalProject(props) {
   const dataPerPage = 10;
 
   useEffect(() => {
+    axios
+      .get(getAllProductApi)
+      .then((response) => {
+        setTableProduct(response.data.data);
+      })
+      .catch((error) => console.log(error));
+
+    axios
+      .get(getAllSectionApi)
+      .then((response) => {
+        setTableSection(response.data.data);
+      })
+      .catch((error) => console.log(error));
+
+    axios
+      .get(getAllUsersApi)
+      .then((response) => {
+        setTableUser(response.data.data);
+      })
+      .catch((error) => console.log(error));
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    setUserId(user.id);
+  }, []);
+
+  useEffect(() => {
+    axios.get(getAllProjectApi).then((response) => {
+      const dataProject = response.data.data;
+      setTableProject(dataProject);
+    });
+  }, [actionStateValue]);
+
+  useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
 
@@ -84,66 +118,91 @@ function TotalProject(props) {
       }
     };
 
-    axios
-      .get(getAllProductApi, {
-        signal: controller.signal,
-      })
-      .then((response) => {
-        setTableProduct(response.data.data);
-      })
-      .catch((error) => console.log(error));
-
-    axios
-      .get(getAllSectionApi, {
-        signal: controller.signal,
-      })
-      .then((response) => {
-        isMounted && setTableSection(response.data.data);
-      })
-      .catch((error) => console.log(error));
-
-    let data = {
-      page: page,
-      section_id: sectionFilter,
-      product_id: productFilter,
-      from_date: startFilter,
-      to_date: endFilter,
-      category: categoryFilter,
+    const setItemsFunction = (data) => {
+      const totalPageData = Math.ceil(data.length / dataPerPage);
+      setStotalPageData(totalPageData);
+      projectWillBeLaunch(data);
+      setTotalItem(data.length);
+      let budget = 0;
+      let saving = 0;
+      if (data.length > 0) {
+        for (let index = 0; index < data.length; index++) {
+          budget += parseFloat(data[index].budget);
+          saving += parseFloat(data[index].saving_cost);
+        }
+      }
+      setTotalBudget(budget);
+      setTotalSavingCost(saving);
     };
 
-    axios.post(searchProjectApi, data).then((response) => {
-      const data = response.data.data;
-      if (data.length > 0) {
-        const filter = data.filter((value) => value.status !== "cancel");
-        setTableProject(data);
-        const totalPageData = Math.ceil(filter.length / dataPerPage);
-        setStotalPageData(totalPageData);
-        projectWillBeLaunch(filter);
-        setTotalItem(filter.length);
-        let budget = 0;
-        let saving = 0;
-        if (filter.length > 0) {
-          for (let index = 0; index < filter.length; index++) {
-            budget += parseFloat(filter[index].budget);
-            saving += parseFloat(filter[index].saving_cost);
-          }
+    if (tableProject.length > 0) {
+      if (
+        sectionFilter &&
+        productFilter &&
+        categoryFilter &&
+        startFilter &&
+        endFilter
+      ) {
+        const filterData = tableProduct.filter(
+          (value) =>
+            value.section_id === sectionFilter &&
+            value.product_id === productFilter &&
+            value.category === categoryFilter &&
+            value.start === startFilter &&
+            value.finish === endFilter
+        );
+        if (filterData.length > 0) {
+          setTableProject(filterData);
+          setItemsFunction(filterData);
+        } else {
+          setTableProject([]);
         }
-        setTotalBudget(budget);
-        setTotalSavingCost(saving);
+      } else if (sectionFilter && productFilter && categoryFilter) {
+        const filterData = tableProduct.filter(
+          (value) =>
+            value.section_id === sectionFilter &&
+            value.product_id === productFilter &&
+            value.category === categoryFilter
+        );
+        if (filterData.length > 0) {
+          setTableProject(filterData);
+          setItemsFunction(filterData);
+        } else {
+          setTableProject([]);
+        }
+      } else if (sectionFilter && productFilter) {
+        const filterData = tableProduct.filter(
+          (value) =>
+            value.section_id === sectionFilter &&
+            value.product_id === productFilter
+        );
+        if (filterData.length > 0) {
+          setTableProject(filterData);
+          setItemsFunction(filterData);
+        } else {
+          setTableProject([]);
+        }
+      } else if (sectionFilter) {
+        const filterData = tableProduct.filter(
+          (value) => value.section_id === sectionFilter
+        );
+        if (filterData.length > 0) {
+          setTableProject(filterData);
+          setItemsFunction(filterData);
+        } else {
+          setTableProject([]);
+        }
       }
-    });
+    }
 
-    axios
-      .get(getAllUsersApi, {
-        signal: controller.signal,
-      })
-      .then((response) => {
-        isMounted && setTableUser(response.data.data);
-      })
-      .catch((error) => console.log(error));
+    // axios.post(searchProjectApi, data).then((response) => {
+    //   const data = response.data.data;
+    //   if (data.length > 0) {
+    //     const filter = data.filter((value) => value.status !== "cancel");
+    //     setTableProject(data);
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    setUserId(user.id);
+    // });
+
     return () => {
       isMounted = false;
       controller.abort();
@@ -151,7 +210,6 @@ function TotalProject(props) {
   }, [
     sectionFilter,
     productFilter,
-    page,
     actionStateValue,
     startFilter,
     endFilter,
