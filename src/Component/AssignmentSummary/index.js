@@ -37,6 +37,8 @@ import { fileName } from "../../Config/fileName";
 import { getExtFileName } from "../../Config/fileType";
 import { GoDesktopDownload } from "react-icons/go";
 import { RiCarFill, RiDeleteBin2Fill } from "react-icons/ri";
+import { DataGrid } from "@mui/x-data-grid";
+import { BeatLoader } from "react-spinners";
 
 function AssignmentSummary(props) {
   const { userId, id } = props;
@@ -365,6 +367,146 @@ function AssignmentSummary(props) {
     }
   };
 
+  const columns = [
+    {
+      field: "item",
+      headerName: "Todo List",
+      width: 350,
+    },
+    {
+      field: "project_name",
+      headerName: "Project",
+      width: 250,
+    },
+    {
+      field: "activity_name",
+      headerName: "Activity",
+      width: 200,
+    },
+    {
+      field: "create_date",
+      headerName: "Create Date",
+      valueFormatter: (value) => {
+        return moment(value).format("ll");
+      },
+      type: "date",
+      width: 150,
+    },
+    {
+      field: "due_date",
+      headerName: "Due Date",
+      valueFormatter: (value) => {
+        return moment(value).format("ll");
+      },
+      type: "date",
+      width: 150,
+    },
+    {
+      field: "pic_id",
+      headerName: "PIC",
+      valueGetter: (value) => {
+        return functionName(value);
+      },
+      width: 150,
+    },
+    {
+      field: "status",
+      headerName: "Actual Finish",
+      valueGetter: (value, row) => {
+        if (value === "Finish") {
+          return row.actual_finish;
+        } else {
+          return "";
+        }
+      },
+      width: 150,
+    },
+    {
+      headerName: "Progress",
+      renderCell: (params) => {
+        return statusFunction(params.row.status, params.row.due_date);
+      },
+      width: 150,
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 200,
+      renderCell: (params) => {
+        if (params.row.status === "Open") {
+          return (
+            <>
+              <Button
+                id={params.row.id}
+                style={{ marginRight: 5 }}
+                onClick={handleMarkAsDoneOrOpen}
+                title="Mark Done"
+                size="sm"
+              >
+                <MdDoneOutline style={{ pointerEvents: "none" }} />
+              </Button>
+              <Button
+                style={{ marginRight: 5 }}
+                id={params.row.id}
+                onClick={handleClickEdit}
+                variant="secondary"
+                title="Edit"
+                size="sm"
+              >
+                <AiOutlineEdit style={{ pointerEvents: "none" }} />
+              </Button>
+
+              <Button
+                variant="success"
+                id={params.row.id}
+                onClick={handleClickStatus}
+                title="View Attchment & Progress"
+                size="sm"
+              >
+                <GrView style={{ pointerEvents: "none" }} />
+              </Button>
+            </>
+          );
+        } else {
+          return (
+            <>
+              <Button
+                id={params.row.id}
+                style={{ marginRight: 5 }}
+                onClick={handleMarkAsDoneOrOpen}
+                variant="warning"
+                title="Mark Open"
+                size="sm"
+              >
+                <AiOutlineClose style={{ pointerEvents: "none" }} />
+              </Button>
+              <Button
+                style={{ marginRight: 5 }}
+                id={params.row.id}
+                onClick={handleClickEdit}
+                variant="secondary"
+                title="Edit"
+                size="sm"
+              >
+                <AiOutlineEdit style={{ pointerEvents: "none" }} />
+              </Button>
+
+              <Button
+                variant="success"
+                id={params.row.id}
+                onClick={handleClickStatus}
+                title="View Attchment & Progress"
+                size="sm"
+              >
+                <GrView style={{ pointerEvents: "none" }} />
+              </Button>
+            </>
+          );
+        }
+      },
+    },
+  ];
+
   return (
     <div>
       <Row>
@@ -388,98 +530,21 @@ function AssignmentSummary(props) {
                   <option value="month">Next Month</option>
                 </Form.Select>
               </div>
-              <Table responsive hover striped bordered>
-                <thead>
-                  <tr>
-                    <th>NO</th>
-                    <th>Todo List</th>
-                    <th>Project</th>
-                    <th>Activity</th>
-                    <th>PIC</th>
-                    <th>Create date</th>
-                    <th>Due Date</th>
-                    <th>Actual Finish</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableAssignmentSummary.map((value, index) => {
-                    return (
-                      <tr key={index}>
-                        <td>{numberStart + index}</td>
-                        <td>{value.item}</td>
-                        <td>{value.project_name}</td>
-                        <td>{value.activity_name}</td>
-                        <td>{functionName(value.pic_id)}</td>
-                        <td>{moment(value.create_date).format("LLL")}</td>
-                        <td>{value.due_date}</td>
-                        <td>
-                          {" "}
-                          {value.status === "Finish" ? value.actual_finish : ""}
-                        </td>
-                        <td>{statusFunction(value.status, value.due_date)}</td>
-                        <td>
-                          {value.status === "Open" ? (
-                            <Button
-                              id={value.id}
-                              style={{ marginRight: 5 }}
-                              onClick={handleMarkAsDoneOrOpen}
-                              title="Mark Done"
-                              size="sm"
-                            >
-                              <MdDoneOutline
-                                style={{ pointerEvents: "none" }}
-                              />
-                            </Button>
-                          ) : (
-                            <Button
-                              id={value.id}
-                              style={{ marginRight: 5 }}
-                              onClick={handleMarkAsDoneOrOpen}
-                              variant="warning"
-                              title="Mark Open"
-                              size="sm"
-                            >
-                              <AiOutlineClose
-                                style={{ pointerEvents: "none" }}
-                              />
-                            </Button>
-                          )}
-                          <Button
-                            style={{ marginRight: 5 }}
-                            id={value.id}
-                            onClick={handleClickEdit}
-                            variant="secondary"
-                            title="Edit"
-                            size="sm"
-                          >
-                            <AiOutlineEdit style={{ pointerEvents: "none" }} />
-                          </Button>
-
-                          <Button
-                            variant="success"
-                            id={value.id}
-                            onClick={handleClickStatus}
-                            title="View Attchment & Progress"
-                            size="sm"
-                          >
-                            <GrView style={{ pointerEvents: "none" }} />
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </Table>
-              <div className="paginationTableProduct">
-                <PaginationTable
-                  totalPage={totalPageData}
-                  maxPagesShow={maxPagesShow}
-                  onChangePage={(e) => setPage(e)}
-                  pageActive={page}
+              {tableProject.length > 0 ? (
+                <DataGrid
+                  columns={columns}
+                  rows={tableAssignmentSummary}
+                  disableRowSelectionOnClick
+                  initialState={{
+                    pagination: {
+                      paginationModel: { pageSize: 10, page: 0 },
+                    },
+                  }}
+                  pageSizeOptions={[5, 10, 20]}
                 />
-              </div>
+              ) : (
+                <BeatLoader color="#00ADEB" />
+              )}
             </div>
           </div>
         </Col>
