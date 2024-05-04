@@ -9,7 +9,6 @@ import {
   Form,
   Modal,
   Row,
-  Table,
 } from "react-bootstrap";
 import PropTypes from "prop-types";
 import { useEffect } from "react";
@@ -35,7 +34,6 @@ import { STATUSOPEN } from "../../Config/const";
 import { BsListNested } from "react-icons/bs";
 import { IoMdCreate } from "react-icons/io";
 import moment from "moment";
-import PaginationTable from "../Pagination";
 import { GoGitCompare } from "react-icons/go";
 import { MdEmail, MdVideoLibrary } from "react-icons/md";
 import { GrEdit, GrShareOption } from "react-icons/gr";
@@ -57,6 +55,7 @@ import { SETFILTER } from "../../Context/const/index";
 import { SETFILTERDETAIL } from "../../Context/const/index";
 import { RiDeleteBack2Fill } from "react-icons/ri";
 import { BeatLoader } from "react-spinners";
+import { DataGrid } from "@mui/x-data-grid";
 
 function Project(props) {
   const {
@@ -86,8 +85,6 @@ function Project(props) {
   const [show, setShow] = useState(false);
   const [message, setMessage] = useState("");
   const [page, setPage] = useState(pageEvent);
-  const [numberStart, setNumberStart] = useState("");
-  const [totalPageData, setStotalPageData] = useState(1);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [memberToEmail, setMemberToEmail] = useState("");
   const [ccMail, setCcMail] = useState("");
@@ -104,19 +101,29 @@ function Project(props) {
   const [showModalCreateProject, setShowModalCreateProject] = useState(false);
   const [userPosition, setUserPosition] = useState("");
   const [userSection, setUserSection] = useState("");
-  const [filterBy, setFilterBy] = useState(filterEvent);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-  const [detailFilterValue, setDetailFilterValue] = useState(filterDetailEvent);
   const [dataForGraph, setDataForGraph] = useState([]);
   const [rank, setRank] = useState("");
-  const [fiscalYear, setFiscalYear] = useState("");
   const [admin, setAdmin] = useState(false);
-
-  const maxPagesShow = 3;
-  const dataPerPage = 10;
+  const [fiscalYear, setFiscalYear] = useState("");
 
   useEffect(() => {
+    const filterFunctionLogicByDate = (data, fromDate, toDate) => {
+      if (fromDate && toDate && data.length > 0) {
+        const fromDateValue = new Date(fromDate).setDate(
+          new Date(fromDate).getDate() - 1
+        );
+        const filterByDate = data.filter(
+          (value) =>
+            new Date(value.finish) > new Date(fromDateValue) &&
+            new Date(value.finish) <= new Date(toDate)
+        );
+        setDataForGraph(filterByDate);
+        setTableProject(filterByDate);
+      }
+    };
+
     axios
       .get(getAllProductApi)
       .then((response) => {
@@ -169,16 +176,26 @@ function Project(props) {
       axios
         .get(getAllProjectApi)
         .then((response) => {
-          const data = response.data.data;
-          setTableProject(data);
+          const responseData = response.data.data;
+          if (toDate && fromDate) {
+            filterFunctionLogicByDate(responseData, fromDate, toDate);
+          } else {
+            setDataForGraph(responseData);
+            setTableProject(responseData);
+          }
         })
         .then((error) => console.log(error));
     } else if (checkPosition) {
       axios
         .get(getProjectBySectionIdAndPage(page, section_id))
         .then((response) => {
-          const data = response.data.data;
-          setTableProject(data);
+          const responseData = response.data.data;
+          if (toDate && fromDate) {
+            filterFunctionLogicByDate(responseData, fromDate, toDate);
+          } else {
+            setDataForGraph(responseData);
+            setTableProject(responseData);
+          }
         })
         .catch((error) => console.log(error));
     } else {
@@ -187,315 +204,320 @@ function Project(props) {
           .get(getProjectByUserApi(userId))
           .then((response) => {
             const responseData = response.data.data;
-            setTableProject(responseData);
+            if (toDate && fromDate) {
+              filterFunctionLogicByDate(responseData, fromDate, toDate);
+            } else {
+              setDataForGraph(responseData);
+              setTableProject(responseData);
+            }
           })
           .catch((error) => {
             console.error("Error in axios get request:", error);
           });
       }
     }
-  }, [userId, page]);
+  }, [userId, page, fromDate, toDate]);
 
-  useEffect(() => {
-    const filterFunctionLogicByDate = (data, fromDate, toDate) => {
-      if (fromDate && toDate && data.length > 0) {
-        let listData = [];
-        const fromDateValue = new Date(fromDate).setDate(
-          new Date(fromDate).getDate() - 1
-        );
-        const filterByDate = data.filter(
-          (value) =>
-            new Date(value.finish) > new Date(fromDateValue) &&
-            new Date(value.finish) <= new Date(toDate)
-        );
+  // useEffect(() => {
+  //   const filterFunctionLogicByDate = (data, fromDate, toDate) => {
+  //     if (fromDate && toDate && data.length > 0) {
+  //       let listData = [];
+  //       const fromDateValue = new Date(fromDate).setDate(
+  //         new Date(fromDate).getDate() - 1
+  //       );
+  //       const filterByDate = data.filter(
+  //         (value) =>
+  //           new Date(value.finish) > new Date(fromDateValue) &&
+  //           new Date(value.finish) <= new Date(toDate)
+  //       );
 
-        for (
-          let index = (page - 1) * dataPerPage;
-          index < page * dataPerPage && index < filterByDate.length;
-          index++
-        ) {
-          listData.push(filterByDate[index]);
-        }
-        const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-        const numberStart = (page - 1) * dataPerPage + 1;
-        setDataForGraph(filterByDate);
-        setTableProject(listData);
-        setStotalPageData(totalPageData);
-        setNumberStart(numberStart);
-      }
-    };
+  //       for (
+  //         let index = (page - 1) * dataPerPage;
+  //         index < page * dataPerPage && index < filterByDate.length;
+  //         index++
+  //       ) {
+  //         listData.push(filterByDate[index]);
+  //       }
+  //       const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+  //       const numberStart = (page - 1) * dataPerPage + 1;
+  //       setDataForGraph(filterByDate);
+  //       setTableProject(listData);
+  //       setStotalPageData(totalPageData);
+  //       setNumberStart(numberStart);
+  //     }
+  //   };
 
-    const filterFunctionLogic = (
-      filterItem,
-      filterDetailItem,
-      data,
-      fromDate,
-      toDate
-    ) => {
-      if (filterItem === "category") {
-        if (data.length > 0) {
-          let listData = [];
-          const filterData = data.filter(
-            (value) => value.category === filterDetailItem
-          );
+  //   const filterFunctionLogic = (
+  //     filterItem,
+  //     filterDetailItem,
+  //     data,
+  //     fromDate,
+  //     toDate
+  //   ) => {
+  //     if (filterItem === "category") {
+  //       if (data.length > 0) {
+  //         let listData = [];
+  //         const filterData = data.filter(
+  //           (value) => value.category === filterDetailItem
+  //         );
 
-          if (fromDate && toDate) {
-            const fromDateValue = new Date(fromDate).setDate(
-              new Date(fromDate).getDate() - 1
-            );
-            const filterByDate = filterData.filter(
-              (value) =>
-                new Date(value.finish) >= new Date(fromDateValue) &&
-                new Date(value.finish) <= new Date(toDate)
-            );
+  //         if (fromDate && toDate) {
+  //           const fromDateValue = new Date(fromDate).setDate(
+  //             new Date(fromDate).getDate() - 1
+  //           );
+  //           const filterByDate = filterData.filter(
+  //             (value) =>
+  //               new Date(value.finish) >= new Date(fromDateValue) &&
+  //               new Date(value.finish) <= new Date(toDate)
+  //           );
 
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < filterByDate.length;
-              index++
-            ) {
-              listData.push(filterByDate[index]);
-            }
-            const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            setDataForGraph(filterByDate);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          } else {
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < filterData.length;
-              index++
-            ) {
-              listData.push(filterData[index]);
-            }
-            const totalPageData = Math.ceil(filterData.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            setDataForGraph(filterData);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          }
-        }
-      } else if (filterItem === "rank") {
-        if (data.length > 0) {
-          let listData = [];
-          const filterData = data.filter(
-            (value) => value.rank === filterDetailItem
-          );
+  //           for (
+  //             let index = (page - 1) * dataPerPage;
+  //             index < page * dataPerPage && index < filterByDate.length;
+  //             index++
+  //           ) {
+  //             listData.push(filterByDate[index]);
+  //           }
+  //           const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+  //           const numberStart = (page - 1) * dataPerPage + 1;
+  //           setDataForGraph(filterByDate);
+  //           setTableProject(listData);
+  //           setStotalPageData(totalPageData);
+  //           setNumberStart(numberStart);
+  //         } else {
+  //           for (
+  //             let index = (page - 1) * dataPerPage;
+  //             index < page * dataPerPage && index < filterData.length;
+  //             index++
+  //           ) {
+  //             listData.push(filterData[index]);
+  //           }
+  //           const totalPageData = Math.ceil(filterData.length / dataPerPage);
+  //           const numberStart = (page - 1) * dataPerPage + 1;
+  //           setDataForGraph(filterData);
+  //           setTableProject(listData);
+  //           setStotalPageData(totalPageData);
+  //           setNumberStart(numberStart);
+  //         }
+  //       }
+  //     } else if (filterItem === "rank") {
+  //       if (data.length > 0) {
+  //         let listData = [];
+  //         const filterData = data.filter(
+  //           (value) => value.rank === filterDetailItem
+  //         );
 
-          if (fromDate && toDate) {
-            const fromDateValue = new Date(fromDate).setDate(
-              new Date(fromDate).getDate() - 1
-            );
-            const filterByDate = filterData.filter(
-              (value) =>
-                new Date(value.finish) >= new Date(fromDateValue) &&
-                new Date(value.finish) <= new Date(toDate)
-            );
+  //         if (fromDate && toDate) {
+  //           const fromDateValue = new Date(fromDate).setDate(
+  //             new Date(fromDate).getDate() - 1
+  //           );
+  //           const filterByDate = filterData.filter(
+  //             (value) =>
+  //               new Date(value.finish) >= new Date(fromDateValue) &&
+  //               new Date(value.finish) <= new Date(toDate)
+  //           );
 
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < filterByDate.length;
-              index++
-            ) {
-              listData.push(filterByDate[index]);
-            }
-            const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            setDataForGraph(filterByDate);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          } else {
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < filterData.length;
-              index++
-            ) {
-              listData.push(filterData[index]);
-            }
-            const totalPageData = Math.ceil(filterData.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            setDataForGraph(filterData);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          }
-        }
-      } else if (filterItem === "pic") {
-        if (data.length > 0) {
-          let listData = [];
-          const filterData = data.filter(
-            (value) => value.manager_id === parseInt(filterDetailItem)
-          );
+  //           for (
+  //             let index = (page - 1) * dataPerPage;
+  //             index < page * dataPerPage && index < filterByDate.length;
+  //             index++
+  //           ) {
+  //             listData.push(filterByDate[index]);
+  //           }
+  //           const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+  //           const numberStart = (page - 1) * dataPerPage + 1;
+  //           setDataForGraph(filterByDate);
+  //           setTableProject(listData);
+  //           setStotalPageData(totalPageData);
+  //           setNumberStart(numberStart);
+  //         } else {
+  //           for (
+  //             let index = (page - 1) * dataPerPage;
+  //             index < page * dataPerPage && index < filterData.length;
+  //             index++
+  //           ) {
+  //             listData.push(filterData[index]);
+  //           }
+  //           const totalPageData = Math.ceil(filterData.length / dataPerPage);
+  //           const numberStart = (page - 1) * dataPerPage + 1;
+  //           setDataForGraph(filterData);
+  //           setTableProject(listData);
+  //           setStotalPageData(totalPageData);
+  //           setNumberStart(numberStart);
+  //         }
+  //       }
+  //     } else if (filterItem === "pic") {
+  //       if (data.length > 0) {
+  //         let listData = [];
+  //         const filterData = data.filter(
+  //           (value) => value.manager_id === parseInt(filterDetailItem)
+  //         );
 
-          if (fromDate && toDate) {
-            const fromDateValue = new Date(fromDate).setDate(
-              new Date(fromDate).getDate() - 1
-            );
-            const filterByDate = filterData.filter(
-              (value) =>
-                new Date(value.finish) >= new Date(fromDateValue) &&
-                new Date(value.finish) <= new Date(toDate)
-            );
+  //         if (fromDate && toDate) {
+  //           const fromDateValue = new Date(fromDate).setDate(
+  //             new Date(fromDate).getDate() - 1
+  //           );
+  //           const filterByDate = filterData.filter(
+  //             (value) =>
+  //               new Date(value.finish) >= new Date(fromDateValue) &&
+  //               new Date(value.finish) <= new Date(toDate)
+  //           );
 
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < filterByDate.length;
-              index++
-            ) {
-              listData.push(filterByDate[index]);
-            }
-            const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            setDataForGraph(filterByDate);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          } else {
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < filterData.length;
-              index++
-            ) {
-              listData.push(filterData[index]);
-            }
-            const totalPageData = Math.ceil(filterData.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            setDataForGraph(filterData);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          }
-        }
-      } else if (filterItem === "status" && data.length > 0) {
-        let listData = [];
-        let filterData = [];
-        if (filterDetailItem === "Delay") {
-          let notCriteria = [
-            "Not Yet Started",
-            "On Progress",
-            "Finish",
-            "Waiting Detail Activity",
-            "cancel",
-          ];
+  //           for (
+  //             let index = (page - 1) * dataPerPage;
+  //             index < page * dataPerPage && index < filterByDate.length;
+  //             index++
+  //           ) {
+  //             listData.push(filterByDate[index]);
+  //           }
+  //           const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+  //           const numberStart = (page - 1) * dataPerPage + 1;
+  //           setDataForGraph(filterByDate);
+  //           setTableProject(listData);
+  //           setStotalPageData(totalPageData);
+  //           setNumberStart(numberStart);
+  //         } else {
+  //           for (
+  //             let index = (page - 1) * dataPerPage;
+  //             index < page * dataPerPage && index < filterData.length;
+  //             index++
+  //           ) {
+  //             listData.push(filterData[index]);
+  //           }
+  //           const totalPageData = Math.ceil(filterData.length / dataPerPage);
+  //           const numberStart = (page - 1) * dataPerPage + 1;
+  //           setDataForGraph(filterData);
+  //           setTableProject(listData);
+  //           setStotalPageData(totalPageData);
+  //           setNumberStart(numberStart);
+  //         }
+  //       }
+  //     } else if (filterItem === "status" && data.length > 0) {
+  //       let listData = [];
+  //       let filterData = [];
+  //       if (filterDetailItem === "Delay") {
+  //         let notCriteria = [
+  //           "Not Yet Started",
+  //           "On Progress",
+  //           "Finish",
+  //           "Waiting Detail Activity",
+  //           "cancel",
+  //         ];
 
-          filterData = data.filter(
-            (value) => !notCriteria.includes(value.status)
-          );
-        } else {
-          filterData = data.filter(
-            (value) => value.status === filterDetailItem
-          );
-        }
+  //         filterData = data.filter(
+  //           (value) => !notCriteria.includes(value.status)
+  //         );
+  //       } else {
+  //         filterData = data.filter(
+  //           (value) => value.status === filterDetailItem
+  //         );
+  //       }
 
-        if (fromDate && toDate) {
-          const fromDateValue = new Date(fromDate).setDate(
-            new Date(fromDate).getDate() - 1
-          );
-          const filterByDate = filterData.filter(
-            (value) =>
-              new Date(value.finish) >= new Date(fromDateValue) &&
-              new Date(value.finish) <= new Date(toDate)
-          );
-          for (
-            let index = (page - 1) * dataPerPage;
-            index < page * dataPerPage && index < filterByDate.length;
-            index++
-          ) {
-            listData.push(filterByDate[index]);
-          }
-          const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-          const numberStart = (page - 1) * dataPerPage + 1;
-          setDataForGraph(filterByDate);
-          setTableProject(listData);
-          setStotalPageData(totalPageData);
-          setNumberStart(numberStart);
-        } else {
-          for (
-            let index = (page - 1) * dataPerPage;
-            index < page * dataPerPage && index < filterData.length;
-            index++
-          ) {
-            listData.push(filterData[index]);
-          }
-          const totalPageData = Math.ceil(filterData.length / dataPerPage);
-          const numberStart = (page - 1) * dataPerPage + 1;
-          setDataForGraph(filterData);
-          setTableProject(listData);
-          setStotalPageData(totalPageData);
-          setNumberStart(numberStart);
-        }
-      } else if (filterItem === "product") {
-        if (data.length > 0) {
-          let listData = [];
-          const filterData = data.filter(
-            (value) => value.product_id === parseInt(filterDetailItem)
-          );
-          if (fromDate && toDate) {
-            const fromDateValue = new Date(fromDate).setDate(
-              new Date(fromDate).getDate() - 1
-            );
-            const filterByDate = filterData.filter(
-              (value) =>
-                new Date(value.finish) >= new Date(fromDateValue) &&
-                new Date(value.finish) <= new Date(toDate)
-            );
+  //       if (fromDate && toDate) {
+  //         const fromDateValue = new Date(fromDate).setDate(
+  //           new Date(fromDate).getDate() - 1
+  //         );
+  //         const filterByDate = filterData.filter(
+  //           (value) =>
+  //             new Date(value.finish) >= new Date(fromDateValue) &&
+  //             new Date(value.finish) <= new Date(toDate)
+  //         );
+  //         for (
+  //           let index = (page - 1) * dataPerPage;
+  //           index < page * dataPerPage && index < filterByDate.length;
+  //           index++
+  //         ) {
+  //           listData.push(filterByDate[index]);
+  //         }
+  //         const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+  //         const numberStart = (page - 1) * dataPerPage + 1;
+  //         setDataForGraph(filterByDate);
+  //         setTableProject(listData);
+  //         setStotalPageData(totalPageData);
+  //         setNumberStart(numberStart);
+  //       } else {
+  //         for (
+  //           let index = (page - 1) * dataPerPage;
+  //           index < page * dataPerPage && index < filterData.length;
+  //           index++
+  //         ) {
+  //           listData.push(filterData[index]);
+  //         }
+  //         const totalPageData = Math.ceil(filterData.length / dataPerPage);
+  //         const numberStart = (page - 1) * dataPerPage + 1;
+  //         setDataForGraph(filterData);
+  //         setTableProject(listData);
+  //         setStotalPageData(totalPageData);
+  //         setNumberStart(numberStart);
+  //       }
+  //     } else if (filterItem === "product") {
+  //       if (data.length > 0) {
+  //         let listData = [];
+  //         const filterData = data.filter(
+  //           (value) => value.product_id === parseInt(filterDetailItem)
+  //         );
+  //         if (fromDate && toDate) {
+  //           const fromDateValue = new Date(fromDate).setDate(
+  //             new Date(fromDate).getDate() - 1
+  //           );
+  //           const filterByDate = filterData.filter(
+  //             (value) =>
+  //               new Date(value.finish) >= new Date(fromDateValue) &&
+  //               new Date(value.finish) <= new Date(toDate)
+  //           );
 
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < filterByDate.length;
-              index++
-            ) {
-              listData.push(filterByDate[index]);
-            }
-            const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            setDataForGraph(filterByDate);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          } else {
-            for (
-              let index = (page - 1) * dataPerPage;
-              index < page * dataPerPage && index < filterData.length;
-              index++
-            ) {
-              listData.push(filterData[index]);
-            }
-            const totalPageData = Math.ceil(filterData.length / dataPerPage);
-            const numberStart = (page - 1) * dataPerPage + 1;
-            setDataForGraph(filterData);
-            setTableProject(listData);
-            setStotalPageData(totalPageData);
-            setNumberStart(numberStart);
-          }
-        }
-      }
-    };
+  //           for (
+  //             let index = (page - 1) * dataPerPage;
+  //             index < page * dataPerPage && index < filterByDate.length;
+  //             index++
+  //           ) {
+  //             listData.push(filterByDate[index]);
+  //           }
+  //           const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
+  //           const numberStart = (page - 1) * dataPerPage + 1;
+  //           setDataForGraph(filterByDate);
+  //           setTableProject(listData);
+  //           setStotalPageData(totalPageData);
+  //           setNumberStart(numberStart);
+  //         } else {
+  //           for (
+  //             let index = (page - 1) * dataPerPage;
+  //             index < page * dataPerPage && index < filterData.length;
+  //             index++
+  //           ) {
+  //             listData.push(filterData[index]);
+  //           }
+  //           const totalPageData = Math.ceil(filterData.length / dataPerPage);
+  //           const numberStart = (page - 1) * dataPerPage + 1;
+  //           setDataForGraph(filterData);
+  //           setTableProject(listData);
+  //           setStotalPageData(totalPageData);
+  //           setNumberStart(numberStart);
+  //         }
+  //       }
+  //     }
+  //   };
 
-    if (tableProject.length > 0) {
-      filterFunctionLogic(
-        filterBy,
-        detailFilterValue,
-        tableProject,
-        fromDate,
-        toDate
-      );
-      filterFunctionLogicByDate(tableProject, fromDate, toDate);
-    }
-    //filter sampai sini
-  }, [
-    actionStateValue,
-    page,
-    filterBy,
-    detailFilterValue,
-    userId,
-    fromDate,
-    toDate,
-  ]);
+  //   if (tableProject.length > 0) {
+  //     filterFunctionLogic(
+  //       filterBy,
+  //       detailFilterValue,
+  //       tableProject,
+  //       fromDate,
+  //       toDate
+  //     );
+  //     filterFunctionLogicByDate(tableProject, fromDate, toDate);
+  //   }
+  //   //filter sampai sini
+  // }, [
+  //   actionStateValue,
+  //   page,
+  //   filterBy,
+  //   detailFilterValue,
+  //   userId,
+  //   fromDate,
+  //   toDate,
+  // ]);
 
   const productOption = () => {
     let option = [];
@@ -919,74 +941,74 @@ function Project(props) {
     setDescription(e.target.value);
   };
 
-  const filterItemLogic = () => {
-    let option = [];
-    if (filterBy === "category") {
-      if (userSection === 4) {
-        option.push(
-          <>
-            <option value={"CO2 Neutral"}>CO2 Neutral</option>
-            <option value={"Log Auto"}>Log Auto</option>
-            <option value={"Vision"}>Vision</option>
-            <option value={"DX"}>DX</option>
-            <option value={"Layout"}>Layout</option>
-          </>
-        );
-      } else if (userSection === 10) {
-        option.push(
-          <>
-            <option value={"CO2 Neutral"}>CO2 Neutral</option>
-            <option value={"Log Auto"}>Log Auto</option>
-            <option value={"Vision"}>Vision</option>
-            <option value={"DX"}>DX</option>
-            <option value={"Layout"}>Layout</option>
-          </>
-        );
-      } else {
-        option.push(
-          <>
-            <option value={"New Model"}>New Model</option>
-            <option value={"Quality"}>Quality</option>
-            <option value={"Integrated Factory"}>Integrated Factory</option>
-            <option value={"Productivity"}>Productivity</option>
-            <option value={"Profit Improvement"}>Profit Improvement</option>
-          </>
-        );
-      }
-    } else if (filterBy === "rank") {
-      option.push(
-        <>
-          <option value={"A1"}>A1</option>
-          <option value={"A2"}>A2</option>
-          <option value={"A3"}>A3</option>
-          <option value={"B1"}>B1</option>
-          <option value={"B2"}>B2</option>
-          <option value={"B3"}>B3</option>
-          <option value={"C1"}>C1</option>
-          <option value={"C2"}>C2</option>
-          <option value={"C3"}>C3</option>
-        </>
-      );
-    } else if (filterBy === "pic") {
-      return userOption();
-    } else if (filterBy === "status") {
-      option.push(
-        <>
-          <option value={"Not Yet Started"}>Not Yet Started</option>
-          <option value={"On Progress"}>On Progress</option>
-          <option value={"Delay"}>Delay</option>
-          <option value={"Finish"}>Finish</option>
-          <option value={"Waiting Detail Activity"}>
-            Waiting Detail Activity
-          </option>
-          <option value={"cancel"}>cancel</option>
-        </>
-      );
-    } else if (filterBy === "product") {
-      return productOption();
-    }
-    return option;
-  };
+  // const filterItemLogic = () => {
+  //   let option = [];
+  //   if (filterBy === "category") {
+  //     if (userSection === 4) {
+  //       option.push(
+  //         <>
+  //           <option value={"CO2 Neutral"}>CO2 Neutral</option>
+  //           <option value={"Log Auto"}>Log Auto</option>
+  //           <option value={"Vision"}>Vision</option>
+  //           <option value={"DX"}>DX</option>
+  //           <option value={"Layout"}>Layout</option>
+  //         </>
+  //       );
+  //     } else if (userSection === 10) {
+  //       option.push(
+  //         <>
+  //           <option value={"CO2 Neutral"}>CO2 Neutral</option>
+  //           <option value={"Log Auto"}>Log Auto</option>
+  //           <option value={"Vision"}>Vision</option>
+  //           <option value={"DX"}>DX</option>
+  //           <option value={"Layout"}>Layout</option>
+  //         </>
+  //       );
+  //     } else {
+  //       option.push(
+  //         <>
+  //           <option value={"New Model"}>New Model</option>
+  //           <option value={"Quality"}>Quality</option>
+  //           <option value={"Integrated Factory"}>Integrated Factory</option>
+  //           <option value={"Productivity"}>Productivity</option>
+  //           <option value={"Profit Improvement"}>Profit Improvement</option>
+  //         </>
+  //       );
+  //     }
+  //   } else if (filterBy === "rank") {
+  //     option.push(
+  //       <>
+  //         <option value={"A1"}>A1</option>
+  //         <option value={"A2"}>A2</option>
+  //         <option value={"A3"}>A3</option>
+  //         <option value={"B1"}>B1</option>
+  //         <option value={"B2"}>B2</option>
+  //         <option value={"B3"}>B3</option>
+  //         <option value={"C1"}>C1</option>
+  //         <option value={"C2"}>C2</option>
+  //         <option value={"C3"}>C3</option>
+  //       </>
+  //     );
+  //   } else if (filterBy === "pic") {
+  //     return userOption();
+  //   } else if (filterBy === "status") {
+  //     option.push(
+  //       <>
+  //         <option value={"Not Yet Started"}>Not Yet Started</option>
+  //         <option value={"On Progress"}>On Progress</option>
+  //         <option value={"Delay"}>Delay</option>
+  //         <option value={"Finish"}>Finish</option>
+  //         <option value={"Waiting Detail Activity"}>
+  //           Waiting Detail Activity
+  //         </option>
+  //         <option value={"cancel"}>cancel</option>
+  //       </>
+  //     );
+  //   } else if (filterBy === "product") {
+  //     return productOption();
+  //   }
+  //   return option;
+  // };
 
   const onHandleChangeFiscalYear = (e) => {
     const fiscalYear = e.target.value;
@@ -1024,6 +1046,161 @@ function Project(props) {
         });
     }
   };
+
+  const columns = [
+    {
+      field: "project_name",
+      headerName: "Project Name",
+      width: 200,
+    },
+    {
+      field: "rank",
+      headerName: "Rank",
+    },
+    {
+      field: "category",
+      headerName: "Category",
+      renderCell: (params) => {
+        return (
+          <>
+            {params.row.category} {subCategoryLabel(params.row.sub_category)}
+          </>
+        );
+      },
+      width: 150,
+    },
+
+    {
+      field: "PIC",
+      headerName: "PIC",
+      valueGetter: (value, rows) => {
+        return userNameFunction(rows.manager_id);
+      },
+      width: 150,
+    },
+    {
+      field: "create_date",
+      headerName: "Create Date",
+      valueFormatter: (value) => {
+        return moment(value).format("ll");
+      },
+      width: 150,
+      type: "date",
+    },
+    {
+      field: "user_id",
+      headerName: "Create By",
+      valueGetter: (value) => {
+        return userNameFunction(value);
+      },
+      width: 150,
+    },
+    {
+      field: "start",
+      headerName: "Start Project",
+      valueFormatter: (value) => {
+        return moment(value).format("ll");
+      },
+      width: 150,
+      type: "date",
+    },
+    {
+      field: "finish",
+      headerName: "Finish Project",
+      valueFormatter: (value) => {
+        return moment(value).format("ll");
+      },
+      width: 150,
+      type: "date",
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      renderCell: (params) => {
+        return (
+          <>
+            {statusFunction(params.row.status, params.row.id)}
+            <br />
+            {params.row.status === "Finish" && (
+              <Button
+                id={params.row.id}
+                size="sm"
+                variant="primary"
+                onClick={handleShowModalShare}
+              >
+                <GrShareOption style={{ pointerEvents: "none" }} />
+              </Button>
+            )}
+          </>
+        );
+      },
+    },
+    {
+      headerName: "Actions",
+      renderCell: (params) => {
+        return (
+          <>
+            {admin && (
+              <Button
+                variant="danger"
+                style={{ marginRight: 2 }}
+                id={params.row.id}
+                size="sm"
+                title="Delete project"
+                onClick={handleDeleteProject}
+              >
+                <RiDeleteBack2Fill style={{ pointerEvents: "none" }} />
+              </Button>
+            )}
+            {params.row.user_id === userId && (
+              <Button
+                title="Cancel Project"
+                size="sm"
+                variant="danger"
+                style={{ marginRight: 2 }}
+                id={params.row.id}
+                onClick={handleChangeStatus}
+              >
+                <GoGitCompare style={{ pointerEvents: "none" }} />
+              </Button>
+            )}
+            <Button
+              title="Edit"
+              size="sm"
+              style={{ marginRight: 2 }}
+              variant="success"
+              id={params.row.id}
+              onClick={handleEdit}
+            >
+              <GrEdit style={{ pointerEvents: "none" }} />
+            </Button>
+            <Link to={`/projectActivity/${params.row.id}`}>
+              <Button
+                title="View"
+                size="sm"
+                style={{ marginRight: 2 }}
+                id={params.row.id}
+                variant="dark"
+              >
+                <MdVideoLibrary style={{ pointerEvents: "none" }} />
+              </Button>
+            </Link>
+            <Button
+              title="SendEmail"
+              size="sm"
+              style={{ marginRight: 2 }}
+              id={params.row.id}
+              variant="warning"
+              onClick={handleSendEmail}
+            >
+              <MdEmail style={{ pointerEvents: "none" }} />
+            </Button>
+          </>
+        );
+      },
+      width: 200,
+    },
+  ];
   return (
     <>
       <Row>
@@ -1117,7 +1294,7 @@ function Project(props) {
               </Col>
             </Row>
           </div>
-
+          {/* 
           <div style={{ marginBottom: 5 }}>
             <Row className="col-12">
               <Col lg={3}>
@@ -1179,145 +1356,28 @@ function Project(props) {
                 )}
               </Col>
             </Row>
-          </div>
+          </div> */}
 
           <TitleSection
             title="Project List"
             icon={<BsListNested style={{ marginRight: 5 }} />}
           />
-          {tableProject ? (
-            <>
-              <Table striped bordered hover>
-                <thead>
-                  <tr>
-                    <th>NO</th>
-                    <th>Project Name</th>
-                    <th>Rank</th>
-                    <th>Category</th>
-                    <th>PIC</th>
-                    <th>Created Date</th>
-                    <th>Created By</th>
-                    <th>Start Date</th>
-                    <th>SOP Date</th>
-                    {/* <th>Last Update</th> */}
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableProject.length > 0 ? (
-                    tableProject.map((value, index) => {
-                      return (
-                        <tr key={index}>
-                          <td>{numberStart + index}</td>
-                          <td>{value.project_name}</td>
-                          <td>{value.rank}</td>
-                          <td>
-                            {value.category} <br />
-                            {subCategoryLabel(value.sub_category)}
-                          </td>
-                          <td>{userNameFunction(value.manager_id)}</td>
-                          {/* <td>{parseFloat(value.budget).toLocaleString()}</td>
-                    <td>{parseFloat(value.saving_cost).toLocaleString()}</td> */}
-                          <td>{moment(value.create_date).format("LL")}</td>
-                          <td>{userNameFunction(value.user_id)}</td>
-                          <td>{moment(value.start).format("LL")}</td>
-                          <td>{moment(value.finish).format("LL")}</td>
-                          {/* <td>{moment(value.create_date).format("LL")}</td> */}
-                          <td>
-                            {statusFunction(value.status, value.id)}
-                            <br />
-                            {value.status === "Finish" && (
-                              <Button
-                                id={value.id}
-                                size="sm"
-                                variant="primary"
-                                onClick={handleShowModalShare}
-                              >
-                                <GrShareOption
-                                  style={{ pointerEvents: "none" }}
-                                />
-                              </Button>
-                            )}
-                          </td>
-                          <td>
-                            {admin && (
-                              <Button
-                                variant="danger"
-                                style={{ marginRight: 2 }}
-                                id={value.id}
-                                size="sm"
-                                title="Delete project"
-                                onClick={handleDeleteProject}
-                              >
-                                <RiDeleteBack2Fill
-                                  style={{ pointerEvents: "none" }}
-                                />
-                              </Button>
-                            )}
-                            {value.user_id === userId && (
-                              <Button
-                                title="Cancel Project"
-                                size="sm"
-                                variant="danger"
-                                style={{ marginRight: 2 }}
-                                id={value.id}
-                                onClick={handleChangeStatus}
-                              >
-                                <GoGitCompare
-                                  style={{ pointerEvents: "none" }}
-                                />
-                              </Button>
-                            )}
-                            <Button
-                              title="Edit"
-                              size="sm"
-                              style={{ marginRight: 2 }}
-                              variant="success"
-                              id={value.id}
-                              onClick={handleEdit}
-                            >
-                              <GrEdit style={{ pointerEvents: "none" }} />
-                            </Button>
-                            <Link to={`/projectActivity/${value.id}`}>
-                              <Button
-                                title="View"
-                                size="sm"
-                                style={{ marginRight: 2 }}
-                                id={value.id}
-                                variant="dark"
-                              >
-                                <MdVideoLibrary
-                                  style={{ pointerEvents: "none" }}
-                                />
-                              </Button>
-                            </Link>
-                            <Button
-                              title="SendEmail"
-                              size="sm"
-                              style={{ marginRight: 2 }}
-                              id={value.id}
-                              variant="warning"
-                              onClick={handleSendEmail}
-                            >
-                              <MdEmail style={{ pointerEvents: "none" }} />
-                            </Button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={11}>Data is Not Available</td>
-                    </tr>
-                  )}
-                </tbody>
-              </Table>
-            </>
+          {tableProject.length > 0 ? (
+            <DataGrid
+              columns={columns}
+              rows={tableProject}
+              disableRowSelectionOnClick
+              initialState={{
+                pagination: {
+                  paginationModel: { pageSize: 10, page: 0 },
+                },
+              }}
+              pageSizeOptions={[5, 10, 20]}
+            />
           ) : (
             <BeatLoader color="#00ADEB" />
           )}
-          <div className="paginationTableProduct">
+          {/* <div className="paginationTableProduct">
             <PaginationTable
               totalPage={totalPageData}
               maxPagesShow={maxPagesShow}
@@ -1330,8 +1390,9 @@ function Project(props) {
               }}
               pageActive={page}
             />
-          </div>
+          </div> */}
         </div>
+        {/* //modal start dari sini */}
         <Modal
           show={show}
           onHide={() => {
@@ -1856,7 +1917,8 @@ function Project(props) {
                         onChange={(e) => setCategory(e.target.value)}
                         required
                       >
-                        {/* {userSection === 4 ? (
+                        <option value={""}>Open This</option>
+                        {userSection === 4 || userSection === 10 ? (
                           <>
                             <option value="" disabled>
                               Open This
@@ -1882,9 +1944,9 @@ function Project(props) {
                               Profit Improvement
                             </option>
                           </>
-                        )} */}
-                        <option value={""}>Open This</option>
-                        {filterItemLogic()}
+                        )}
+
+                        {/* {filterItemLogic()} */}
                       </Form.Select>
                     </Col>
                   </Row>

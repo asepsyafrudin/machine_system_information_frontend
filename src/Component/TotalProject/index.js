@@ -30,6 +30,7 @@ import { SETFILTERDETAIL1 } from "../../Context/const/index";
 import { SETFILTERDETAIL2 } from "../../Context/const/index";
 import { SETFILTERDETAIL3 } from "../../Context/const/index";
 import { BeatLoader } from "react-spinners";
+import { DataGrid } from "@mui/x-data-grid";
 
 function TotalProject(props) {
   const {
@@ -90,12 +91,12 @@ function TotalProject(props) {
     setUserId(user.id);
   }, []);
 
-  useEffect(() => {
-    axios.get(getAllProjectApi).then((response) => {
-      const dataProject = response.data.data;
-      setTableProject(dataProject);
-    });
-  }, [actionStateValue]);
+  // useEffect(() => {
+  //   axios.get(getAllProjectApi).then((response) => {
+  //     const dataProject = response.data.data;
+  //     setTableProject(dataProject);
+  //   });
+  // }, [actionStateValue]);
 
   useEffect(() => {
     let isMounted = true;
@@ -135,65 +136,74 @@ function TotalProject(props) {
       setTotalSavingCost(saving);
     };
 
-    if (tableProject.length > 0) {
-      if (
-        sectionFilter &&
-        productFilter &&
-        categoryFilter &&
-        startFilter &&
-        endFilter
-      ) {
-        const filterData = tableProject.filter(
-          (value) =>
-            value.section_id === sectionFilter &&
-            value.product_id === productFilter &&
-            value.category === categoryFilter &&
-            value.start === startFilter &&
-            value.finish === endFilter
-        );
-        if (filterData.length > 0) {
-          setTableProject(filterData);
-          setItemsFunction(filterData);
+    axios.get(getAllProjectApi).then((response) => {
+      const dataProject = response.data.data.filter(
+        (value) => value.status !== "cancel"
+      );
+      if (dataProject.length > 0) {
+        if (
+          sectionFilter &&
+          productFilter &&
+          categoryFilter &&
+          startFilter &&
+          endFilter
+        ) {
+          const filterData = dataProject.filter(
+            (value) =>
+              value.section_id === sectionFilter &&
+              value.product_id === productFilter &&
+              value.category === categoryFilter &&
+              value.start === startFilter &&
+              value.finish === endFilter
+          );
+          if (filterData.length > 0) {
+            setTableProject(filterData);
+            setItemsFunction(filterData);
+          } else {
+            setTableProject([]);
+          }
+        } else if (sectionFilter && productFilter && categoryFilter) {
+          const filterData = dataProject.filter(
+            (value) =>
+              parseInt(value.section_id) === parseInt(sectionFilter) &&
+              parseInt(value.product_id) === parseInt(productFilter) &&
+              value.category === categoryFilter
+          );
+          if (filterData.length > 0) {
+            setTableProject(filterData);
+            setItemsFunction(filterData);
+          } else {
+            setTableProject([]);
+          }
+        } else if (sectionFilter && productFilter) {
+          const filterData = dataProject.filter(
+            (value) =>
+              parseInt(value.section_id) === parseInt(sectionFilter) &&
+              parseInt(value.product_id) === parseInt(productFilter)
+          );
+          if (filterData.length > 0) {
+            setTableProject(filterData);
+            setItemsFunction(filterData);
+          } else {
+            setTableProject([]);
+          }
+        } else if (sectionFilter) {
+          const filterData = dataProject.filter(
+            (value) => parseInt(value.section_id) === parseInt(sectionFilter)
+          );
+          console.log(sectionFilter, dataProject);
+          if (filterData.length > 0) {
+            setTableProject(filterData);
+            setItemsFunction(filterData);
+          } else {
+            setTableProject([]);
+          }
         } else {
-          setTableProject([]);
-        }
-      } else if (sectionFilter && productFilter && categoryFilter) {
-        const filterData = tableProject.filter(
-          (value) =>
-            value.section_id === sectionFilter &&
-            value.product_id === productFilter &&
-            value.category === categoryFilter
-        );
-        if (filterData.length > 0) {
-          setTableProject(filterData);
-          setItemsFunction(filterData);
-        } else {
-          setTableProject([]);
-        }
-      } else if (sectionFilter && productFilter) {
-        const filterData = tableProject.filter(
-          (value) =>
-            value.section_id === sectionFilter &&
-            value.product_id === productFilter
-        );
-        if (filterData.length > 0) {
-          setTableProject(filterData);
-          setItemsFunction(filterData);
-        } else {
-          setTableProject([]);
-        }
-      } else if (sectionFilter) {
-        const filterData = tableProject.filter(
-          (value) => value.section_id === sectionFilter
-        );
-        if (filterData.length > 0) {
-          setTableProject(filterData);
-          setItemsFunction(filterData);
-        } else {
-          setTableProject([]);
+          setTableProject(dataProject);
+          setItemsFunction(dataProject);
         }
       }
-    }
+    });
 
     // axios.post(searchProjectApi, data).then((response) => {
     //   const data = response.data.data;
@@ -538,6 +548,87 @@ function TotalProject(props) {
     }
   };
 
+  const columns = [
+    {
+      field: "project_name",
+      headerName: "Project Name",
+      width: 200,
+    },
+    {
+      field: "product_id",
+      headerName: "Product",
+      valueGetter: (value) => {
+        return productNameFunction(value);
+      },
+    },
+    {
+      field: "category",
+      headerName: "Category",
+      renderCell: (params) => {
+        return (
+          <>
+            {params.row.category} {subCategoryLabel(params.row.sub_category)}
+          </>
+        );
+      },
+    },
+
+    {
+      field: "PIC",
+      headerName: "PIC",
+      valueGetter: (value, rows) => {
+        return userNameFunction(rows.manager_id);
+      },
+      width: 150,
+    },
+    {
+      field: "create_date",
+      headerName: "Create Date",
+      valueFormatter: (value) => {
+        return moment(value).format("ll");
+      },
+      width: 150,
+      type: "date",
+    },
+    {
+      field: "user_id",
+      headerName: "Create By",
+      valueGetter: (value) => {
+        return userNameFunction(value);
+      },
+      width: 150,
+    },
+    {
+      field: "start",
+      headerName: "Start Project",
+      valueFormatter: (value) => {
+        return moment(value).format("ll");
+      },
+      width: 150,
+      type: "date",
+    },
+    {
+      field: "finish",
+      headerName: "Finish Project",
+      valueFormatter: (value) => {
+        return moment(value).format("ll");
+      },
+      width: 150,
+      type: "date",
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      renderCell: (params) => {
+        return (
+          <>
+            {statusFunction(params.row.status)}
+            {buttonView(params.row.id)}
+          </>
+        );
+      },
+    },
+  ];
   return (
     <div>
       <Row>
@@ -740,44 +831,21 @@ function TotalProject(props) {
               <BsListTask style={{ marginRight: 5 }} />
               Project List
             </span>
-            {tableListProject(page) ? (
-              <>
-                <Table striped bordered hover>
-                  <thead>
-                    <tr>
-                      <th>NO</th>
-                      <th>Project Name</th>
-                      <th>Product</th>
-                      <th>Category</th>
-                      <th>PIC</th>
-                      <th>Created Date</th>
-                      <th>Created By</th>
-                      <th>Start Date</th>
-                      <th>SOP Date</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>{tableListProject(page)}</tbody>
-                </Table>
-              </>
+            {tableProject.length > 0 ? (
+              <DataGrid
+                columns={columns}
+                rows={tableProject}
+                disableRowSelectionOnClick
+                initialState={{
+                  pagination: {
+                    paginationModel: { pageSize: 10, page: 0 },
+                  },
+                }}
+                pageSizeOptions={[5, 10, 20]}
+              />
             ) : (
               <BeatLoader color="#00ADEB" />
             )}
-
-            <div className="paginationTableProduct">
-              <PaginationTable
-                totalPage={totalPageData}
-                maxPagesShow={maxPagesShow}
-                onChangePage={(e) => {
-                  setPage(e);
-                  dispatch({
-                    type: SETPAGE,
-                    payload: e,
-                  });
-                }}
-                pageActive={page}
-              />
-            </div>
           </div>
         </Col>
         <Col sm={4}>
