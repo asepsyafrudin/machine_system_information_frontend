@@ -11,6 +11,8 @@ import CapabilityCompareImage from "../../Asset/ImageGeneral/Data analysis-rafik
 import FTAListImage from "../../Asset/ImageGeneral/Completed-rafiki.png";
 
 function EngineeringTools() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const position = user.position;
   return (
     <div className="userListContainer">
       <TitleSection
@@ -43,18 +45,24 @@ function EngineeringTools() {
         <Link to={"/FTAList"} className="link">
           <CardMenuEngineering image={FTAListImage} title="FTA List" />
         </Link>
-        <Link to={"/DocumentUpload"} className="link">
+        {/* <Link to={"/DocumentUpload"} className="link">
           <CardMenuEngineering
             image={FTAListImage}
             title="Upload Document Engineering"
           />
         </Link>
-        <Link to={"/ListDocumentEngineering"} className="link">
-          <CardMenuEngineering
-            image={FTAListImage}
-            title="View Document Engineering"
-          />
-        </Link>
+        {position === "Manager" ? (
+          <>
+            <Link to={"/ListDocumentEngineering"} className="link">
+              <CardMenuEngineering
+                image={FTAListImage}
+                title="View Document Engineering"
+              />
+            </Link>
+          </>
+        ) : (
+          ""
+        )} */}
       </div>
     </div>
   );

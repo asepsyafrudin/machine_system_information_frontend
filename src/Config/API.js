@@ -163,6 +163,9 @@ export const getDocumentByIdApi = (id) => {
 export const getDocumentGeneralBypageApi = (page) => {
   return `${port}/api/document/getDocumentForGeneralByPage/${page}`;
 };
+export const getDocumentApprovalApi = (page) => {
+  return `${port}/api/document/getDocumentApproval/${page}`;
+};
 
 export const getDocumentByProjectIdApi = (projectId) => {
   return `${port}/api/document/getDocumentByProjectId/${projectId}`;

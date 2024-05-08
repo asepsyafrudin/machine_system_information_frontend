@@ -100,6 +100,8 @@ function GraphPieProject(props) {
         let category;
         if (section === 4) {
           category = ["CO2 Neutral", "Log Auto", "Vision", "DX", "Layout"];
+        } else if (section === 10) {
+          category = ["CO2 Neutral", "Log Auto", "Vision", "DX", "Layout"];
         } else {
           category = [
             "Productivity",

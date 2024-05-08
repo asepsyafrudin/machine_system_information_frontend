@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getUserByUserIdApi } from "../../Config/API";
 
 function RedirectPage(props) {
-  const { activityId, userId } = useParams();
+  const { activityId, userId, documentId } = useParams();
   console.log(activityId, userId);
   const [login, setLogin] = useState(false);
   useEffect(() => {
@@ -33,7 +33,9 @@ function RedirectPage(props) {
           <Spinner animation="grow" variant="dark" />
         </>
       );
-    } else {
+    } else if (documentId) {
+      navigate(`/document/${documentId}`);
+    } else if (activityId) {
       navigate(`/projectActivity/${activityId}`);
     }
   };
