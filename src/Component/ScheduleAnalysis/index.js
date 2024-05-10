@@ -634,12 +634,12 @@ function ScheduleReview(props) {
       filterFunctionLogic(
         filterBy,
         detailFilterValue,
-        tableProject,
+        totalProject,
         fromDate,
         toDate
       );
     } else if (fromDate && toDate) {
-      filterFunctionLogicByDate(tableProject, fromDate, toDate);
+      filterFunctionLogicByDate(totalProject, fromDate, toDate);
     }
   };
 

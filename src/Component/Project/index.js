@@ -69,6 +69,7 @@ function Project(props) {
   const [description, setDescription] = useState("");
   const [tableProduct, setTableProduct] = useState([]);
   const [tableProject, setTableProject] = useState([]);
+  const [totalProject, setTotalProject] = useState([]);
   const [product, setProduct] = useState("");
   const [projectName, setProjectName] = useState("");
   const [manager, setManager] = useState("");
@@ -108,22 +109,22 @@ function Project(props) {
   const [admin, setAdmin] = useState(false);
   const [fiscalYear, setFiscalYear] = useState("");
 
-  useEffect(() => {
-    const filterFunctionLogicByDate = (data, fromDate, toDate) => {
-      if (fromDate && toDate && data.length > 0) {
-        const fromDateValue = new Date(fromDate).setDate(
-          new Date(fromDate).getDate() - 1
-        );
-        const filterByDate = data.filter(
-          (value) =>
-            new Date(value.finish) > new Date(fromDateValue) &&
-            new Date(value.finish) <= new Date(toDate)
-        );
-        setDataForGraph(filterByDate);
-        setTableProject(filterByDate);
-      }
-    };
+  const filterFunctionLogicByDate = (data, fromDate, toDate) => {
+    if (fromDate && toDate && data.length > 0) {
+      const fromDateValue = new Date(fromDate).setDate(
+        new Date(fromDate).getDate() - 1
+      );
+      const filterByDate = data.filter(
+        (value) =>
+          new Date(value.finish) > new Date(fromDateValue) &&
+          new Date(value.finish) <= new Date(toDate)
+      );
+      setDataForGraph(filterByDate);
+      setTableProject(filterByDate);
+    }
+  };
 
+  useEffect(() => {
     axios
       .get(getAllProductApi)
       .then((response) => {
@@ -177,12 +178,9 @@ function Project(props) {
         .get(getAllProjectApi)
         .then((response) => {
           const responseData = response.data.data;
-          if (toDate && fromDate) {
-            filterFunctionLogicByDate(responseData, fromDate, toDate);
-          } else {
-            setDataForGraph(responseData);
-            setTableProject(responseData);
-          }
+          setDataForGraph(responseData);
+          setTableProject(responseData);
+          setTotalProject(responseData);
         })
         .then((error) => console.log(error));
     } else if (checkPosition) {
@@ -190,12 +188,9 @@ function Project(props) {
         .get(getProjectBySectionIdAndPage(page, section_id))
         .then((response) => {
           const responseData = response.data.data;
-          if (toDate && fromDate) {
-            filterFunctionLogicByDate(responseData, fromDate, toDate);
-          } else {
-            setDataForGraph(responseData);
-            setTableProject(responseData);
-          }
+          setDataForGraph(responseData);
+          setTableProject(responseData);
+          setTotalProject([]);
         })
         .catch((error) => console.log(error));
     } else {
@@ -204,19 +199,16 @@ function Project(props) {
           .get(getProjectByUserApi(userId))
           .then((response) => {
             const responseData = response.data.data;
-            if (toDate && fromDate) {
-              filterFunctionLogicByDate(responseData, fromDate, toDate);
-            } else {
-              setDataForGraph(responseData);
-              setTableProject(responseData);
-            }
+            setDataForGraph(responseData);
+            setTableProject(responseData);
+            setTotalProject(responseData);
           })
           .catch((error) => {
             console.error("Error in axios get request:", error);
           });
       }
     }
-  }, [userId, page, fromDate, toDate]);
+  }, [userId, page]);
 
   // useEffect(() => {
   //   const filterFunctionLogicByDate = (data, fromDate, toDate) => {
@@ -518,6 +510,12 @@ function Project(props) {
   //   fromDate,
   //   toDate,
   // ]);
+
+  const handleFilterTableProject = () => {
+    if (toDate && fromDate) {
+      filterFunctionLogicByDate(totalProject, fromDate, toDate);
+    }
+  };
 
   const productOption = () => {
     let option = [];
@@ -1278,7 +1276,10 @@ function Project(props) {
                   <Form.Control
                     type="date"
                     value={fromDate}
-                    onChange={(e) => setFromDate(e.target.value)}
+                    onChange={(e) => {
+                      setFromDate(e.target.value);
+                      handleFilterTableProject();
+                    }}
                   />
                 </Form.Group>
                 <Form.Group className="col-2">
@@ -1288,7 +1289,10 @@ function Project(props) {
                   <Form.Control
                     type="date"
                     value={toDate}
-                    onChange={(e) => setToDate(e.target.value)}
+                    onChange={(e) => {
+                      setToDate(e.target.value);
+                      handleFilterTableProject();
+                    }}
                   />
                 </Form.Group>
               </Col>
