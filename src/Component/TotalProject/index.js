@@ -8,13 +8,11 @@ import {
   getAllProjectApi,
   getAllSectionApi,
   getAllUsersApi,
-  searchProjectApi,
 } from "../../Config/API";
 import axios from "axios";
 import { FaMoneyBillWaveAlt, FaSmile } from "react-icons/fa";
 import { BiLoader, BiWallet } from "react-icons/bi";
 import { BsFlag, BsListTask } from "react-icons/bs";
-import PaginationTable from "../Pagination";
 import { RiStarLine } from "react-icons/ri";
 import moment from "moment/moment";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
@@ -23,7 +21,6 @@ import { TfiShine } from "react-icons/tfi";
 import { Link } from "react-router-dom";
 import { MdVideoLibrary } from "react-icons/md";
 import { GlobalConsumer } from "../../Context/store/index";
-import { SETPAGE } from "../../Context/const/index";
 import { SETFILTER } from "../../Context/const/index";
 import { SETFILTERDETAIL } from "../../Context/const/index";
 import { SETFILTERDETAIL1 } from "../../Context/const/index";
@@ -36,7 +33,6 @@ function TotalProject(props) {
   const {
     actionStateValue,
     dispatch,
-    pageEvent,
     filterEvent,
     filterDetailEvent,
     filterDetailEvent1,
@@ -52,8 +48,6 @@ function TotalProject(props) {
   const [categoryFilter, setCategoryFilter] = useState(filterDetailEvent1);
   const [totalSavingCost, setTotalSavingCost] = useState("");
   const [tableProduct, setTableProduct] = useState([]);
-  const [page, setPage] = useState(pageEvent);
-  const [totalPageData, setStotalPageData] = useState(1);
   const [tableProject, setTableProject] = useState([]);
   const [projectLaunch, setProjectLaunch] = useState("");
   const [show, setShow] = useState(false);
@@ -61,9 +55,6 @@ function TotalProject(props) {
   const [sectionFilter, setSectionFilter] = useState(filterEvent);
   const [buttonFilter, setButtonFilter] = useState("");
   const [userId, setUserId] = useState("");
-
-  const maxPagesShow = 3;
-  const dataPerPage = 10;
 
   useEffect(() => {
     axios
@@ -96,113 +87,109 @@ function TotalProject(props) {
   //     const dataProject = response.data.data;
   //     setTableProject(dataProject);
   //   });
-  // }, [actionStateValue]);
+  // }, [actionStateValue]);\
+
+  const projectWillBeLaunch = (data) => {
+    let currentDate = new Date().getTime();
+    if (data.length > 1) {
+      const sorted = data.sort(
+        (a, b) => new Date(a.finish) - new Date(b.finish)
+      );
+      const closest = sorted.find((o) => new Date(o.finish) - currentDate > 0);
+      setProjectLaunch(closest);
+    } else if (data.length === 1) {
+      setProjectLaunch(data[0]);
+    } else {
+      setProjectLaunch("");
+    }
+  };
+
+  const setItemsFunction = (data) => {
+    projectWillBeLaunch(data);
+    setTotalItem(data.length);
+    let budget = 0;
+    let saving = 0;
+    if (data.length > 0) {
+      for (let index = 0; index < data.length; index++) {
+        budget += parseFloat(data[index].budget);
+        saving += parseFloat(data[index].saving_cost);
+      }
+    }
+    setTotalBudget(budget);
+    setTotalSavingCost(saving);
+  };
 
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-
-    const projectWillBeLaunch = (data) => {
-      let currentDate = new Date().getTime();
-      if (data.length > 1) {
-        const sorted = data.sort(
-          (a, b) => new Date(a.finish) - new Date(b.finish)
-        );
-        const closest = sorted.find(
-          (o) => new Date(o.finish) - currentDate > 0
-        );
-        setProjectLaunch(closest);
-      } else if (data.length === 1) {
-        setProjectLaunch(data[0]);
-      } else {
-        setProjectLaunch("");
-      }
-    };
-
-    const setItemsFunction = (data) => {
-      const totalPageData = Math.ceil(data.length / dataPerPage);
-      setStotalPageData(totalPageData);
-      projectWillBeLaunch(data);
-      setTotalItem(data.length);
-      let budget = 0;
-      let saving = 0;
-      if (data.length > 0) {
-        for (let index = 0; index < data.length; index++) {
-          budget += parseFloat(data[index].budget);
-          saving += parseFloat(data[index].saving_cost);
-        }
-      }
-      setTotalBudget(budget);
-      setTotalSavingCost(saving);
-    };
-
     axios.get(getAllProjectApi).then((response) => {
       const dataProject = response.data.data.filter(
         (value) => value.status !== "cancel"
       );
-      if (dataProject.length > 0) {
-        if (
-          sectionFilter &&
-          productFilter &&
-          categoryFilter &&
-          startFilter &&
-          endFilter
-        ) {
-          const filterData = dataProject.filter(
-            (value) =>
-              value.section_id === sectionFilter &&
-              value.product_id === productFilter &&
-              value.category === categoryFilter &&
-              value.start === startFilter &&
-              value.finish === endFilter
-          );
-          if (filterData.length > 0) {
-            setTableProject(filterData);
-            setItemsFunction(filterData);
-          } else {
-            setTableProject([]);
-          }
-        } else if (sectionFilter && productFilter && categoryFilter) {
-          const filterData = dataProject.filter(
-            (value) =>
-              parseInt(value.section_id) === parseInt(sectionFilter) &&
-              parseInt(value.product_id) === parseInt(productFilter) &&
-              value.category === categoryFilter
-          );
-          if (filterData.length > 0) {
-            setTableProject(filterData);
-            setItemsFunction(filterData);
-          } else {
-            setTableProject([]);
-          }
-        } else if (sectionFilter && productFilter) {
-          const filterData = dataProject.filter(
-            (value) =>
-              parseInt(value.section_id) === parseInt(sectionFilter) &&
-              parseInt(value.product_id) === parseInt(productFilter)
-          );
-          if (filterData.length > 0) {
-            setTableProject(filterData);
-            setItemsFunction(filterData);
-          } else {
-            setTableProject([]);
-          }
-        } else if (sectionFilter) {
-          const filterData = dataProject.filter(
-            (value) => parseInt(value.section_id) === parseInt(sectionFilter)
-          );
-          console.log(sectionFilter, dataProject);
-          if (filterData.length > 0) {
-            setTableProject(filterData);
-            setItemsFunction(filterData);
-          } else {
-            setTableProject([]);
-          }
-        } else {
-          setTableProject(dataProject);
-          setItemsFunction(dataProject);
-        }
-      }
+      setTableProject(dataProject);
+
+      //   if (dataProject.length > 0) {
+      //     if (
+      //       sectionFilter &&
+      //       productFilter &&
+      //       categoryFilter &&
+      //       startFilter &&
+      //       endFilter
+      //     ) {
+      //       const filterData = dataProject.filter(
+      //         (value) =>
+      //           value.section_id === sectionFilter &&
+      //           value.product_id === productFilter &&
+      //           value.category === categoryFilter &&
+      //           value.start === startFilter &&
+      //           value.finish === endFilter
+      //       );
+      //       if (filterData.length > 0) {
+      //         setTableProject(filterData);
+      //         setItemsFunction(filterData);
+      //       } else {
+      //         setTableProject([]);
+      //       }
+      //     } else if (sectionFilter && productFilter && categoryFilter) {
+      //       const filterData = dataProject.filter(
+      //         (value) =>
+      //           parseInt(value.section_id) === parseInt(sectionFilter) &&
+      //           parseInt(value.product_id) === parseInt(productFilter) &&
+      //           value.category === categoryFilter
+      //       );
+      //       if (filterData.length > 0) {
+      //         setTableProject(filterData);
+      //         setItemsFunction(filterData);
+      //       } else {
+      //         setTableProject([]);
+      //       }
+      //     } else if (sectionFilter && productFilter) {
+      //       const filterData = dataProject.filter(
+      //         (value) =>
+      //           parseInt(value.section_id) === parseInt(sectionFilter) &&
+      //           parseInt(value.product_id) === parseInt(productFilter)
+      //       );
+      //       if (filterData.length > 0) {
+      //         setTableProject(filterData);
+      //         setItemsFunction(filterData);
+      //       } else {
+      //         setTableProject([]);
+      //       }
+      //     } else if (sectionFilter) {
+      //       const filterData = dataProject.filter(
+      //         (value) => parseInt(value.section_id) === parseInt(sectionFilter)
+      //       );
+      //       if (filterData.length > 0) {
+      //         setTableProject(filterData);
+      //         setItemsFunction(filterData);
+      //       } else {
+      //         setTableProject([]);
+      //       }
+      //     } else {
+      //       setTableProject(dataProject);
+      //       setItemsFunction(dataProject);
+      //     }
+      //   } else {
+      //     setTableProject([]);
+      //   }
     });
 
     // axios.post(searchProjectApi, data).then((response) => {
@@ -212,19 +199,7 @@ function TotalProject(props) {
     //     setTableProject(data);
 
     // });
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [
-    sectionFilter,
-    productFilter,
-    actionStateValue,
-    startFilter,
-    endFilter,
-    categoryFilter,
-  ]);
+  }, [actionStateValue]);
 
   const productOption = () => {
     let option = [];
@@ -389,42 +364,42 @@ function TotalProject(props) {
     }
   };
 
-  const tableListProject = (page) => {
-    const listTable = [];
-    if (tableProject.length > 0) {
-      const filter = tableProject.filter((value) => value.status !== "cancel");
-      for (
-        let index = (page - 1) * dataPerPage;
-        index < page * dataPerPage && index < filter.length;
-        index++
-      ) {
-        listTable.push(
-          <tr key={index + 1}>
-            <td>{index + 1}</td>
-            <td>{filter[index].project_name}</td>
+  // const tableListProject = (page) => {
+  //   const listTable = [];
+  //   if (tableProject.length > 0) {
+  //     const filter = tableProject.filter((value) => value.status !== "cancel");
+  //     for (
+  //       let index = (page - 1) * dataPerPage;
+  //       index < page * dataPerPage && index < filter.length;
+  //       index++
+  //     ) {
+  //       listTable.push(
+  //         <tr key={index + 1}>
+  //           <td>{index + 1}</td>
+  //           <td>{filter[index].project_name}</td>
 
-            <td>{productNameFunction(filter[index].product_id)}</td>
-            <td>
-              {filter[index].category} <br />
-              {subCategoryLabel(filter[index].sub_category)}
-            </td>
-            <td>{userNameFunction(filter[index].manager_id)}</td>
-            {/* <td>{moment(filter[index].create_date)}</td>
-            <td>{userNameFunction(filter[index].user_id)}</td> */}
-            <td>{moment(filter[index].create_date).format("LL")}</td>
-            <td>{userNameFunction(filter[index].user_id)}</td>
-            <td>{moment(filter[index].start).format("LL")}</td>
-            <td>{moment(filter[index].finish).format("LL")}</td>
-            <td>
-              {statusFunction(filter[index].status)} <br />
-              {buttonView(filter[index].id)}
-            </td>
-          </tr>
-        );
-      }
-      return listTable;
-    }
-  };
+  //           <td>{productNameFunction(filter[index].product_id)}</td>
+  //           <td>
+  //             {filter[index].category} <br />
+  //             {subCategoryLabel(filter[index].sub_category)}
+  //           </td>
+  //           <td>{userNameFunction(filter[index].manager_id)}</td>
+  //           {/* <td>{moment(filter[index].create_date)}</td>
+  //           <td>{userNameFunction(filter[index].user_id)}</td> */}
+  //           <td>{moment(filter[index].create_date).format("LL")}</td>
+  //           <td>{userNameFunction(filter[index].user_id)}</td>
+  //           <td>{moment(filter[index].start).format("LL")}</td>
+  //           <td>{moment(filter[index].finish).format("LL")}</td>
+  //           <td>
+  //             {statusFunction(filter[index].status)} <br />
+  //             {buttonView(filter[index].id)}
+  //           </td>
+  //         </tr>
+  //       );
+  //     }
+  //     return listTable;
+  //   }
+  // };
 
   const buttonView = (projectId) => {
     const dataView = tableProject.find((value) => value.id === projectId);
@@ -629,6 +604,69 @@ function TotalProject(props) {
       },
     },
   ];
+
+  const handleFilterTableProject = () => {
+    if (
+      sectionFilter &&
+      productFilter &&
+      categoryFilter &&
+      startFilter &&
+      endFilter
+    ) {
+      const filterData = tableProject.filter(
+        (value) =>
+          value.section_id === sectionFilter &&
+          value.product_id === productFilter &&
+          value.category === categoryFilter &&
+          value.start === startFilter &&
+          value.finish === endFilter
+      );
+      if (filterData.length > 0) {
+        setTableProject(filterData);
+        setItemsFunction(filterData);
+      } else {
+        setTableProject([]);
+      }
+    } else if (sectionFilter && productFilter && categoryFilter) {
+      const filterData = tableProject.filter(
+        (value) =>
+          parseInt(value.section_id) === parseInt(sectionFilter) &&
+          parseInt(value.product_id) === parseInt(productFilter) &&
+          value.category === categoryFilter
+      );
+      if (filterData.length > 0) {
+        setTableProject(filterData);
+        setItemsFunction(filterData);
+      } else {
+        setTableProject([]);
+      }
+    } else if (sectionFilter && productFilter) {
+      const filterData = tableProject.filter(
+        (value) =>
+          parseInt(value.section_id) === parseInt(sectionFilter) &&
+          parseInt(value.product_id) === parseInt(productFilter)
+      );
+      if (filterData.length > 0) {
+        setTableProject(filterData);
+        setItemsFunction(filterData);
+      } else {
+        setTableProject([]);
+      }
+    } else if (sectionFilter) {
+      const filterData = tableProject.filter(
+        (value) => parseInt(value.section_id) === parseInt(sectionFilter)
+      );
+      if (filterData.length > 0) {
+        setTableProject(filterData);
+        setItemsFunction(filterData);
+      } else {
+        setTableProject([]);
+      }
+    } else {
+      setTableProject(tableProject);
+      setItemsFunction(tableProject);
+    }
+  };
   return (
     <div>
       <Row>
@@ -640,7 +678,10 @@ function TotalProject(props) {
                   <Form.Label>Select Section</Form.Label>
                   <Form.Select
                     value={sectionFilter}
-                    onChange={handleChangeSectionFilter}
+                    onChange={() => {
+                      handleChangeSectionFilter();
+                      handleFilterTableProject();
+                    }}
                   >
                     <option value={""} disabled>
                       open this to product filter
@@ -654,6 +695,7 @@ function TotalProject(props) {
                     value={productFilter}
                     onChange={(e) => {
                       setProductFilter(e.target.value);
+                      handleFilterTableProject();
                       dispatch({
                         type: SETFILTERDETAIL,
                         payload: e.target.value,
@@ -672,6 +714,7 @@ function TotalProject(props) {
                     value={categoryFilter}
                     onChange={(e) => {
                       setCategoryFilter(e.target.value);
+                      handleFilterTableProject();
                       dispatch({
                         type: SETFILTERDETAIL1,
                         payload: e.target.value,
@@ -691,6 +734,7 @@ function TotalProject(props) {
                     value={startFilter}
                     onChange={(e) => {
                       setStartFilter(e.target.value);
+                      handleFilterTableProject();
                       dispatch({
                         type: SETFILTERDETAIL2,
                         payload: e.target.value,
@@ -705,6 +749,7 @@ function TotalProject(props) {
                     value={endFilter}
                     onChange={(e) => {
                       setEndFilter(e.target.value);
+                      handleFilterTableProject();
                       dispatch({
                         type: SETFILTERDETAIL3,
                         payload: e.target.value,

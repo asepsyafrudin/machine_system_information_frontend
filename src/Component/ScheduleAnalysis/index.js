@@ -57,6 +57,144 @@ function ScheduleReview(props) {
   const [totalProject, setTotalProject] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const filterFunctionLogicByDate = (data, fromDate, toDate) => {
+    if (fromDate && toDate && data.length > 0) {
+      const fromDateValue = new Date(fromDate).setDate(
+        new Date(fromDate).getDate() - 1
+      );
+      const filterByDate = data.filter(
+        (value) =>
+          new Date(value.finish) > new Date(fromDateValue) &&
+          new Date(value.finish) <= new Date(toDate)
+      );
+      setTableProject(filterByDate);
+    }
+  };
+
+  const filterFunctionLogic = (
+    filterItem,
+    filterDetailItem,
+    data,
+    fromDate,
+    toDate
+  ) => {
+    if (filterItem === "category") {
+      if (data.length > 0) {
+        const filterData = data.filter(
+          (value) => value.category === filterDetailItem
+        );
+
+        if (fromDate && toDate) {
+          const fromDateValue = new Date(fromDate).setDate(
+            new Date(fromDate).getDate() - 1
+          );
+          const filterByDate = filterData.filter(
+            (value) =>
+              new Date(value.finish) >= new Date(fromDateValue) &&
+              new Date(value.finish) <= new Date(toDate)
+          );
+          setTableProject(filterByDate);
+        } else {
+          setTableProject(filterData);
+        }
+      }
+    } else if (filterItem === "rank") {
+      if (data.length > 0) {
+        const filterData = data.filter(
+          (value) => value.rank === filterDetailItem
+        );
+
+        if (fromDate && toDate) {
+          const fromDateValue = new Date(fromDate).setDate(
+            new Date(fromDate).getDate() - 1
+          );
+          const filterByDate = filterData.filter(
+            (value) =>
+              new Date(value.finish) >= new Date(fromDateValue) &&
+              new Date(value.finish) <= new Date(toDate)
+          );
+
+          setTableProject(filterByDate);
+        } else {
+          setTableProject(filterData);
+        }
+      }
+    } else if (filterItem === "pic") {
+      if (data.length > 0) {
+        const filterData = data.filter(
+          (value) => value.manager_id === parseInt(filterDetailItem)
+        );
+
+        if (fromDate && toDate) {
+          const fromDateValue = new Date(fromDate).setDate(
+            new Date(fromDate).getDate() - 1
+          );
+          const filterByDate = filterData.filter(
+            (value) =>
+              new Date(value.finish) >= new Date(fromDateValue) &&
+              new Date(value.finish) <= new Date(toDate)
+          );
+
+          setTableProject(filterByDate);
+        } else {
+          setTableProject(filterData);
+        }
+      }
+    } else if (filterItem === "status" && data.length > 0) {
+      let filterData = [];
+      if (filterDetailItem === "Delay") {
+        let notCriteria = [
+          "Not Yet Started",
+          "On Progress",
+          "Finish",
+          "Waiting Detail Activity",
+          "cancel",
+        ];
+
+        filterData = data.filter(
+          (value) => !notCriteria.includes(value.status)
+        );
+      } else {
+        filterData = data.filter((value) => value.status === filterDetailItem);
+      }
+
+      if (fromDate && toDate) {
+        const fromDateValue = new Date(fromDate).setDate(
+          new Date(fromDate).getDate() - 1
+        );
+        const filterByDate = filterData.filter(
+          (value) =>
+            new Date(value.finish) >= new Date(fromDateValue) &&
+            new Date(value.finish) <= new Date(toDate)
+        );
+
+        setTableProject(filterByDate);
+      } else {
+        setTableProject(filterData);
+      }
+    } else if (filterItem === "product") {
+      if (data.length > 0) {
+        const filterData = data.filter(
+          (value) => value.product_id === parseInt(filterDetailItem)
+        );
+        if (fromDate && toDate) {
+          const fromDateValue = new Date(fromDate).setDate(
+            new Date(fromDate).getDate() - 1
+          );
+          const filterByDate = filterData.filter(
+            (value) =>
+              new Date(value.finish) >= new Date(fromDateValue) &&
+              new Date(value.finish) <= new Date(toDate)
+          );
+
+          setTableProject(filterByDate);
+        } else {
+          setTableProject(filterData);
+        }
+      }
+    }
+  };
+
   const backgroundColorDelay = (endProject, progressBar, remark) => {
     let currentDate = new Date();
     currentDate.setDate(currentDate.getDate() - 1);
@@ -135,146 +273,6 @@ function ScheduleReview(props) {
       });
     }
 
-    const filterFunctionLogicByDate = (data, fromDate, toDate) => {
-      if (fromDate && toDate && data.length > 0) {
-        const fromDateValue = new Date(fromDate).setDate(
-          new Date(fromDate).getDate() - 1
-        );
-        const filterByDate = data.filter(
-          (value) =>
-            new Date(value.finish) > new Date(fromDateValue) &&
-            new Date(value.finish) <= new Date(toDate)
-        );
-        setTableProject(filterByDate);
-      }
-    };
-
-    const filterFunctionLogic = (
-      filterItem,
-      filterDetailItem,
-      data,
-      fromDate,
-      toDate
-    ) => {
-      if (filterItem === "category") {
-        if (data.length > 0) {
-          const filterData = data.filter(
-            (value) => value.category === filterDetailItem
-          );
-
-          if (fromDate && toDate) {
-            const fromDateValue = new Date(fromDate).setDate(
-              new Date(fromDate).getDate() - 1
-            );
-            const filterByDate = filterData.filter(
-              (value) =>
-                new Date(value.finish) >= new Date(fromDateValue) &&
-                new Date(value.finish) <= new Date(toDate)
-            );
-            setTableProject(filterByDate);
-          } else {
-            setTableProject(filterData);
-          }
-        }
-      } else if (filterItem === "rank") {
-        if (data.length > 0) {
-          const filterData = data.filter(
-            (value) => value.rank === filterDetailItem
-          );
-
-          if (fromDate && toDate) {
-            const fromDateValue = new Date(fromDate).setDate(
-              new Date(fromDate).getDate() - 1
-            );
-            const filterByDate = filterData.filter(
-              (value) =>
-                new Date(value.finish) >= new Date(fromDateValue) &&
-                new Date(value.finish) <= new Date(toDate)
-            );
-
-            setTableProject(filterByDate);
-          } else {
-            setTableProject(filterData);
-          }
-        }
-      } else if (filterItem === "pic") {
-        if (data.length > 0) {
-          const filterData = data.filter(
-            (value) => value.manager_id === parseInt(filterDetailItem)
-          );
-
-          if (fromDate && toDate) {
-            const fromDateValue = new Date(fromDate).setDate(
-              new Date(fromDate).getDate() - 1
-            );
-            const filterByDate = filterData.filter(
-              (value) =>
-                new Date(value.finish) >= new Date(fromDateValue) &&
-                new Date(value.finish) <= new Date(toDate)
-            );
-
-            setTableProject(filterByDate);
-          } else {
-            setTableProject(filterData);
-          }
-        }
-      } else if (filterItem === "status" && data.length > 0) {
-        let filterData = [];
-        if (filterDetailItem === "Delay") {
-          let notCriteria = [
-            "Not Yet Started",
-            "On Progress",
-            "Finish",
-            "Waiting Detail Activity",
-            "cancel",
-          ];
-
-          filterData = data.filter(
-            (value) => !notCriteria.includes(value.status)
-          );
-        } else {
-          filterData = data.filter(
-            (value) => value.status === filterDetailItem
-          );
-        }
-
-        if (fromDate && toDate) {
-          const fromDateValue = new Date(fromDate).setDate(
-            new Date(fromDate).getDate() - 1
-          );
-          const filterByDate = filterData.filter(
-            (value) =>
-              new Date(value.finish) >= new Date(fromDateValue) &&
-              new Date(value.finish) <= new Date(toDate)
-          );
-
-          setTableProject(filterByDate);
-        } else {
-          setTableProject(filterData);
-        }
-      } else if (filterItem === "product") {
-        if (data.length > 0) {
-          const filterData = data.filter(
-            (value) => value.product_id === parseInt(filterDetailItem)
-          );
-          if (fromDate && toDate) {
-            const fromDateValue = new Date(fromDate).setDate(
-              new Date(fromDate).getDate() - 1
-            );
-            const filterByDate = filterData.filter(
-              (value) =>
-                new Date(value.finish) >= new Date(fromDateValue) &&
-                new Date(value.finish) <= new Date(toDate)
-            );
-
-            setTableProject(filterByDate);
-          } else {
-            setTableProject(filterData);
-          }
-        }
-      }
-    };
-
     //filter sampai sini
 
     if (user.position === "Administrator") {
@@ -282,20 +280,8 @@ function ScheduleReview(props) {
         .get(getAllProjectApi)
         .then((response) => {
           const data = response.data.data;
-
-          if (filterBy && detailFilterValue) {
-            filterFunctionLogic(
-              filterBy,
-              detailFilterValue,
-              data,
-              fromDate,
-              toDate
-            );
-          } else if (fromDate && toDate) {
-            filterFunctionLogicByDate(data, fromDate, toDate);
-          } else {
-            setTableProject(data);
-          }
+          setTableProject(data);
+          setTotalProject(data);
         })
         .then((error) => console.log(error));
     } else if (checkPosition) {
@@ -303,19 +289,8 @@ function ScheduleReview(props) {
         .get(getProjectBySectionIdAndPage(page, section_id))
         .then((response) => {
           const data = response.data.data;
-          if (filterBy && detailFilterValue) {
-            filterFunctionLogic(
-              filterBy,
-              detailFilterValue,
-              data,
-              fromDate,
-              toDate
-            );
-          } else if (fromDate && toDate) {
-            filterFunctionLogicByDate(data, fromDate, toDate);
-          } else {
-            setTableProject(data);
-          }
+          setTableProject(data);
+          setTotalProject(data);
         })
         .catch((error) => console.log(error));
     } else {
@@ -324,41 +299,21 @@ function ScheduleReview(props) {
           .get(getProjectByUserApi(userId))
           .then((response) => {
             const responseData = response.data.data;
-            if (filterBy && detailFilterValue) {
-              filterFunctionLogic(
-                filterBy,
-                detailFilterValue,
-                responseData,
-                fromDate,
-                toDate
-              );
-            } else if (fromDate && toDate) {
-              filterFunctionLogicByDate(responseData, fromDate, toDate);
-            } else {
-              setTableProject(responseData);
-            }
+            setTableProject(responseData);
+            setTotalProject(responseData);
           })
           .catch((error) => {
             console.error("Error in axios get request:", error);
           });
       }
     }
-  }, [
-    viewMode,
-    id,
-    filterBy,
-    detailFilterValue,
-    userId,
-    fromDate,
-    toDate,
-    page,
-  ]);
+  }, [id, userId, page]);
 
-  useEffect(() => {
-    axios.get(getAllProjectApi).then((response) => {
-      setTotalProject(response.data.data);
-    });
-  }, []);
+  // useEffect(() => {
+  //   axios.get(getAllProjectApi).then((response) => {
+  //     setTotalProject(response.data.data);
+  //   });
+  // }, []);
 
   const handleImportActivity = async (e) => {
     e.preventDefault();
@@ -674,6 +629,20 @@ function ScheduleReview(props) {
     }
   };
 
+  const handleFilterTableProject = () => {
+    if (filterBy && detailFilterValue) {
+      filterFunctionLogic(
+        filterBy,
+        detailFilterValue,
+        tableProject,
+        fromDate,
+        toDate
+      );
+    } else if (fromDate && toDate) {
+      filterFunctionLogicByDate(tableProject, fromDate, toDate);
+    }
+  };
+
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -719,7 +688,10 @@ function ScheduleReview(props) {
                     <Form.Select
                       className="form margin"
                       value={fiscalYear}
-                      onChange={onHandleChangeFiscalYear}
+                      onChange={() => {
+                        onHandleChangeFiscalYear();
+                        handleFilterTableProject();
+                      }}
                     >
                       <option value={""}>Fiscal Year</option>
                       <option value={"FY 23"}>FY 23</option>
@@ -734,7 +706,10 @@ function ScheduleReview(props) {
                     <Form.Control
                       type="date"
                       value={fromDate}
-                      onChange={(e) => setFromDate(e.target.value)}
+                      onChange={(e) => {
+                        setFromDate(e.target.value);
+                        handleFilterTableProject();
+                      }}
                     />
                   </Form.Group>
                   <Form.Group as={Col}>
@@ -744,7 +719,10 @@ function ScheduleReview(props) {
                     <Form.Control
                       type="date"
                       value={toDate}
-                      onChange={(e) => setToDate(e.target.value)}
+                      onChange={(e) => {
+                        setToDate(e.target.value);
+                        handleFilterTableProject();
+                      }}
                     />
                   </Form.Group>
                 </Row>
@@ -760,6 +738,7 @@ function ScheduleReview(props) {
                           type: SETFILTER,
                           payload: e.target.value,
                         });
+                        handleFilterTableProject();
                       }}
                     >
                       <option value="">Filter By</option>
@@ -779,6 +758,7 @@ function ScheduleReview(props) {
                           type: SETFILTERDETAIL,
                           payload: e.target.value,
                         });
+                        handleFilterTableProject();
                       }}
                     >
                       <option value="">Select Detail</option>
