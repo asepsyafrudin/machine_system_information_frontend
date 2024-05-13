@@ -44,6 +44,7 @@ function TotalProject(props) {
   const [endFilter, setEndFilter] = useState(filterDetailEvent3);
   const [tableUser, setTableUser] = useState([]);
   const [totalItem, setTotalItem] = useState("");
+  const [totalTableProject, setTotalTableProject] = useState([]);
   const [totalBudget, setTotalBudget] = useState("");
   const [categoryFilter, setCategoryFilter] = useState(filterDetailEvent1);
   const [totalSavingCost, setTotalSavingCost] = useState("");
@@ -125,6 +126,8 @@ function TotalProject(props) {
         (value) => value.status !== "cancel"
       );
       setTableProject(dataProject);
+      setTotalTableProject(dataProject);
+      setItemsFunction(dataProject);
 
       //   if (dataProject.length > 0) {
       //     if (
@@ -605,7 +608,15 @@ function TotalProject(props) {
     },
   ];
 
-  const handleFilterTableProject = () => {
+  const handleFilterTableProject = (filter) => {
+    const {
+      sectionFilter,
+      productFilter,
+      categoryFilter,
+      startFilter,
+      endFilter,
+    } = filter;
+
     if (
       sectionFilter &&
       productFilter &&
@@ -613,7 +624,7 @@ function TotalProject(props) {
       startFilter &&
       endFilter
     ) {
-      const filterData = tableProject.filter(
+      const filterData = totalTableProject.filter(
         (value) =>
           value.section_id === sectionFilter &&
           value.product_id === productFilter &&
@@ -626,9 +637,10 @@ function TotalProject(props) {
         setItemsFunction(filterData);
       } else {
         setTableProject([]);
+        setItemsFunction(filterData);
       }
     } else if (sectionFilter && productFilter && categoryFilter) {
-      const filterData = tableProject.filter(
+      const filterData = totalTableProject.filter(
         (value) =>
           parseInt(value.section_id) === parseInt(sectionFilter) &&
           parseInt(value.product_id) === parseInt(productFilter) &&
@@ -641,7 +653,7 @@ function TotalProject(props) {
         setTableProject([]);
       }
     } else if (sectionFilter && productFilter) {
-      const filterData = tableProject.filter(
+      const filterData = totalTableProject.filter(
         (value) =>
           parseInt(value.section_id) === parseInt(sectionFilter) &&
           parseInt(value.product_id) === parseInt(productFilter)
@@ -651,16 +663,20 @@ function TotalProject(props) {
         setItemsFunction(filterData);
       } else {
         setTableProject([]);
+        setItemsFunction(filterData);
       }
     } else if (sectionFilter) {
-      const filterData = tableProject.filter(
+      console.log();
+      const filterData = totalTableProject.filter(
         (value) => parseInt(value.section_id) === parseInt(sectionFilter)
       );
+
       if (filterData.length > 0) {
         setTableProject(filterData);
         setItemsFunction(filterData);
       } else {
         setTableProject([]);
+        setItemsFunction(filterData);
       }
     } else {
       setTableProject(tableProject);
@@ -678,9 +694,11 @@ function TotalProject(props) {
                   <Form.Label>Select Section</Form.Label>
                   <Form.Select
                     value={sectionFilter}
-                    onChange={() => {
-                      handleChangeSectionFilter();
-                      handleFilterTableProject();
+                    onChange={(e) => {
+                      handleChangeSectionFilter(e);
+                      handleFilterTableProject({
+                        sectionFilter: e.target.value,
+                      });
                     }}
                   >
                     <option value={""} disabled>
@@ -695,7 +713,10 @@ function TotalProject(props) {
                     value={productFilter}
                     onChange={(e) => {
                       setProductFilter(e.target.value);
-                      handleFilterTableProject();
+                      handleFilterTableProject({
+                        productFilter: e.target.value,
+                        sectionFilter: sectionFilter,
+                      });
                       dispatch({
                         type: SETFILTERDETAIL,
                         payload: e.target.value,
@@ -714,7 +735,11 @@ function TotalProject(props) {
                     value={categoryFilter}
                     onChange={(e) => {
                       setCategoryFilter(e.target.value);
-                      handleFilterTableProject();
+                      handleFilterTableProject({
+                        categoryFilter: e.target.value,
+                        sectionFilter: sectionFilter,
+                        productFilter: productFilter,
+                      });
                       dispatch({
                         type: SETFILTERDETAIL1,
                         payload: e.target.value,
@@ -734,7 +759,12 @@ function TotalProject(props) {
                     value={startFilter}
                     onChange={(e) => {
                       setStartFilter(e.target.value);
-                      handleFilterTableProject();
+                      handleFilterTableProject({
+                        startFilter: e.target.value,
+                        sectionFilter: sectionFilter,
+                        productFilter: productFilter,
+                        categoryFilter: categoryFilter,
+                      });
                       dispatch({
                         type: SETFILTERDETAIL2,
                         payload: e.target.value,
@@ -749,7 +779,13 @@ function TotalProject(props) {
                     value={endFilter}
                     onChange={(e) => {
                       setEndFilter(e.target.value);
-                      handleFilterTableProject();
+                      handleFilterTableProject({
+                        endFilter: e.target.value,
+                        sectionFilter: sectionFilter,
+                        productFilter: productFilter,
+                        categoryFilter: categoryFilter,
+                        startFilter: startFilter,
+                      });
                       dispatch({
                         type: SETFILTERDETAIL3,
                         payload: e.target.value,

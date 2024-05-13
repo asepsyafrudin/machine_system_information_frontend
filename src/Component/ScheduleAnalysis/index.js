@@ -540,22 +540,25 @@ function ScheduleReview(props) {
     return option;
   };
 
-  const onHandleChangeFiscalYear = (e) => {
-    const fiscalYear = e.target.value;
+  const onHandleChangeFiscalYear = (data) => {
+    const { fiscalYear, status } = data;
     setFiscalYear(fiscalYear);
-
     if (fiscalYear === "FY 23") {
-      setFromDate("2023-04-01");
-      setToDate("2024-03-31");
+      const fromDate = "2023-04-01";
+      const toDate = "2024-03-31";
+      filterFunctionLogicByDate(totalProject, fromDate, toDate, status);
     } else if (fiscalYear === "FY 24") {
-      setFromDate("2024-04-01");
-      setToDate("2025-03-31");
+      const fromDate = "2024-04-01";
+      const toDate = "2025-03-31";
+      filterFunctionLogicByDate(totalProject, fromDate, toDate, status);
     } else if (fiscalYear === "FY 25") {
-      setFromDate("2025-04-01");
-      setToDate("2026-03-31");
+      const fromDate = "2025-04-01";
+      const toDate = "2026-03-31";
+      filterFunctionLogicByDate(totalProject, fromDate, toDate, status);
     } else {
-      setFromDate("");
-      setToDate("");
+      const fromDate = "";
+      const toDate = "";
+      filterFunctionLogicByDate(totalProject, fromDate, toDate, status);
     }
   };
 
@@ -629,17 +632,50 @@ function ScheduleReview(props) {
     }
   };
 
-  const handleFilterTableProject = () => {
-    if (filterBy && detailFilterValue) {
-      filterFunctionLogic(
-        filterBy,
-        detailFilterValue,
-        totalProject,
-        fromDate,
-        toDate
-      );
-    } else if (fromDate && toDate) {
-      filterFunctionLogicByDate(totalProject, fromDate, toDate);
+  const handleFilterTableProject = (data) => {
+    const { fiscalYear, filterBy, detailFilterValue } = data;
+    if (fiscalYear && filterBy && detailFilterValue) {
+      if (fiscalYear === "FY 23") {
+        const fromDate = "2023-04-01";
+        const toDate = "2024-03-31";
+        filterFunctionLogic(
+          filterBy,
+          detailFilterValue,
+          totalProject,
+          fromDate,
+          toDate
+        );
+      } else if (fiscalYear === "FY 24") {
+        const fromDate = "2024-04-01";
+        const toDate = "2025-03-31";
+        filterFunctionLogic(
+          filterBy,
+          detailFilterValue,
+          totalProject,
+          fromDate,
+          toDate
+        );
+      } else if (fiscalYear === "FY 25") {
+        const fromDate = "2025-04-01";
+        const toDate = "2026-03-31";
+        filterFunctionLogic(
+          filterBy,
+          detailFilterValue,
+          totalProject,
+          fromDate,
+          toDate
+        );
+      } else {
+        const fromDate = "";
+        const toDate = "";
+        filterFunctionLogic(
+          filterBy,
+          detailFilterValue,
+          totalProject,
+          fromDate,
+          toDate
+        );
+      }
     }
   };
 
@@ -682,136 +718,109 @@ function ScheduleReview(props) {
         <Modal show={showModal} centered size="lg">
           <Form onSubmit={handleImportActivity}>
             <Modal.Body>
-              <div style={{ marginBottom: 6 }}>
-                <Row className="test2 mb-3">
-                  <Form.Group as={Col}>
-                    <Form.Select
-                      className="form margin"
-                      value={fiscalYear}
-                      onChange={() => {
-                        onHandleChangeFiscalYear();
-                        handleFilterTableProject();
-                      }}
-                    >
-                      <option value={""}>Fiscal Year</option>
-                      <option value={"FY 23"}>FY 23</option>
-                      <option value={"FY 24"}>FY 24</option>
-                      <option value={"FY 25"}>FY 25</option>
-                    </Form.Select>
-                  </Form.Group>
-                  <Form.Group as={Col}>
-                    <Form.Label className="label_start">
-                      Start Project
-                    </Form.Label>
-                    <Form.Control
-                      type="date"
-                      value={fromDate}
-                      onChange={(e) => {
-                        setFromDate(e.target.value);
-                        handleFilterTableProject();
-                      }}
-                    />
-                  </Form.Group>
-                  <Form.Group as={Col}>
-                    <Form.Label className="label_start">
-                      Finish Project
-                    </Form.Label>
-                    <Form.Control
-                      type="date"
-                      value={toDate}
-                      onChange={(e) => {
-                        setToDate(e.target.value);
-                        handleFilterTableProject();
-                      }}
-                    />
-                  </Form.Group>
-                </Row>
-              </div>
-              <div style={{ marginBottom: 5 }}>
-                <Row className="col-12 mb-3">
-                  <Col lg={3}>
-                    <Form.Select
-                      value={filterBy}
-                      onChange={(e) => {
-                        setFilterBy(e.target.value);
+              <Row className="mb-3">
+                <Form.Group as={Col}>
+                  <Form.Select
+                    value={fiscalYear}
+                    onChange={(e) => {
+                      onHandleChangeFiscalYear({ fiscalYear: e.target.value });
+                      handleFilterTableProject({ fiscalYear: e.target.value });
+                    }}
+                  >
+                    <option value={""}>Fiscal Year</option>
+                    <option value={"FY 23"}>FY 23</option>
+                    <option value={"FY 24"}>FY 24</option>
+                    <option value={"FY 25"}>FY 25</option>
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Select
+                    value={filterBy}
+                    onChange={(e) => {
+                      setFilterBy(e.target.value);
+                      dispatch({
+                        type: SETFILTER,
+                        payload: e.target.value,
+                      });
+                      handleFilterTableProject({
+                        filterBy: e.target.value,
+                        fiscalYear: fiscalYear,
+                      });
+                    }}
+                  >
+                    <option value="">Filter By</option>
+                    <option value="category">Category</option>
+                    <option value="rank">Rank</option>
+                    <option value="pic">PIC</option>
+                    <option value="status">Status</option>
+                    <option value="product">Product</option>
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Select
+                    value={detailFilterValue}
+                    onChange={(e) => {
+                      setDetailFilterValue(e.target.value);
+                      dispatch({
+                        type: SETFILTERDETAIL,
+                        payload: e.target.value,
+                      });
+                      handleFilterTableProject({
+                        fiscalYear: fiscalYear,
+                        filterBy: filterBy,
+                        detailFilterValue: e.target.value,
+                      });
+                    }}
+                  >
+                    <option value="">Select Detail</option>
+                    {filterItemLogic()}
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group as={Col}>
+                  <Form.Select
+                    value={selectedProjectId}
+                    onChange={(e) => {
+                      setSelectedProjectId(e.target.value);
+                      dispatch({
+                        type: SETFILTERDETAIL,
+                        payload: e.target.value,
+                      });
+                    }}
+                  >
+                    <option value="">Select Detail</option>
+                    {tableProject.map((value, index) => {
+                      return (
+                        <option key={index} value={value.id}>
+                          {" "}
+                          {value.project_name}
+                        </option>
+                      );
+                    })}
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group as={Col}>
+                  {filterBy !== "" && (
+                    <Button
+                      onClick={() => {
+                        setFilterBy("");
+                        dispatch({
+                          type: SETFILTERDETAIL,
+                          payload: "",
+                        });
                         dispatch({
                           type: SETFILTER,
-                          payload: e.target.value,
+                          payload: "",
                         });
-                        handleFilterTableProject();
+                        setFiscalYear("");
+                        setFromDate("");
+                        setToDate("");
                       }}
                     >
-                      <option value="">Filter By</option>
-                      <option value="category">Category</option>
-                      <option value="rank">Rank</option>
-                      <option value="pic">PIC</option>
-                      <option value="status">Status</option>
-                      <option value="product">Product</option>
-                    </Form.Select>
-                  </Col>
-                  <Col lg={3}>
-                    <Form.Select
-                      value={detailFilterValue}
-                      onChange={(e) => {
-                        setDetailFilterValue(e.target.value);
-                        dispatch({
-                          type: SETFILTERDETAIL,
-                          payload: e.target.value,
-                        });
-                        handleFilterTableProject();
-                      }}
-                    >
-                      <option value="">Select Detail</option>
-                      {filterItemLogic()}
-                    </Form.Select>
-                  </Col>
-                  <Col lg={3}>
-                    <Form.Select
-                      value={selectedProjectId}
-                      onChange={(e) => {
-                        setSelectedProjectId(e.target.value);
-                        dispatch({
-                          type: SETFILTERDETAIL,
-                          payload: e.target.value,
-                        });
-                      }}
-                    >
-                      <option value="">Select Detail</option>
-                      {tableProject.map((value, index) => {
-                        return (
-                          <option key={index} value={value.id}>
-                            {" "}
-                            {value.project_name}
-                          </option>
-                        );
-                      })}
-                    </Form.Select>
-                  </Col>
-                  <Col lg={3}>
-                    {filterBy !== "" && (
-                      <Button
-                        onClick={() => {
-                          setFilterBy("");
-                          dispatch({
-                            type: SETFILTERDETAIL,
-                            payload: "",
-                          });
-                          dispatch({
-                            type: SETFILTER,
-                            payload: "",
-                          });
-                          setFiscalYear("");
-                          setFromDate("");
-                          setToDate("");
-                        }}
-                      >
-                        Reset
-                      </Button>
-                    )}
-                  </Col>
-                </Row>
-              </div>
-
+                      Reset
+                    </Button>
+                  )}
+                </Form.Group>
+              </Row>
               <Row>
                 <Col>
                   <Button onClick={handleAddProject} className="mb-3 me-2">

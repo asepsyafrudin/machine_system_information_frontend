@@ -58,14 +58,7 @@ import { BeatLoader } from "react-spinners";
 import { DataGrid } from "@mui/x-data-grid";
 
 function Project(props) {
-  const {
-    actionState,
-    actionStateValue,
-    dispatch,
-    pageEvent,
-    filterEvent,
-    filterDetailEvent,
-  } = props;
+  const { actionState, pageEvent } = props;
   const [description, setDescription] = useState("");
   const [tableProduct, setTableProduct] = useState([]);
   const [tableProject, setTableProject] = useState([]);
@@ -102,15 +95,44 @@ function Project(props) {
   const [showModalCreateProject, setShowModalCreateProject] = useState(false);
   const [userPosition, setUserPosition] = useState("");
   const [userSection, setUserSection] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
   const [dataForGraph, setDataForGraph] = useState([]);
   const [rank, setRank] = useState("");
   const [admin, setAdmin] = useState(false);
   const [fiscalYear, setFiscalYear] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
-  const filterFunctionLogicByDate = (data, fromDate, toDate) => {
-    if (fromDate && toDate && data.length > 0) {
+  const filterFunctionLogicByDate = (data, fromDate, toDate, status) => {
+    if (fromDate && toDate && status && data.length > 0) {
+      const fromDateValue = new Date(fromDate).setDate(
+        new Date(fromDate).getDate() - 1
+      );
+      const filterByDate = data.filter(
+        (value) =>
+          new Date(value.finish) > new Date(fromDateValue) &&
+          new Date(value.finish) <= new Date(toDate)
+      );
+      setStatusFilter(status);
+      let filterData = [];
+      if (status === "Delay") {
+        let notCriteria = [
+          "Not Yet Started",
+          "On Progress",
+          "Finish",
+          "Waiting Detail Activity",
+          "cancel",
+        ];
+
+        filterData = filterByDate.filter(
+          (value) => !notCriteria.includes(value.status)
+        );
+        setTableProject(filterData);
+        setDataForGraph(filterData);
+      } else {
+        filterData = filterByDate.filter((value) => value.status === status);
+        setTableProject(filterData);
+        setDataForGraph(filterData);
+      }
+    } else if (fromDate && toDate && data.length > 0) {
       const fromDateValue = new Date(fromDate).setDate(
         new Date(fromDate).getDate() - 1
       );
@@ -190,7 +212,7 @@ function Project(props) {
           const responseData = response.data.data;
           setDataForGraph(responseData);
           setTableProject(responseData);
-          setTotalProject([]);
+          setTotalProject(responseData);
         })
         .catch((error) => console.log(error));
     } else {
@@ -510,12 +532,6 @@ function Project(props) {
   //   fromDate,
   //   toDate,
   // ]);
-
-  const handleFilterTableProject = () => {
-    if (toDate && fromDate) {
-      filterFunctionLogicByDate(totalProject, fromDate, toDate);
-    }
-  };
 
   const productOption = () => {
     let option = [];
@@ -935,6 +951,29 @@ function Project(props) {
     }
   };
 
+  // const onHandleChangeStatus = (e) => {
+  //   const status = e.target.value;
+  //   setStatusFilter(status);
+  //   let filterData = [];
+  //   if (status === "Delay") {
+  //     let notCriteria = [
+  //       "Not Yet Started",
+  //       "On Progress",
+  //       "Finish",
+  //       "Waiting Detail Activity",
+  //       "cancel",
+  //     ];
+
+  //     filterData = tableProject.filter(
+  //       (value) => !notCriteria.includes(value.status)
+  //     );
+  //     setTableProject(filterData);
+  //   } else {
+  //     filterData = tableProject.filter((value) => value.status === status);
+  //     setTableProject(filterData);
+  //   }
+  // };
+
   const handleChangeDescription = (e) => {
     setDescription(e.target.value);
   };
@@ -1008,22 +1047,25 @@ function Project(props) {
   //   return option;
   // };
 
-  const onHandleChangeFiscalYear = (e) => {
-    const fiscalYear = e.target.value;
+  const onHandleChangeFiscalYear = (data) => {
+    const { fiscalYear, status } = data;
     setFiscalYear(fiscalYear);
-
     if (fiscalYear === "FY 23") {
-      setFromDate("2023-04-01");
-      setToDate("2024-03-31");
+      const fromDate = "2023-04-01";
+      const toDate = "2024-03-31";
+      filterFunctionLogicByDate(totalProject, fromDate, toDate, status);
     } else if (fiscalYear === "FY 24") {
-      setFromDate("2024-04-01");
-      setToDate("2025-03-31");
+      const fromDate = "2024-04-01";
+      const toDate = "2025-03-31";
+      filterFunctionLogicByDate(totalProject, fromDate, toDate, status);
     } else if (fiscalYear === "FY 25") {
-      setFromDate("2025-04-01");
-      setToDate("2026-03-31");
+      const fromDate = "2025-04-01";
+      const toDate = "2026-03-31";
+      filterFunctionLogicByDate(totalProject, fromDate, toDate, status);
     } else {
-      setFromDate("");
-      setToDate("");
+      const fromDate = "";
+      const toDate = "";
+      filterFunctionLogicByDate(totalProject, fromDate, toDate, status);
     }
   };
 
@@ -1264,21 +1306,47 @@ function Project(props) {
                 <Form.Select
                   className="form margin"
                   value={fiscalYear}
-                  onChange={onHandleChangeFiscalYear}
+                  onChange={(e) =>
+                    onHandleChangeFiscalYear({ fiscalYear: e.target.value })
+                  }
                 >
                   <option value={""}>Fiscal Year</option>
                   <option value={"FY 23"}>FY 23</option>
                   <option value={"FY 24"}>FY 24</option>
                   <option value={"FY 25"}>FY 25</option>
                 </Form.Select>
-                <Form.Group className="col-2  margin">
+                <Form.Select
+                  className="form margin"
+                  value={statusFilter}
+                  onChange={(e) =>
+                    onHandleChangeFiscalYear({
+                      fiscalYear: fiscalYear,
+                      status: e.target.value,
+                    })
+                  }
+                  disabled={fiscalYear === "" ? true : false}
+                >
+                  <option value={""}>Select Status</option>
+                  <option value={"Not Yet Started"}>Not Yet Started</option>
+                  <option value={"On Progress"}>On Progress</option>
+                  <option value={"Delay"}>Delay</option>
+                  <option value={"Finish"}>Finish</option>
+                  <option value={"Waiting Detail Activity"}>
+                    Waiting Detail Activity
+                  </option>
+                  <option value={"cancel"}>cancel</option>
+                </Form.Select>
+                {/* <Form.Group className="col-2  margin">
                   <Form.Label className="label_start">Start Project</Form.Label>
                   <Form.Control
                     type="date"
                     value={fromDate}
                     onChange={(e) => {
                       setFromDate(e.target.value);
-                      handleFilterTableProject();
+                      handleFilterTableProject({
+                        totalProject,
+                        fromDate: e.target.value,
+                      });
                     }}
                   />
                 </Form.Group>
@@ -1294,7 +1362,7 @@ function Project(props) {
                       handleFilterTableProject();
                     }}
                   />
-                </Form.Group>
+                </Form.Group> */}
               </Col>
             </Row>
           </div>
