@@ -321,10 +321,14 @@ function ScheduleReview(props) {
     if (projectListWillReview.length > 0) {
       let dataArray = [];
       for (let index = 0; index < projectListWillReview.length; index++) {
-        const project = await axios.get(
-          getProjectByIdApi(projectListWillReview[index])
+        const projectData = totalProject.find(
+          (value) => value.id === projectListWillReview[index]
         );
-        const dataProject = project.data.data[0];
+
+        // const project = await axios.get(
+        //   getProjectByIdApi(projectListWillReview[index])
+        // );
+        const dataProject = projectData;
         const data = {
           no: dataArray.length + 1,
           name: dataProject.project_name,
@@ -337,35 +341,40 @@ function ScheduleReview(props) {
         };
         dataArray.push(data);
 
-        const activityData = await axios.get(
-          getActivityByProjectIdApi(dataProject.id)
-        );
-        const dataActivity = activityData.data.data;
-        if (dataActivity.length > 0) {
-          for (let index2 = 0; index2 < dataActivity.length; index2++) {
-            let pushData = {
-              no: dataArray.length + 1,
-              id: dataActivity[index2].id,
-              start: new Date(moment(dataActivity[index2].start)),
-              end: new Date(moment(dataActivity[index2].end)),
-              name: dataActivity[index2].name,
-              progress: dataActivity[index2].progress,
-              dependencies: dataActivity[index2].dependencies,
-              type: dataActivity[index2].type,
-              project: dataActivity[index2].project,
-              styles: backgroundColorDelay(
-                new Date(moment(dataActivity[index2].end)),
-                dataActivity[index2].progress,
-                dataActivity[index2].remark
-              ),
-              remark: dataActivity[index2].remark,
-              linkToProject: dataActivity[index2].linkToProject,
-              pic: dataActivity[index2].pic,
-            };
-            dataArray.push(pushData);
+        // const activityData = await axios.get(
+        //   getActivityByProjectIdApi(dataProject.id)
+        // );
+
+        const getDetail = async () => {
+          const dataActivity = dataProject.activityData;
+          console.log("dataACtivity", dataActivity);
+          if (dataActivity.length > 0) {
+            for (let index2 = 0; index2 < dataActivity.length; index2++) {
+              let pushData = {
+                id: dataActivity[index2].id,
+                start: new Date(moment(dataActivity[index2].start)),
+                end: new Date(moment(dataActivity[index2].end)),
+                name: dataActivity[index2].name,
+                progress: dataActivity[index2].progress,
+                dependencies: dataActivity[index2].dependencies,
+                type: dataActivity[index2].type,
+                project: dataProject.id,
+                styles: backgroundColorDelay(
+                  new Date(moment(dataActivity[index2].end)),
+                  dataActivity[index2].progress,
+                  dataActivity[index2].remark
+                ),
+                remark: dataActivity[index2].remark,
+                linkToProject: dataActivity[index2].linkToProject,
+                pic: dataActivity[index2].pic,
+              };
+              await dataArray.push(pushData);
+            }
           }
-        }
+        };
+        await getDetail();
       }
+      console.log(dataArray);
       setActivity(dataArray);
       setShowModal(false);
       setLoading(false);

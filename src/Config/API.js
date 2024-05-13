@@ -1,5 +1,5 @@
 // const port = "http://10.122.80.8:80";
-const port = "http://localhost:8081";
+const port = "http://localhost:80";
 
 //users Api
 export const registerUserApi = `${port}/api/users/create_users`;
