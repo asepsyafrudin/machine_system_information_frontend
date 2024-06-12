@@ -107,7 +107,6 @@ function ToDoListSummary(props) {
         .post(getTodoByUserIdApi, data)
         .then((response) => {
           let filteredData = response.data.data;
-          console.log("data", filteredData);
           setTableTodoList(filteredData);
           setNumberStart(response.data.numberStart);
           setTotalPageData(response.data.totalPageData);

@@ -58,15 +58,28 @@ import { BeatLoader } from "react-spinners";
 import { DataGrid } from "@mui/x-data-grid";
 
 function Project(props) {
-  const { actionState, pageEvent } = props;
+  const {
+    actionState,
+    pageEvent,
+    tableProject,
+    tableProduct,
+    userId,
+    userData,
+    userEmail,
+    userPosition,
+    userSection,
+    admin,
+    dispatch,
+    dataForGraph,
+    tableUser,
+    onChangeTableProject,
+    totalProject,
+  } = props;
+
   const [description, setDescription] = useState("");
-  const [tableProduct, setTableProduct] = useState([]);
-  const [tableProject, setTableProject] = useState([]);
-  const [totalProject, setTotalProject] = useState([]);
   const [product, setProduct] = useState("");
   const [projectName, setProjectName] = useState("");
   const [manager, setManager] = useState("");
-  const [tableUser, setTableUser] = useState([]);
   const [budget, setBudget] = useState("");
   const [savingCost, setSavingCost] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -74,8 +87,6 @@ function Project(props) {
   const [memberId, setMemberId] = useState("");
   const [member, setMember] = useState([]);
   const [projectIdEdit, setProjectIdEdit] = useState("");
-  const [userId, setUserId] = useState("");
-  const [userEmail, setUserEmail] = useState("");
   const [show, setShow] = useState(false);
   const [message, setMessage] = useState("");
   const [page, setPage] = useState(pageEvent);
@@ -93,11 +104,9 @@ function Project(props) {
   const [subCategory, setSubCategory] = useState("");
   const [showModalShare, setShowModalShare] = useState(false);
   const [showModalCreateProject, setShowModalCreateProject] = useState(false);
-  const [userPosition, setUserPosition] = useState("");
-  const [userSection, setUserSection] = useState("");
-  const [dataForGraph, setDataForGraph] = useState([]);
+
+  const [dataForGraphFilter, setDataForGraphFilter] = useState([]);
   const [rank, setRank] = useState("");
-  const [admin, setAdmin] = useState(false);
   const [fiscalYear, setFiscalYear] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
@@ -125,12 +134,12 @@ function Project(props) {
         filterData = filterByDate.filter(
           (value) => !notCriteria.includes(value.status)
         );
-        setTableProject(filterData);
-        setDataForGraph(filterData);
+        setDataForGraphFilter(filterData);
+        onChangeTableProject(filterData);
       } else {
         filterData = filterByDate.filter((value) => value.status === status);
-        setTableProject(filterData);
-        setDataForGraph(filterData);
+        setDataForGraphFilter(filterData);
+        onChangeTableProject(filterData);
       }
     } else if (fromDate && toDate && data.length > 0) {
       const fromDateValue = new Date(fromDate).setDate(
@@ -141,397 +150,10 @@ function Project(props) {
           new Date(value.finish) > new Date(fromDateValue) &&
           new Date(value.finish) <= new Date(toDate)
       );
-      setDataForGraph(filterByDate);
-      setTableProject(filterByDate);
+      setDataForGraphFilter(filterByDate);
+      onChangeTableProject(filterByDate);
     }
   };
-
-  useEffect(() => {
-    axios
-      .get(getAllProductApi)
-      .then((response) => {
-        setTableProduct(response.data.data);
-      })
-      .catch((error) => console.log(error));
-
-    axios
-      .get(getAllUsersApi)
-      .then((response) => {
-        const tableUserSort = response.data.data;
-        setTableUser(
-          tableUserSort.sort((nameA, nameB) => {
-            let a = nameA.username;
-            let b = nameB.username;
-
-            if (a < b) {
-              return -1;
-            }
-            if (a > b) {
-              return 1;
-            }
-            return 0;
-          })
-        );
-      })
-      .catch((error) => console.log(error));
-
-    const user = JSON.parse(localStorage.getItem("user"));
-    setUserId(user.id);
-    setUserEmail(user.email);
-    const position = user.position;
-    setUserPosition(position);
-    const section_id = user.section_id;
-    setUserSection(section_id);
-    const positionThatCanOpenProject = [
-      "Departement Manager",
-      "Assistant General Manager",
-      "General Manager",
-      "Director",
-      "President",
-    ];
-
-    const checkPosition = positionThatCanOpenProject.find(
-      (value) => value === position
-    );
-
-    if (user.position === "Administrator") {
-      setAdmin(true);
-      axios
-        .get(getAllProjectApi)
-        .then((response) => {
-          const responseData = response.data.data;
-          setDataForGraph(responseData);
-          setTableProject(responseData);
-          setTotalProject(responseData);
-        })
-        .then((error) => console.log(error));
-    } else if (checkPosition) {
-      axios
-        .get(getProjectBySectionIdAndPage(page, section_id))
-        .then((response) => {
-          const responseData = response.data.data;
-          setDataForGraph(responseData);
-          setTableProject(responseData);
-          setTotalProject(responseData);
-        })
-        .catch((error) => console.log(error));
-    } else {
-      if (userId) {
-        axios
-          .get(getProjectByUserApi(userId))
-          .then((response) => {
-            const responseData = response.data.data;
-            setDataForGraph(responseData);
-            setTableProject(responseData);
-            setTotalProject(responseData);
-          })
-          .catch((error) => {
-            console.error("Error in axios get request:", error);
-          });
-      }
-    }
-  }, [userId, page]);
-
-  // useEffect(() => {
-  //   const filterFunctionLogicByDate = (data, fromDate, toDate) => {
-  //     if (fromDate && toDate && data.length > 0) {
-  //       let listData = [];
-  //       const fromDateValue = new Date(fromDate).setDate(
-  //         new Date(fromDate).getDate() - 1
-  //       );
-  //       const filterByDate = data.filter(
-  //         (value) =>
-  //           new Date(value.finish) > new Date(fromDateValue) &&
-  //           new Date(value.finish) <= new Date(toDate)
-  //       );
-
-  //       for (
-  //         let index = (page - 1) * dataPerPage;
-  //         index < page * dataPerPage && index < filterByDate.length;
-  //         index++
-  //       ) {
-  //         listData.push(filterByDate[index]);
-  //       }
-  //       const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-  //       const numberStart = (page - 1) * dataPerPage + 1;
-  //       setDataForGraph(filterByDate);
-  //       setTableProject(listData);
-  //       setStotalPageData(totalPageData);
-  //       setNumberStart(numberStart);
-  //     }
-  //   };
-
-  //   const filterFunctionLogic = (
-  //     filterItem,
-  //     filterDetailItem,
-  //     data,
-  //     fromDate,
-  //     toDate
-  //   ) => {
-  //     if (filterItem === "category") {
-  //       if (data.length > 0) {
-  //         let listData = [];
-  //         const filterData = data.filter(
-  //           (value) => value.category === filterDetailItem
-  //         );
-
-  //         if (fromDate && toDate) {
-  //           const fromDateValue = new Date(fromDate).setDate(
-  //             new Date(fromDate).getDate() - 1
-  //           );
-  //           const filterByDate = filterData.filter(
-  //             (value) =>
-  //               new Date(value.finish) >= new Date(fromDateValue) &&
-  //               new Date(value.finish) <= new Date(toDate)
-  //           );
-
-  //           for (
-  //             let index = (page - 1) * dataPerPage;
-  //             index < page * dataPerPage && index < filterByDate.length;
-  //             index++
-  //           ) {
-  //             listData.push(filterByDate[index]);
-  //           }
-  //           const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-  //           const numberStart = (page - 1) * dataPerPage + 1;
-  //           setDataForGraph(filterByDate);
-  //           setTableProject(listData);
-  //           setStotalPageData(totalPageData);
-  //           setNumberStart(numberStart);
-  //         } else {
-  //           for (
-  //             let index = (page - 1) * dataPerPage;
-  //             index < page * dataPerPage && index < filterData.length;
-  //             index++
-  //           ) {
-  //             listData.push(filterData[index]);
-  //           }
-  //           const totalPageData = Math.ceil(filterData.length / dataPerPage);
-  //           const numberStart = (page - 1) * dataPerPage + 1;
-  //           setDataForGraph(filterData);
-  //           setTableProject(listData);
-  //           setStotalPageData(totalPageData);
-  //           setNumberStart(numberStart);
-  //         }
-  //       }
-  //     } else if (filterItem === "rank") {
-  //       if (data.length > 0) {
-  //         let listData = [];
-  //         const filterData = data.filter(
-  //           (value) => value.rank === filterDetailItem
-  //         );
-
-  //         if (fromDate && toDate) {
-  //           const fromDateValue = new Date(fromDate).setDate(
-  //             new Date(fromDate).getDate() - 1
-  //           );
-  //           const filterByDate = filterData.filter(
-  //             (value) =>
-  //               new Date(value.finish) >= new Date(fromDateValue) &&
-  //               new Date(value.finish) <= new Date(toDate)
-  //           );
-
-  //           for (
-  //             let index = (page - 1) * dataPerPage;
-  //             index < page * dataPerPage && index < filterByDate.length;
-  //             index++
-  //           ) {
-  //             listData.push(filterByDate[index]);
-  //           }
-  //           const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-  //           const numberStart = (page - 1) * dataPerPage + 1;
-  //           setDataForGraph(filterByDate);
-  //           setTableProject(listData);
-  //           setStotalPageData(totalPageData);
-  //           setNumberStart(numberStart);
-  //         } else {
-  //           for (
-  //             let index = (page - 1) * dataPerPage;
-  //             index < page * dataPerPage && index < filterData.length;
-  //             index++
-  //           ) {
-  //             listData.push(filterData[index]);
-  //           }
-  //           const totalPageData = Math.ceil(filterData.length / dataPerPage);
-  //           const numberStart = (page - 1) * dataPerPage + 1;
-  //           setDataForGraph(filterData);
-  //           setTableProject(listData);
-  //           setStotalPageData(totalPageData);
-  //           setNumberStart(numberStart);
-  //         }
-  //       }
-  //     } else if (filterItem === "pic") {
-  //       if (data.length > 0) {
-  //         let listData = [];
-  //         const filterData = data.filter(
-  //           (value) => value.manager_id === parseInt(filterDetailItem)
-  //         );
-
-  //         if (fromDate && toDate) {
-  //           const fromDateValue = new Date(fromDate).setDate(
-  //             new Date(fromDate).getDate() - 1
-  //           );
-  //           const filterByDate = filterData.filter(
-  //             (value) =>
-  //               new Date(value.finish) >= new Date(fromDateValue) &&
-  //               new Date(value.finish) <= new Date(toDate)
-  //           );
-
-  //           for (
-  //             let index = (page - 1) * dataPerPage;
-  //             index < page * dataPerPage && index < filterByDate.length;
-  //             index++
-  //           ) {
-  //             listData.push(filterByDate[index]);
-  //           }
-  //           const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-  //           const numberStart = (page - 1) * dataPerPage + 1;
-  //           setDataForGraph(filterByDate);
-  //           setTableProject(listData);
-  //           setStotalPageData(totalPageData);
-  //           setNumberStart(numberStart);
-  //         } else {
-  //           for (
-  //             let index = (page - 1) * dataPerPage;
-  //             index < page * dataPerPage && index < filterData.length;
-  //             index++
-  //           ) {
-  //             listData.push(filterData[index]);
-  //           }
-  //           const totalPageData = Math.ceil(filterData.length / dataPerPage);
-  //           const numberStart = (page - 1) * dataPerPage + 1;
-  //           setDataForGraph(filterData);
-  //           setTableProject(listData);
-  //           setStotalPageData(totalPageData);
-  //           setNumberStart(numberStart);
-  //         }
-  //       }
-  //     } else if (filterItem === "status" && data.length > 0) {
-  //       let listData = [];
-  //       let filterData = [];
-  //       if (filterDetailItem === "Delay") {
-  //         let notCriteria = [
-  //           "Not Yet Started",
-  //           "On Progress",
-  //           "Finish",
-  //           "Waiting Detail Activity",
-  //           "cancel",
-  //         ];
-
-  //         filterData = data.filter(
-  //           (value) => !notCriteria.includes(value.status)
-  //         );
-  //       } else {
-  //         filterData = data.filter(
-  //           (value) => value.status === filterDetailItem
-  //         );
-  //       }
-
-  //       if (fromDate && toDate) {
-  //         const fromDateValue = new Date(fromDate).setDate(
-  //           new Date(fromDate).getDate() - 1
-  //         );
-  //         const filterByDate = filterData.filter(
-  //           (value) =>
-  //             new Date(value.finish) >= new Date(fromDateValue) &&
-  //             new Date(value.finish) <= new Date(toDate)
-  //         );
-  //         for (
-  //           let index = (page - 1) * dataPerPage;
-  //           index < page * dataPerPage && index < filterByDate.length;
-  //           index++
-  //         ) {
-  //           listData.push(filterByDate[index]);
-  //         }
-  //         const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-  //         const numberStart = (page - 1) * dataPerPage + 1;
-  //         setDataForGraph(filterByDate);
-  //         setTableProject(listData);
-  //         setStotalPageData(totalPageData);
-  //         setNumberStart(numberStart);
-  //       } else {
-  //         for (
-  //           let index = (page - 1) * dataPerPage;
-  //           index < page * dataPerPage && index < filterData.length;
-  //           index++
-  //         ) {
-  //           listData.push(filterData[index]);
-  //         }
-  //         const totalPageData = Math.ceil(filterData.length / dataPerPage);
-  //         const numberStart = (page - 1) * dataPerPage + 1;
-  //         setDataForGraph(filterData);
-  //         setTableProject(listData);
-  //         setStotalPageData(totalPageData);
-  //         setNumberStart(numberStart);
-  //       }
-  //     } else if (filterItem === "product") {
-  //       if (data.length > 0) {
-  //         let listData = [];
-  //         const filterData = data.filter(
-  //           (value) => value.product_id === parseInt(filterDetailItem)
-  //         );
-  //         if (fromDate && toDate) {
-  //           const fromDateValue = new Date(fromDate).setDate(
-  //             new Date(fromDate).getDate() - 1
-  //           );
-  //           const filterByDate = filterData.filter(
-  //             (value) =>
-  //               new Date(value.finish) >= new Date(fromDateValue) &&
-  //               new Date(value.finish) <= new Date(toDate)
-  //           );
-
-  //           for (
-  //             let index = (page - 1) * dataPerPage;
-  //             index < page * dataPerPage && index < filterByDate.length;
-  //             index++
-  //           ) {
-  //             listData.push(filterByDate[index]);
-  //           }
-  //           const totalPageData = Math.ceil(filterByDate.length / dataPerPage);
-  //           const numberStart = (page - 1) * dataPerPage + 1;
-  //           setDataForGraph(filterByDate);
-  //           setTableProject(listData);
-  //           setStotalPageData(totalPageData);
-  //           setNumberStart(numberStart);
-  //         } else {
-  //           for (
-  //             let index = (page - 1) * dataPerPage;
-  //             index < page * dataPerPage && index < filterData.length;
-  //             index++
-  //           ) {
-  //             listData.push(filterData[index]);
-  //           }
-  //           const totalPageData = Math.ceil(filterData.length / dataPerPage);
-  //           const numberStart = (page - 1) * dataPerPage + 1;
-  //           setDataForGraph(filterData);
-  //           setTableProject(listData);
-  //           setStotalPageData(totalPageData);
-  //           setNumberStart(numberStart);
-  //         }
-  //       }
-  //     }
-  //   };
-
-  //   if (tableProject.length > 0) {
-  //     filterFunctionLogic(
-  //       filterBy,
-  //       detailFilterValue,
-  //       tableProject,
-  //       fromDate,
-  //       toDate
-  //     );
-  //     filterFunctionLogicByDate(tableProject, fromDate, toDate);
-  //   }
-  //   //filter sampai sini
-  // }, [
-  //   actionStateValue,
-  //   page,
-  //   filterBy,
-  //   detailFilterValue,
-  //   userId,
-  //   fromDate,
-  //   toDate,
-  // ]);
 
   const productOption = () => {
     let option = [];
@@ -1255,7 +877,11 @@ function Project(props) {
                     userId={userId}
                     userPosition={userPosition}
                     userSection={userSection}
-                    dataForGraph={dataForGraph}
+                    dataForGraph={
+                      dataForGraphFilter.length === 0
+                        ? dataForGraph
+                        : dataForGraphFilter
+                    }
                   />
                 </>
               ) : (
@@ -1275,7 +901,11 @@ function Project(props) {
                     userId={userId}
                     userPosition={userPosition}
                     userSection={userSection}
-                    dataForGraph={dataForGraph}
+                    dataForGraph={
+                      dataForGraphFilter.length === 0
+                        ? dataForGraph
+                        : dataForGraphFilter
+                    }
                   />
                 </>
               ) : (
@@ -1434,6 +1064,7 @@ function Project(props) {
             title="Project List"
             icon={<BsListNested style={{ marginRight: 5 }} />}
           />
+
           {tableProject.length > 0 ? (
             <DataGrid
               columns={columns}
@@ -1930,7 +1561,6 @@ function Project(props) {
                 <Col>
                   {member.length > 0
                     ? member.map((value, index) => {
-                        console.log(member, "cekkk");
                         return (
                           <Badge
                             key={index}

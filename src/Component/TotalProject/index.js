@@ -4,8 +4,7 @@ import "./totalProject.css";
 import { useState } from "react";
 import { useEffect } from "react";
 import {
-  getAllProductApi,
-  getAllProjectApi,
+  getAllProject2Api,
   getAllSectionApi,
   getAllUsersApi,
 } from "../../Config/API";
@@ -38,6 +37,7 @@ function TotalProject(props) {
     filterDetailEvent1,
     filterDetailEvent2,
     filterDetailEvent3,
+    tableProduct,
   } = props;
   const [productFilter, setProductFilter] = useState(filterDetailEvent);
   const [startFilter, setStartFilter] = useState(filterDetailEvent2);
@@ -48,7 +48,7 @@ function TotalProject(props) {
   const [totalBudget, setTotalBudget] = useState("");
   const [categoryFilter, setCategoryFilter] = useState(filterDetailEvent1);
   const [totalSavingCost, setTotalSavingCost] = useState("");
-  const [tableProduct, setTableProduct] = useState([]);
+
   const [tableProject, setTableProject] = useState([]);
   const [projectLaunch, setProjectLaunch] = useState("");
   const [show, setShow] = useState(false);
@@ -58,13 +58,6 @@ function TotalProject(props) {
   const [userId, setUserId] = useState("");
 
   useEffect(() => {
-    axios
-      .get(getAllProductApi)
-      .then((response) => {
-        setTableProduct(response.data.data);
-      })
-      .catch((error) => console.log(error));
-
     axios
       .get(getAllSectionApi)
       .then((response) => {
@@ -82,13 +75,6 @@ function TotalProject(props) {
     const user = JSON.parse(localStorage.getItem("user"));
     setUserId(user.id);
   }, []);
-
-  // useEffect(() => {
-  //   axios.get(getAllProjectApi).then((response) => {
-  //     const dataProject = response.data.data;
-  //     setTableProject(dataProject);
-  //   });
-  // }, [actionStateValue]);\
 
   const projectWillBeLaunch = (data) => {
     let currentDate = new Date().getTime();
@@ -121,7 +107,7 @@ function TotalProject(props) {
   };
 
   useEffect(() => {
-    axios.get(getAllProjectApi).then((response) => {
+    axios.get(getAllProject2Api).then((response) => {
       const dataProject = response.data.data.filter(
         (value) => value.status !== "cancel"
       );

@@ -280,6 +280,8 @@ export const getAllProjectByPageApi = (page) => {
 };
 
 export const getAllProjectApi = `${port}/api/project/getAllProject`;
+export const getAllProject2Api = `${port}/api/project/getAllProject2`;
+export const saveSummaryProjectApi = `${port}/api/project/saveSummaryProject`;
 
 export const updateStatusProjectApi = `${port}/api/project/updateStatus`;
 export const getProjectByIdApi = (id) => {

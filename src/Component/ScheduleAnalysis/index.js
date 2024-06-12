@@ -13,15 +13,7 @@ import axios from "axios";
 import moment from "moment";
 import TitleSection from "../TitleSection";
 import { BsListNested } from "react-icons/bs";
-import {
-  getActivityByProjectIdApi,
-  getProjectByUserApi,
-  getProjectByIdApi,
-  getAllUsersApi,
-  getAllProductApi,
-  getAllProjectApi,
-  getProjectBySectionIdAndPage,
-} from "../../Config/API";
+
 import GanttChart from "../GanttChart";
 import { ViewMode } from "gantt-task-react";
 import TaskListTable from "../TaskListTable";
@@ -29,14 +21,27 @@ import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { SETFILTER } from "../../Context/const/index";
 import { SETFILTERDETAIL } from "../../Context/const/index";
 import { GlobalConsumer } from "../../Context/store/index";
+import "./scheduleAnalysis.css";
+import { round } from "../../Config/function";
 
 function ScheduleReview(props) {
-  const { id, filterEvent, filterDetailEvent, dispatch, pageEvent } = props;
+  const {
+    id,
+    filterEvent,
+    filterDetailEvent,
+    dispatch,
+    pageEvent,
+    tableUser,
+    tableProduct,
+    tableProject,
+    totalProject,
+    userId,
+  } = props;
   const [showModal, setShowModal] = useState(false);
-  const [tableProject, setTableProject] = useState([]);
+
   const [activity, setActivity] = useState([]);
   const [section, setSection] = useState("");
-  const [userId, setUserId] = useState("");
+  const [filterProject, setFilterProject] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [monthFormat, setMonthFormat] = useState("en-US");
   const [viewMode, setViewMode] = useState(ViewMode.Month);
@@ -48,13 +53,10 @@ function ScheduleReview(props) {
   const [openSetting, setOpenSetting] = useState(false);
   const [filterBy, setFilterBy] = useState(filterEvent);
   const [detailFilterValue, setDetailFilterValue] = useState(filterDetailEvent);
-  const [tableUser, setTableUser] = useState([]);
-  const [tableProduct, setTableProduct] = useState([]);
+
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [fiscalYear, setFiscalYear] = useState("");
-  const [page, setPage] = useState(pageEvent);
-  const [totalProject, setTotalProject] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const filterFunctionLogicByDate = (data, fromDate, toDate) => {
@@ -67,7 +69,7 @@ function ScheduleReview(props) {
           new Date(value.finish) > new Date(fromDateValue) &&
           new Date(value.finish) <= new Date(toDate)
       );
-      setTableProject(filterByDate);
+      setFilterProject(filterByDate);
     }
   };
 
@@ -93,9 +95,9 @@ function ScheduleReview(props) {
               new Date(value.finish) >= new Date(fromDateValue) &&
               new Date(value.finish) <= new Date(toDate)
           );
-          setTableProject(filterByDate);
+          setFilterProject(filterByDate);
         } else {
-          setTableProject(filterData);
+          setFilterProject(filterData);
         }
       }
     } else if (filterItem === "rank") {
@@ -114,9 +116,9 @@ function ScheduleReview(props) {
               new Date(value.finish) <= new Date(toDate)
           );
 
-          setTableProject(filterByDate);
+          setFilterProject(filterByDate);
         } else {
-          setTableProject(filterData);
+          setFilterProject(filterData);
         }
       }
     } else if (filterItem === "pic") {
@@ -135,9 +137,9 @@ function ScheduleReview(props) {
               new Date(value.finish) <= new Date(toDate)
           );
 
-          setTableProject(filterByDate);
+          setFilterProject(filterByDate);
         } else {
-          setTableProject(filterData);
+          setFilterProject(filterData);
         }
       }
     } else if (filterItem === "status" && data.length > 0) {
@@ -168,9 +170,9 @@ function ScheduleReview(props) {
             new Date(value.finish) <= new Date(toDate)
         );
 
-        setTableProject(filterByDate);
+        setFilterProject(filterByDate);
       } else {
-        setTableProject(filterData);
+        setFilterProject(filterData);
       }
     } else if (filterItem === "product") {
       if (data.length > 0) {
@@ -187,9 +189,9 @@ function ScheduleReview(props) {
               new Date(value.finish) <= new Date(toDate)
           );
 
-          setTableProject(filterByDate);
+          setFilterProject(filterByDate);
         } else {
-          setTableProject(filterData);
+          setFilterProject(filterData);
         }
       }
     }
@@ -213,101 +215,6 @@ function ScheduleReview(props) {
       return { backgroundColor: "red", backgroundSelectedColor: "red" };
     }
   };
-
-  useEffect(() => {
-    if (localStorage.getItem("user")) {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (user) {
-        setSection(user.section_id);
-        setUserId(user.id);
-      }
-    }
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    const position = user.position;
-    const section_id = user.section_id;
-    const positionThatCanOpenProject = [
-      "Departement Manager",
-      "Assistant General Manager",
-      "General Manager",
-      "Director",
-      "President",
-    ];
-
-    const checkPosition = positionThatCanOpenProject.find(
-      (value) => value === position
-    );
-
-    axios
-      .get(getAllUsersApi)
-      .then((response) => {
-        const tableUserSort = response.data.data;
-        setTableUser(
-          tableUserSort.sort((nameA, nameB) => {
-            let a = nameA.username;
-            let b = nameB.username;
-
-            if (a < b) {
-              return -1;
-            }
-            if (a > b) {
-              return 1;
-            }
-            return 0;
-          })
-        );
-      })
-      .catch((error) => console.log(error));
-
-    axios
-      .get(getAllProductApi)
-      .then((response) => {
-        setTableProduct(response.data.data);
-      })
-      .catch((error) => console.log(error));
-
-    if (userId) {
-      axios.get(getProjectByUserApi(userId)).then((response) => {
-        const data = response.data.data;
-        setTableProject(data);
-      });
-    }
-
-    //filter sampai sini
-
-    if (user.position === "Administrator") {
-      axios
-        .get(getAllProjectApi)
-        .then((response) => {
-          const data = response.data.data;
-          setTableProject(data);
-          setTotalProject(data);
-        })
-        .then((error) => console.log(error));
-    } else if (checkPosition) {
-      axios
-        .get(getProjectBySectionIdAndPage(page, section_id))
-        .then((response) => {
-          const data = response.data.data;
-          setTableProject(data);
-          setTotalProject(data);
-        })
-        .catch((error) => console.log(error));
-    } else {
-      if (userId) {
-        axios
-          .get(getProjectByUserApi(userId))
-          .then((response) => {
-            const responseData = response.data.data;
-            setTableProject(responseData);
-            setTotalProject(responseData);
-          })
-          .catch((error) => {
-            console.error("Error in axios get request:", error);
-          });
-      }
-    }
-  }, [id, userId, page]);
 
   // useEffect(() => {
   //   axios.get(getAllProjectApi).then((response) => {
@@ -347,7 +254,6 @@ function ScheduleReview(props) {
 
         const getDetail = async () => {
           const dataActivity = dataProject.activityData;
-          console.log("dataACtivity", dataActivity);
           if (dataActivity.length > 0) {
             for (let index2 = 0; index2 < dataActivity.length; index2++) {
               let pushData = {
@@ -374,7 +280,6 @@ function ScheduleReview(props) {
         };
         await getDetail();
       }
-      console.log(dataArray);
       setActivity(dataArray);
       setShowModal(false);
       setLoading(false);
@@ -575,6 +480,25 @@ function ScheduleReview(props) {
     setActivity(activity.map((t) => (t.id === task.id ? task : t)));
   };
 
+  const handleTooltip = (task) => {
+    const dataProject = totalProject.find((value) => value.id === task.id);
+
+    return (
+      <div className="box-progress">
+        <div>
+          <b>{task.name}</b>
+        </div>
+        <div>Progress : {round(task.progress, 2)}%</div>
+        {dataProject && (
+          <div>
+            Summary Progress : <br />
+            {dataProject.summary_progress}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const ganttChartFormat = () => {
     if (activity.length > 0) {
       return (
@@ -603,6 +527,7 @@ function ScheduleReview(props) {
             </div>
           )}
           TaskListTable={(props) => <TaskListTable {...props} />}
+          TooltipContent={({ task }) => handleTooltip(task)}
         />
       );
     }
@@ -622,16 +547,16 @@ function ScheduleReview(props) {
   };
 
   const handleAddAllProject = () => {
-    if (tableProject.length > 0) {
-      for (let index = 0; index < tableProject.length; index++) {
+    if (filterProject.length > 0) {
+      for (let index = 0; index < filterProject.length; index++) {
         if (projectListWillReview.length > 0) {
           const checkData = projectListWillReview.find(
-            (value) => value === tableProject[index].id
+            (value) => value === filterProject[index].id
           );
           if (!checkData) {
             setProjectListWillReview((prev) => [
               ...prev,
-              tableProject[index].id,
+              filterProject[index].id,
             ]);
           }
         } else {
@@ -797,7 +722,7 @@ function ScheduleReview(props) {
                     }}
                   >
                     <option value="">Select Detail</option>
-                    {tableProject.map((value, index) => {
+                    {filterProject.map((value, index) => {
                       return (
                         <option key={index} value={value.id}>
                           {" "}
@@ -823,6 +748,8 @@ function ScheduleReview(props) {
                         setFiscalYear("");
                         setFromDate("");
                         setToDate("");
+                        setProjectListWillReview([]);
+                        setFilterProject([]);
                       }}
                     >
                       Reset

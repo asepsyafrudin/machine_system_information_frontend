@@ -5,6 +5,7 @@ import {
   Alert,
   Badge,
   Button,
+  Card,
   CloseButton,
   Col,
   Form,
@@ -35,6 +36,7 @@ import {
   createPatternApi,
   getAllPatternApi,
   getActivityPatternByIdPatternApi,
+  saveSummaryProjectApi,
 } from "../../Config/API";
 import { SiStarbucks } from "react-icons/si";
 import TitleSection from "../TitleSection";
@@ -48,7 +50,7 @@ import moment from "moment";
 import { v4 as uuid } from "uuid";
 import { CapitalCaseFirstWord } from "../../Config/capitalCaseFirstWord";
 import { CHANGEDATA, SAVECHANGEDATA } from "../../Context/const";
-import { FaBackward } from "react-icons/fa";
+import { FaBackward, FaEdit, FaSave } from "react-icons/fa";
 import { json, useNavigate } from "react-router-dom";
 import { MdDeleteForever, MdLink } from "react-icons/md";
 import TaskListTable from "../TaskListTable";
@@ -112,6 +114,8 @@ function ProjectActivity(props) {
   const [tablePattern, setTablePattern] = useState("");
   const [tableActivityPattern, setTableActivityPattern] = useState("");
   const [patternImportId, setPatternImportId] = useState("");
+  const [summaryProgress, setSummaryProgress] = useState("");
+  const [summaryEdit, setSummaryEdit] = useState(false);
 
   const refDescription = useRef("");
   if (description) {
@@ -159,6 +163,7 @@ function ProjectActivity(props) {
         setProject(dataProject);
         setDescription(dataProject.description);
         setCategory(dataProject.category);
+        setSummaryProgress(dataProject.summary_progress);
         let memberIdData = [];
         for (let index = 0; index < dataProject.member.length; index++) {
           memberIdData.push(dataProject.member[index].user_id);
@@ -766,6 +771,7 @@ function ProjectActivity(props) {
               start: minDateFromListDateStart,
               end: maxDateFromListDateEnd,
               hideChildren: false,
+              summary_progress: summaryProgress,
             };
 
             axios
@@ -987,6 +993,22 @@ function ProjectActivity(props) {
       }
     }
   };
+
+  const saveSummary = () => {
+    setSummaryEdit(!summaryEdit);
+    axios
+      .put(saveSummaryProjectApi, {
+        id: project.id,
+        summary_progress: summaryProgress,
+      })
+      .then((response) => console.log(response))
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        setUpdateValue(updateValue + 1);
+      });
+  };
   return (
     <div className="capabilityFormContainer">
       <div className="capabilityForm">
@@ -1036,28 +1058,77 @@ function ProjectActivity(props) {
           icon={<SiStarbucks style={{ marginRight: 5 }} />}
         />
         <div>
-          <Row className="mb-1" style={{ textAlign: "left" }}>
-            <Col sm={2}>PIC</Col>
-            <Col sm={4}>{userNameFunction(project.manager_id)}</Col>
-          </Row>
-          <Row className="mb-1" style={{ textAlign: "left" }}>
-            <Col sm={2}>Category</Col>
-            <Col sm={10}>{category}</Col>
-          </Row>
-          <Row className="mb-1" style={{ textAlign: "left" }}>
-            <Col sm={2}>Budget</Col>
-            <Col sm={10}>{parseFloat(project.budget).toLocaleString()}</Col>
-          </Row>
-          <Row className="mb-1" style={{ textAlign: "left" }}>
-            <Col sm={2}>Saving Cost</Col>
-            <Col sm={10}>
-              {parseFloat(project.saving_cost).toLocaleString()}
+          <Row>
+            <Col sm={5}>
+              <Row className="mb-1" style={{ textAlign: "left" }}>
+                <Col sm={4}>PIC</Col>
+                <Col sm={8}>{userNameFunction(project.manager_id)}</Col>
+              </Row>
+              <Row className="mb-1" style={{ textAlign: "left" }}>
+                <Col sm={4}>Category</Col>
+                <Col sm={8}>{category}</Col>
+              </Row>
+              <Row className="mb-1" style={{ textAlign: "left" }}>
+                <Col sm={4}>Budget</Col>
+                <Col sm={8}>{parseFloat(project.budget).toLocaleString()}</Col>
+              </Row>
+              <Row className="mb-1" style={{ textAlign: "left" }}>
+                <Col sm={4}>Saving Cost</Col>
+                <Col sm={8}>
+                  {parseFloat(project.saving_cost).toLocaleString()}
+                </Col>
+              </Row>
+              <Row className="mb-1" style={{ textAlign: "left" }}>
+                <Col sm={4}>Description</Col>
+                <Col sm={8} ref={refDescription}></Col>
+              </Row>
+            </Col>
+            <Col sm={7}>
+              <Card className="mb-3" style={{ textAlign: "left" }}>
+                <div>
+                  <Row>
+                    <Col
+                      style={{
+                        textAlign: "left",
+                        marginLeft: "10px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      SUMMARY PROGRESS
+                    </Col>
+                    <Col
+                      style={{
+                        textAlign: "right",
+                        marginRight: "10px",
+                        padding: 10,
+                      }}
+                    >
+                      <Button onClick={saveSummary}>
+                        {" "}
+                        {summaryEdit ? (
+                          <FaSave style={{ pointerEvents: "none" }} />
+                        ) : (
+                          <FaEdit style={{ pointerEvents: "none" }} />
+                        )}
+                      </Button>
+                    </Col>
+                  </Row>
+                </div>
+                <Card.Body>
+                  <Form.Control
+                    as="textarea"
+                    style={{ height: 100 }}
+                    maxLength={300}
+                    value={summaryProgress ? summaryProgress : ""}
+                    onChange={(e) => setSummaryProgress(e.target.value)}
+                    disabled={summaryEdit ? false : true}
+                  />
+                </Card.Body>
+              </Card>
             </Col>
           </Row>
           <Row className="mb-1" style={{ textAlign: "left" }}>
-            <Col sm={2}>Description</Col>
-            <Col sm={4} ref={refDescription}></Col>
-            <Col sm={6} style={{ textAlign: "right" }}>
+            <Col style={{ textAlign: "right" }}>
               <div className="box-revise" /> Revise
               <div className="box-plan" /> Plan
               <div className="box-actual" /> Progress
