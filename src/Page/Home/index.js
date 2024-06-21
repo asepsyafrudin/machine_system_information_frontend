@@ -2,7 +2,7 @@ import React from "react";
 import Footer from "../../Component/Footer";
 import Header from "../../Component/Header";
 import "./home.css";
-import ProjectImage from "../../Asset/ImageGeneral/Project.jpg";
+import ProjectImage from "../../Asset/ImageGeneral/project2.JPG";
 import { useEffect } from "react";
 
 import { useState } from "react";

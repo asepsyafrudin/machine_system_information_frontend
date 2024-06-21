@@ -16,6 +16,7 @@ import ScheduleReview from "../ScheduleAnalysis";
 import axios from "axios";
 import {
   getAllProductApi,
+  getAllProject2Api,
   getAllProjectApi,
   getAllUsersApi,
   getProjectBySectionIdAndPage,
@@ -98,7 +99,7 @@ function NavigationProject(props) {
     if (user.position === "Administrator") {
       setAdmin(true);
       axios
-        .get(getAllProjectApi)
+        .get(getAllProject2Api)
         .then((response) => {
           const responseData = response.data.data;
           setDataForGraph(responseData);
@@ -131,7 +132,7 @@ function NavigationProject(props) {
           });
       }
     }
-  }, [userId]);
+  }, [userId, actionState]);
 
   return (
     <Tab.Container

@@ -59,6 +59,8 @@ import { fileName } from "../../Config/fileName";
 import { getExtFileName } from "../../Config/fileType";
 import { GoDesktopDownload } from "react-icons/go";
 import { RiDeleteBin2Fill } from "react-icons/ri";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 function ProjectActivity(props) {
   const { id, accessMember, dataChangeCount, dispatch, todoChangeCount } =
@@ -252,7 +254,7 @@ function ProjectActivity(props) {
     });
 
     axios
-      .get(getProjectByUserApi(userId))
+      .get(getProjectByUserApi(user.id))
       .then((response) => {
         setTableProject(response.data.data);
       })
@@ -565,100 +567,106 @@ function ProjectActivity(props) {
     setShowForm(false);
     e.preventDefault();
 
-    let data = {
-      start: new Date(startDate),
-      end: new Date(type === "milestone" ? startDate : finishDate),
-      name: activityName,
-      progress: progress,
-      dependencies: dependencies === "" ? [] : [dependencies],
-      type: type,
-      project: project.id,
-      remark: remark,
-      linkToProject: linkToProject,
-      pic: pic,
-    };
+    if (new Date(startDate) <= new Date(finishDate)) {
+      let data = {
+        start: new Date(startDate),
+        end: new Date(type === "milestone" ? startDate : finishDate),
+        name: activityName,
+        progress: progress,
+        dependencies: dependencies === "" ? [] : [dependencies],
+        type: type,
+        project: project.id,
+        remark: remark,
+        linkToProject: linkToProject,
+        pic: pic,
+      };
 
-    let revise = {
-      start: new Date(reviseStartDate),
-      end: new Date(type === "milestone" ? reviseStartDate : reviseFinishDate),
-      name: activityName + " Revise",
-      progress: progress,
-      dependencies: dependencies === "" ? [] : [dependencies],
-      type: type,
-      project: project.id,
-      remark: "",
-      linkToProject: linkToProject,
-      pic: pic,
-    };
+      let revise = {
+        start: new Date(reviseStartDate),
+        end: new Date(
+          type === "milestone" ? reviseStartDate : reviseFinishDate
+        ),
+        name: activityName + " Revise",
+        progress: progress,
+        dependencies: dependencies === "" ? [] : [dependencies],
+        type: type,
+        project: project.id,
+        remark: "",
+        linkToProject: linkToProject,
+        pic: pic,
+      };
 
-    let filterData = [];
-    if (idUpdate === "") {
-      let newData = { ...data, id: `${activityName}-${uuid()}` };
-      setActivity((prev) => [...prev, newData]);
-      resetForm();
-      dispatch({ type: CHANGEDATA });
-    } else if (idUpdate && showForm) {
-      if (activity.length > 0) {
-        let oldData = {
-          start: new Date(startDate),
-          end: new Date(type === "milestone" ? startDate : finishDate),
-          name: activityName,
-          progress: 0,
-          dependencies: dependencies === "" ? [] : [dependencies],
-          type: type,
-          project: project.id,
-          remark: "revise",
-          linkToProject: linkToProject,
-          pic: pic,
-        };
+      let filterData = [];
+      if (idUpdate === "") {
+        let newData = { ...data, id: `${activityName}-${uuid()}` };
+        setActivity((prev) => [...prev, newData]);
+        resetForm();
+        dispatch({ type: CHANGEDATA });
+      } else if (idUpdate && showForm) {
+        if (activity.length > 0) {
+          let oldData = {
+            start: new Date(startDate),
+            end: new Date(type === "milestone" ? startDate : finishDate),
+            name: activityName,
+            progress: 0,
+            dependencies: dependencies === "" ? [] : [dependencies],
+            type: type,
+            project: project.id,
+            remark: "revise",
+            linkToProject: linkToProject,
+            pic: pic,
+          };
 
-        for (let index = 0; index < activity.length; index++) {
-          if (activity[index].id === idUpdate) {
-            filterData.push({
-              ...oldData,
-              id: idUpdate,
-            });
-          } else {
-            filterData.push(activity[index]);
+          for (let index = 0; index < activity.length; index++) {
+            if (activity[index].id === idUpdate) {
+              filterData.push({
+                ...oldData,
+                id: idUpdate,
+              });
+            } else {
+              filterData.push(activity[index]);
+            }
+          }
+
+          let data = { ...revise, id: `${activityName}-${uuid()}` };
+          filterData.push(data);
+        }
+
+        setActivity(filterData);
+        dispatch({ type: CHANGEDATA });
+        resetForm();
+      } else if (idUpdate) {
+        if (activity.length > 0) {
+          let data = {
+            start: new Date(startDate),
+            end: new Date(type === "milestone" ? startDate : finishDate),
+            name: activityName,
+            progress: progress,
+            dependencies: dependencies === "" ? [] : [dependencies],
+            type: type,
+            project: project.id,
+            remark: remark,
+            linkToProject: linkToProject,
+            pic: pic,
+          };
+          for (let index = 0; index < activity.length; index++) {
+            if (activity[index].id === idUpdate) {
+              filterData.push({
+                ...data,
+                id: idUpdate,
+              });
+            } else {
+              filterData.push(activity[index]);
+            }
           }
         }
 
-        let data = { ...revise, id: `${activityName}-${uuid()}` };
-        filterData.push(data);
+        setActivity(filterData);
+        dispatch({ type: CHANGEDATA });
+        resetForm();
       }
-
-      setActivity(filterData);
-      dispatch({ type: CHANGEDATA });
-      resetForm();
-    } else if (idUpdate) {
-      if (activity.length > 0) {
-        let data = {
-          start: new Date(startDate),
-          end: new Date(type === "milestone" ? startDate : finishDate),
-          name: activityName,
-          progress: progress,
-          dependencies: dependencies === "" ? [] : [dependencies],
-          type: type,
-          project: project.id,
-          remark: remark,
-          linkToProject: linkToProject,
-          pic: pic,
-        };
-        for (let index = 0; index < activity.length; index++) {
-          if (activity[index].id === idUpdate) {
-            filterData.push({
-              ...data,
-              id: idUpdate,
-            });
-          } else {
-            filterData.push(activity[index]);
-          }
-        }
-      }
-
-      setActivity(filterData);
-      dispatch({ type: CHANGEDATA });
-      resetForm();
+    } else {
+      window.alert("Finish Date must be greater than Start Date");
     }
   };
 
@@ -995,19 +1003,37 @@ function ProjectActivity(props) {
   };
 
   const saveSummary = () => {
-    setSummaryEdit(!summaryEdit);
-    axios
-      .put(saveSummaryProjectApi, {
-        id: project.id,
-        summary_progress: summaryProgress,
-      })
-      .then((response) => console.log(response))
-      .catch((error) => {
-        console.log(error);
-      })
-      .finally(() => {
-        setUpdateValue(updateValue + 1);
-      });
+    if (summaryProgress === null) {
+      setSummaryEdit(!summaryEdit);
+      axios
+        .put(saveSummaryProjectApi, {
+          id: project.id,
+          summary_progress: summaryProgress,
+        })
+        .then((response) => console.log(response))
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          setUpdateValue(updateValue + 1);
+        });
+    } else if (summaryProgress.length < 400) {
+      setSummaryEdit(!summaryEdit);
+      axios
+        .put(saveSummaryProjectApi, {
+          id: project.id,
+          summary_progress: summaryProgress,
+        })
+        .then((response) => console.log(response))
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          setUpdateValue(updateValue + 1);
+        });
+    } else {
+      window.alert("Summary Progress Maximal 400 Karakter");
+    }
   };
   return (
     <div className="capabilityFormContainer">
@@ -1115,13 +1141,12 @@ function ProjectActivity(props) {
                   </Row>
                 </div>
                 <Card.Body>
-                  <Form.Control
-                    as="textarea"
-                    style={{ height: 100 }}
-                    maxLength={300}
+                  <ReactQuill
+                    theme="snow"
                     value={summaryProgress ? summaryProgress : ""}
-                    onChange={(e) => setSummaryProgress(e.target.value)}
-                    disabled={summaryEdit ? false : true}
+                    onChange={setSummaryProgress}
+                    readOnly={summaryEdit ? false : true}
+                    maxLength={300}
                   />
                 </Card.Body>
               </Card>
@@ -1290,12 +1315,6 @@ function ProjectActivity(props) {
                     {type === "milestone" ? "Time" : "Start"}
                   </Form.Label>
                   <Form.Control
-                    // value={startDate}
-                    // onChange={(e) => setStartDate(e.target.value)}
-                    // type="date"
-
-                    // required
-                    // disabled={linkToProject ? true : false}
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     type="date"
@@ -1309,11 +1328,6 @@ function ProjectActivity(props) {
                   <Form.Group as={Col}>
                     <Form.Label>Finish</Form.Label>
                     <Form.Control
-                      // type="date"
-                      // value={finishDate}
-                      // onChange={(e) => setFinishDate(e.target.value)}
-                      // required
-                      // disabled={linkToProject ? true : false}
                       type="date"
                       value={finishDate}
                       onChange={(e) => setFinishDate(e.target.value)}

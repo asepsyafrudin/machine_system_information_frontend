@@ -41,14 +41,11 @@ import { DataGrid } from "@mui/x-data-grid";
 import { BeatLoader } from "react-spinners";
 
 function AssignmentSummary(props) {
-  const { userId, id } = props;
+  const { userId, id, tableUser, tableProject } = props;
   const [tableAssignmentSummary, setTableAssignmentSummary] = useState([]);
-  const [allUser, setAllUser] = useState([]);
+
   const refAttachment = useRef();
-  const [totalPageData, setTotalPageData] = useState(1);
-  const [numberStart, setNumberStart] = useState("");
   const [action, setAction] = useState(0);
-  const maxPagesShow = 3;
   const [page, setPage] = useState(1);
   const [assignBy, setAssignBy] = useState("");
   const [show, setShow] = useState(false);
@@ -66,7 +63,6 @@ function AssignmentSummary(props) {
   const [picId, setPicId] = useState("");
   const [showNotif, setShowNotif] = useState(false);
   const [message, setMessage] = useState("");
-  const [tableProject, setTableProject] = useState([]);
   const [showModalMarkAsFinish, setShowModalMarkAsFinish] = useState(false);
   const [comment, setComment] = useState("");
   const [filterType, setFilterType] = useState("");
@@ -87,23 +83,11 @@ function AssignmentSummary(props) {
         .then((response) => {
           let filteredData = response.data.data;
           setTableAssignmentSummary(filteredData);
-          setNumberStart(response.data.numberStart);
-          setTotalPageData(response.data.totalPageData);
         })
         .catch((error) => console.log(error));
     }
 
     // get project
-    axios
-      .get(getAllUsersApi)
-      .then((response) => {
-        setAllUser(response.data.data);
-      })
-      .then((error) => console.log(error));
-
-    axios.get(getAllProjectApi).then((response) => {
-      setTableProject(response.data.data);
-    });
 
     // edit
     if (idEdit) {
@@ -123,7 +107,7 @@ function AssignmentSummary(props) {
   }, [userId, page, action, idEdit, filterType]);
 
   const functionName = (id) => {
-    const dataUser = allUser.find((value) => value.id === parseInt(id));
+    const dataUser = tableUser.find((value) => value.id === parseInt(id));
     if (dataUser) {
       return dataUser.username;
     }

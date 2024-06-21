@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import TitleSection from "../TitleSection";
 import {
   Alert,
@@ -11,14 +11,8 @@ import {
   Row,
 } from "react-bootstrap";
 import PropTypes from "prop-types";
-import { useEffect } from "react";
 import {
   createProjectApi,
-  getAllProductApi,
-  getAllProjectApi,
-  getAllUsersApi,
-  getProjectBySectionIdAndPage,
-  getProjectByUserApi,
   sendEmailApi,
   shareFinishProjectForSMDNewModelApi,
   shareFinishProjectToUserCommonApi,
@@ -55,7 +49,7 @@ import { GlobalConsumer } from "../../Context/store/index";
 // import { SETFILTERDETAIL } from "../../Context/const/index";
 import { RiDeleteBack2Fill } from "react-icons/ri";
 import { BeatLoader } from "react-spinners";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, gridClasses } from "@mui/x-data-grid";
 
 function Project(props) {
   const {
@@ -76,6 +70,9 @@ function Project(props) {
     totalProject,
   } = props;
 
+  const [pinnedColumns, setPinnedColumns] = useState({
+    left: ["project_name"],
+  });
   const [description, setDescription] = useState("");
   const [product, setProduct] = useState("");
   const [projectName, setProjectName] = useState("");
@@ -110,6 +107,9 @@ function Project(props) {
   const [fiscalYear, setFiscalYear] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  const handlePinnedColumnsChange = useCallback((updatedPinnedColumns) => {
+    setPinnedColumns(updatedPinnedColumns);
+  }, []);
   const filterFunctionLogicByDate = (data, fromDate, toDate, status) => {
     if (fromDate && toDate && status && data.length > 0) {
       const fromDateValue = new Date(fromDate).setDate(
@@ -262,47 +262,51 @@ function Project(props) {
 
   const handleSaveCreateProject = (e) => {
     e.preventDefault();
-    let data = {
-      product_id: product,
-      project_name: projectName,
-      rank: rank,
-      manager_id: manager,
-      budget: budget,
-      saving_cost: savingCost,
-      start: startDate,
-      finish: sopDate,
-      category: category,
-      sub_category: subCategory,
-      member: projectIdEdit ? [...member] : [...member, userId],
-      user_id: userId,
-      status: STATUSOPEN,
-      description: description,
-    };
+    if (new Date(startDate) < new Date(sopDate)) {
+      let data = {
+        product_id: product,
+        project_name: projectName,
+        rank: rank,
+        manager_id: manager,
+        budget: budget,
+        saving_cost: savingCost,
+        start: startDate,
+        finish: sopDate,
+        category: category,
+        sub_category: subCategory,
+        member: projectIdEdit ? [...member] : [...member, userId],
+        user_id: userId,
+        status: STATUSOPEN,
+        description: description,
+      };
 
-    if (member.length > 0) {
-      if (projectIdEdit) {
-        let newData = { ...data, id: projectIdEdit };
-        axios.put(updateProjectApi, newData);
-        setShowModalCreateProject(false);
-        setMessage("Project already Update");
-        setShow(true);
-        handleReset();
-        actionState(1);
-      } else {
-        let newData = { ...data, id: uuid() };
-        let confirm = window.confirm("Do you want to save?");
-        if (confirm) {
-          axios.post(createProjectApi, newData).then((response) => {
-            setShowModalCreateProject(false);
-            setMessage("Project already created");
-            setShow(true);
-            handleReset();
-            actionState(1);
-          });
+      if (member.length > 0) {
+        if (projectIdEdit) {
+          let newData = { ...data, id: projectIdEdit };
+          axios.put(updateProjectApi, newData);
+          setShowModalCreateProject(false);
+          setMessage("Project already Update");
+          setShow(true);
+          handleReset();
+          actionState(1);
+        } else {
+          let newData = { ...data, id: uuid() };
+          let confirm = window.confirm("Do you want to save?");
+          if (confirm) {
+            axios.post(createProjectApi, newData).then((response) => {
+              setShowModalCreateProject(false);
+              setMessage("Project already created");
+              setShow(true);
+              handleReset();
+              actionState(1);
+            });
+          }
         }
+      } else {
+        window.alert("Please Add Member of This Project ");
       }
     } else {
-      window.alert("Please Add Member of This Project ");
+      window.alert("Please Check Start Date and Sop Date");
     }
   };
 
@@ -798,6 +802,18 @@ function Project(props) {
       },
     },
     {
+      field: "summary_progress",
+      width: 200,
+      headerName: "Progress",
+      renderCell: (params) => {
+        return (
+          <div
+            dangerouslySetInnerHTML={{ __html: params.row.summary_progress }}
+          />
+        );
+      },
+    },
+    {
       headerName: "Actions",
       renderCell: (params) => {
         return (
@@ -1067,6 +1083,16 @@ function Project(props) {
 
           {tableProject.length > 0 ? (
             <DataGrid
+              pinnedColumns={pinnedColumns}
+              onPinnedColumnsChange={handlePinnedColumnsChange}
+              density={"comfortable"}
+              getRowHeight={() => "auto"}
+              sx={{
+                [`& .${gridClasses.cell}`]: {
+                  py: 1,
+                },
+              }}
+              getEstimatedRowHeight={() => 100}
               columns={columns}
               rows={tableProject}
               disableRowSelectionOnClick

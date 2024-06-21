@@ -40,14 +40,10 @@ import { DataGrid } from "@mui/x-data-grid";
 import { BeatLoader } from "react-spinners";
 
 function ToDoListSummary(props) {
-  const { userId } = props;
+  const { userId, tableUser, tableProject } = props;
   const [tableTodoList, setTableTodoList] = useState([]);
-  const [allUser, setAllUser] = useState([]);
   const refAttachment = useRef();
-  const [totalPageData, setTotalPageData] = useState(1);
-  const [numberStart, setNumberStart] = useState("");
   const [action, setAction] = useState(0);
-  const maxPagesShow = 3;
   const [page, setPage] = useState(1);
   const [assignBy, setAssignBy] = useState("");
   const [show, setShow] = useState(false);
@@ -65,24 +61,10 @@ function ToDoListSummary(props) {
   const [picId, setPicId] = useState("");
   const [showNotif, setShowNotif] = useState(false);
   const [message, setMessage] = useState("");
-  const [tableProject, setTableProject] = useState([]);
   const [showModalMarkAsFinish, setShowModalMarkAsFinish] = useState(false);
   const [comment, setComment] = useState("");
   const [filterType, setFilterType] = useState("");
   const [activity, setActivity] = useState("");
-
-  useEffect(() => {
-    axios
-      .get(getAllUsersApi)
-      .then((response) => {
-        setAllUser(response.data.data);
-      })
-      .then((error) => console.log(error));
-
-    axios.get(getAllProjectApi).then((response) => {
-      setTableProject(response.data.data);
-    });
-  }, [action]);
 
   useEffect(() => {
     if (idEdit) {
@@ -108,22 +90,9 @@ function ToDoListSummary(props) {
         .then((response) => {
           let filteredData = response.data.data;
           setTableTodoList(filteredData);
-          setNumberStart(response.data.numberStart);
-          setTotalPageData(response.data.totalPageData);
         })
         .catch((error) => console.log(error));
     }
-
-    axios
-      .get(getAllUsersApi)
-      .then((response) => {
-        setAllUser(response.data.data);
-      })
-      .then((error) => console.log(error));
-
-    axios.get(getAllProjectApi).then((response) => {
-      setTableProject(response.data.data);
-    });
 
     if (idEdit) {
       axios.get(getCommentBySelectedId(idEdit)).then((response) => {
@@ -133,7 +102,7 @@ function ToDoListSummary(props) {
   }, [userId, page, action, idEdit, filterType]);
 
   const functionName = (id) => {
-    const dataUser = allUser.find((value) => value.id === parseInt(id));
+    const dataUser = tableUser.find((value) => value.id === parseInt(id));
     if (dataUser) {
       return dataUser.username;
     }
@@ -221,39 +190,6 @@ function ToDoListSummary(props) {
     const id = e.target.id;
     setIdEdit(id);
     setShowModalMarkAsFinish(true);
-
-    // const id = e.target.id;
-    // let confirm = window.confirm("Do you want to change status?");
-    // if (confirm) {
-    //   const findData = todo.find((value) => value.id === id);
-    //   let newStatus = "";
-    //   if (findData.status === "Open") {
-    //     newStatus = "Finish";
-    //   } else {
-    //     newStatus = "Open";
-    //   }
-    //   let newListTodo = [];
-    //   if (todo.length > 0) {
-    //     for (let index = 0; index < todo.length; index++) {
-    //       if (todo[index].id === id) {
-    //         newListTodo.push({
-    //           id: todo[index].id,
-    //           project_id: todo[index].project_id,
-    //           item: todo[index].item,
-    //           due_date: todo[index].due_date,
-    //           pic: todo[index].pic,
-    //           status: newStatus,
-    //           actual_finish: moment().format("YYYY-MM-DD"),
-    //           user_id: todo[index].user_id,
-    //           pic_id: todo[index].pic_id,
-    //         });
-    //       } else {
-    //         newListTodo.push(todo[index]);
-    //       }
-    //     }
-    //   }
-    // setTodo(newListTodo);
-    // }
   };
 
   const dateParse = (date) => {

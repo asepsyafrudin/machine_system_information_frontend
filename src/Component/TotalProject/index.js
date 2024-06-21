@@ -107,87 +107,17 @@ function TotalProject(props) {
   };
 
   useEffect(() => {
-    axios.get(getAllProject2Api).then((response) => {
-      const dataProject = response.data.data.filter(
-        (value) => value.status !== "cancel"
-      );
-      setTableProject(dataProject);
-      setTotalTableProject(dataProject);
-      setItemsFunction(dataProject);
-
-      //   if (dataProject.length > 0) {
-      //     if (
-      //       sectionFilter &&
-      //       productFilter &&
-      //       categoryFilter &&
-      //       startFilter &&
-      //       endFilter
-      //     ) {
-      //       const filterData = dataProject.filter(
-      //         (value) =>
-      //           value.section_id === sectionFilter &&
-      //           value.product_id === productFilter &&
-      //           value.category === categoryFilter &&
-      //           value.start === startFilter &&
-      //           value.finish === endFilter
-      //       );
-      //       if (filterData.length > 0) {
-      //         setTableProject(filterData);
-      //         setItemsFunction(filterData);
-      //       } else {
-      //         setTableProject([]);
-      //       }
-      //     } else if (sectionFilter && productFilter && categoryFilter) {
-      //       const filterData = dataProject.filter(
-      //         (value) =>
-      //           parseInt(value.section_id) === parseInt(sectionFilter) &&
-      //           parseInt(value.product_id) === parseInt(productFilter) &&
-      //           value.category === categoryFilter
-      //       );
-      //       if (filterData.length > 0) {
-      //         setTableProject(filterData);
-      //         setItemsFunction(filterData);
-      //       } else {
-      //         setTableProject([]);
-      //       }
-      //     } else if (sectionFilter && productFilter) {
-      //       const filterData = dataProject.filter(
-      //         (value) =>
-      //           parseInt(value.section_id) === parseInt(sectionFilter) &&
-      //           parseInt(value.product_id) === parseInt(productFilter)
-      //       );
-      //       if (filterData.length > 0) {
-      //         setTableProject(filterData);
-      //         setItemsFunction(filterData);
-      //       } else {
-      //         setTableProject([]);
-      //       }
-      //     } else if (sectionFilter) {
-      //       const filterData = dataProject.filter(
-      //         (value) => parseInt(value.section_id) === parseInt(sectionFilter)
-      //       );
-      //       if (filterData.length > 0) {
-      //         setTableProject(filterData);
-      //         setItemsFunction(filterData);
-      //       } else {
-      //         setTableProject([]);
-      //       }
-      //     } else {
-      //       setTableProject(dataProject);
-      //       setItemsFunction(dataProject);
-      //     }
-      //   } else {
-      //     setTableProject([]);
-      //   }
-    });
-
-    // axios.post(searchProjectApi, data).then((response) => {
-    //   const data = response.data.data;
-    //   if (data.length > 0) {
-    //     const filter = data.filter((value) => value.status !== "cancel");
-    //     setTableProject(data);
-
-    // });
+    axios
+      .get(getAllProject2Api)
+      .then((response) => {
+        const dataProject = response.data.data.filter(
+          (value) => value.status !== "cancel"
+        );
+        setTableProject(dataProject);
+        setTotalTableProject(dataProject);
+        setItemsFunction(dataProject);
+      })
+      .catch((error) => console.log(error));
   }, [actionStateValue]);
 
   const productOption = () => {
@@ -352,43 +282,6 @@ function TotalProject(props) {
       );
     }
   };
-
-  // const tableListProject = (page) => {
-  //   const listTable = [];
-  //   if (tableProject.length > 0) {
-  //     const filter = tableProject.filter((value) => value.status !== "cancel");
-  //     for (
-  //       let index = (page - 1) * dataPerPage;
-  //       index < page * dataPerPage && index < filter.length;
-  //       index++
-  //     ) {
-  //       listTable.push(
-  //         <tr key={index + 1}>
-  //           <td>{index + 1}</td>
-  //           <td>{filter[index].project_name}</td>
-
-  //           <td>{productNameFunction(filter[index].product_id)}</td>
-  //           <td>
-  //             {filter[index].category} <br />
-  //             {subCategoryLabel(filter[index].sub_category)}
-  //           </td>
-  //           <td>{userNameFunction(filter[index].manager_id)}</td>
-  //           {/* <td>{moment(filter[index].create_date)}</td>
-  //           <td>{userNameFunction(filter[index].user_id)}</td> */}
-  //           <td>{moment(filter[index].create_date).format("LL")}</td>
-  //           <td>{userNameFunction(filter[index].user_id)}</td>
-  //           <td>{moment(filter[index].start).format("LL")}</td>
-  //           <td>{moment(filter[index].finish).format("LL")}</td>
-  //           <td>
-  //             {statusFunction(filter[index].status)} <br />
-  //             {buttonView(filter[index].id)}
-  //           </td>
-  //         </tr>
-  //       );
-  //     }
-  //     return listTable;
-  //   }
-  // };
 
   const buttonView = (projectId) => {
     const dataView = tableProject.find((value) => value.id === projectId);

@@ -36,11 +36,11 @@ function ScheduleReview(props) {
     tableProject,
     totalProject,
     userId,
+    userData,
   } = props;
   const [showModal, setShowModal] = useState(false);
 
   const [activity, setActivity] = useState([]);
-  const [section, setSection] = useState("");
   const [filterProject, setFilterProject] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [monthFormat, setMonthFormat] = useState("en-US");
@@ -216,12 +216,6 @@ function ScheduleReview(props) {
     }
   };
 
-  // useEffect(() => {
-  //   axios.get(getAllProjectApi).then((response) => {
-  //     setTotalProject(response.data.data);
-  //   });
-  // }, []);
-
   const handleImportActivity = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -350,7 +344,7 @@ function ScheduleReview(props) {
   const filterItemLogic = () => {
     let option = [];
     if (filterBy === "category") {
-      if (section === 4) {
+      if (userData.section_id === 4) {
         option.push(
           <>
             <option key={1} value={"CO2 Neutral"}>
@@ -482,6 +476,7 @@ function ScheduleReview(props) {
 
   const handleTooltip = (task) => {
     const dataProject = totalProject.find((value) => value.id === task.id);
+    console.log(dataProject);
 
     return (
       <div className="box-progress">
@@ -492,7 +487,9 @@ function ScheduleReview(props) {
         {dataProject && (
           <div>
             Summary Progress : <br />
-            {dataProject.summary_progress}
+            <div
+              dangerouslySetInnerHTML={{ __html: dataProject.summary_progress }}
+            />
           </div>
         )}
       </div>
